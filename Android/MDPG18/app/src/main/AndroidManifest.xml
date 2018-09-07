@@ -19,7 +19,6 @@
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -27,17 +26,11 @@
         <activity android:name=".MainScreen">
             android:label="@string/Android Controller Module"
             android:parentActivityName=".BluetoothConnecting">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.mdp18.mdpg18.BluetoothConnecting" />
         </activity>
 
         <activity android:name=".BluetoothConnecting">
             android:label="@string/Connect to Bluetooth"
             android:parentActivityName=".MainActivity">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.mdp18.mdpg18.MainActivity" />
         </activity>
     </application>
 

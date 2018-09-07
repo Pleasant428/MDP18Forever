@@ -186,6 +186,10 @@ public class BluetoothConnecting extends AppCompatActivity implements AdapterVie
             }
         });
 
+        //assert getSupportActionBar() != null; //this tells the application that ActionBar is not null and therefore dont call an java null exceptions and crash the activity
+        //getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        //getSupportActionBar().setDisplayShowHomeEnabled(true);
+
     }
 
 

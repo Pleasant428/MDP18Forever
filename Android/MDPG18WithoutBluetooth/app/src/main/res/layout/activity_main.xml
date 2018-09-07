@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="16dp"
+    android:paddingLeft="16dp"
+    android:paddingRight="16dp"
+    android:paddingTop="16dp"
+    tools:context=".MainActivity">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:layout_editor_absoluteX="32dp"
+        tools:layout_editor_absoluteY="16dp">
+
+        <TextView
+            android:id="@+id/tv_status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:text="Current status"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintHorizontal_bias="0.228"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.422" />
+
+        <TextView
+            android:id="@+id/tv_string"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_marginTop="60dp"
+            android:text="String command" />
+
+        <ImageButton
+            android:id="@+id/fwd_btn"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentEnd="true"
+            android:layout_marginBottom="129dp"
+            android:layout_marginEnd="84dp"
+            android:background="@drawable/fwdarrowbtn"
+            android:clickable="true" />
+
+        <ImageButton
+            android:id="@+id/right_btn"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="65dp"
+            android:layout_marginStart="-84dp"
+            android:layout_toEndOf="@+id/fwd_btn"
+            android:background="@drawable/rightturnbtn"
+            android:clickable="true" />
+
+        <EditText
+            android:id="@+id/et_status"
+            android:layout_width="match_parent"
+            android:layout_height="32dp"
+            android:layout_below="@+id/tv_status"
+            android:background="@drawable/textbar"
+            android:ems="15"
+            android:inputType="none"
+            android:text="" />
+
+        <EditText
+            android:id="@+id/et_stringcmd"
+            android:layout_width="match_parent"
+            android:layout_height="32dp"
+            android:layout_below="@+id/tv_string"
+            android:background="@drawable/textbar"
+            android:ems="15"
+            android:inputType="none"
+            android:text="" />
+
+        <ImageButton
+            android:id="@+id/left_btn"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_alignTop="@+id/right_btn"
+            android:layout_centerHorizontal="true"
+            android:background="@drawable/leftturnbtn"
+            android:clickable="true"
+            tools:layout_editor_absoluteX="167dp"
+            tools:layout_editor_absoluteY="367dp" />
+
+    </RelativeLayout>
+
+</android.support.constraint.ConstraintLayout>
