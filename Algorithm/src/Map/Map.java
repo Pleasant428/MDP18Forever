@@ -1,3 +1,4 @@
+package Map;
 import java.awt.Point;
 /**
  * 
@@ -30,6 +31,10 @@ public class Map {
 			}
 		}
 		
+	}
+	
+	public Cell getCell(int row, int col) {
+		return grid[row][col];
 	}
 
 }

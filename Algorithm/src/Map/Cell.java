@@ -1,3 +1,5 @@
+package Map;
+
 import java.awt.Point;
 /**
  * 
