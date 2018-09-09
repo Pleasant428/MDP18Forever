@@ -26,6 +26,7 @@ public class MapConstants {
 	public static final Color OB_COLOR = Color.BLACK;	//Obstacle Color
 	public static final Color CW_COLOR = Color.WHITESMOKE;	//Cell Border Color
 	
-	public static final int MAP_CELL_SZ = 20;			//Size of the Cells on the Map (Pixels)
+	public static final int MAP_CELL_SZ = 25;			//Size of the Cells on the Map (Pixels)
+	public static final int MAP_OFFSET = 10;
 	
 }

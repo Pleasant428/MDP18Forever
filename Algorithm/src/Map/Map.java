@@ -21,7 +21,7 @@ public class Map {
 		//Init Cells on the grid;
 		for(int row=0; row < MapConstants.MAP_HEIGHT; row++) {
 			for(int col=0; col < MapConstants.MAP_WIDTH; col++) {
-				grid[row][col] = new Cell(new Point(row,col));
+				grid[row][col] = new Cell(new Point(col,row));
 				
 				//Init Virtual wall
 				if(row==0||col==0||row==MapConstants.MAP_HEIGHT-1||col==MapConstants.MAP_WIDTH-1) {
