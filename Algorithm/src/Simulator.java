@@ -5,8 +5,7 @@ import Map.Map;
 //JavaFX Librarys
 import javafx.application.Application;
 import javafx.geometry.*;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
+import javafx.event.*;
 import javafx.scene.Scene;
 import javafx.scene.layout.*;
 import javafx.scene.control.*;

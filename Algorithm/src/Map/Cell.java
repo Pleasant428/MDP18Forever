@@ -18,7 +18,20 @@ public class Cell {
 	private boolean explored;
 	private boolean obstacle;
 	private boolean virtualWall;
+	private boolean isWayPoint;
 	
+	public boolean isWayPoint() {
+		return isWayPoint;
+	}
+
+	public boolean setWayPoint(boolean isWayPoint) {
+		if(!obstacle&&explored) {
+			this.isWayPoint = isWayPoint;
+			return true;
+		}
+		return false;
+	}
+
 	public Cell(Point pos) {
 		this.pos = pos;
 		this.explored = false;
