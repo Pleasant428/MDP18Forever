@@ -30,27 +30,42 @@ public class Simulator extends Application {
 	//GUI Components
     private int stage = 1;
     private Canvas mapGrid;
-    private Button loadMapBtn, resetMapBtn, realExpBtn, realFastBtn, expBtn, fastBtn, setUpConnBtn;
+    
+    //UI components
+    private Button loadMapBtn, resetMapBtn, startBtn, connectBtn, setWaypoint, setRobotBtn;
     private TextField ipTxt;
     private Label ipLbl;
+    private ComboBox<String> modeCB;
     
     
+    //Mode Constants
+    private final String REAL_FAST = "Real Fastest Path";
+    private final String REAL_EXP = "Real Exploration";
+    private final String SIM_FAST = "Simulation Fastest Path";
+    private final String SIM_EXP = "Simulation Exploration Path";
     
-	
 	public void start(Stage primaryStage) {
 		//Init for Map and Robot
 		map = new Map();
 		
-		
         //Setting the Title and Values for the Window
         primaryStage.setTitle("MDP Group 18: Algorithm Simulator");
         GridPane grid = new GridPane();
-        grid.setAlignment(Pos.CENTER_LEFT);
+        GridPane controlGrid = new GridPane();
+        
+        //Grid Settings
+        grid.setAlignment(Pos.CENTER);
         grid.setHgap(10);
         grid.setVgap(10);
         grid.setPadding(new Insets(25, 25, 25, 25));
+        
+        controlGrid.setAlignment(Pos.TOP_CENTER);
+        controlGrid.setHgap(10);
+        controlGrid.setVgap(10);
+        controlGrid.setPadding(new Insets(25, 25, 25, 25));
        
-        //Map Drawing COmpaonent
+       
+        //Map Drawing Component
         mapGrid = new Canvas(MapConstants.MAP_CELL_SZ*MapConstants.MAP_WIDTH + MapConstants.MAP_OFFSET,MapConstants.MAP_CELL_SZ*MapConstants.MAP_HEIGHT + MapConstants.MAP_OFFSET);
         GraphicsContext gc = mapGrid.getGraphicsContext2D();
         drawMap(gc);
@@ -58,9 +73,58 @@ public class Simulator extends Application {
         //Canvas MouseEvent
         mapGrid.setOnMouseClicked(MapClick);
         
+        //Lbl Init
+        ipLbl = new Label("IP Address:");
+        ipTxt = new TextField();
+        
+        //ChoiceBox Init
+        modeCB = new ComboBox<String>();
+        modeCB.getItems().addAll(
+        		REAL_FAST,
+        		REAL_EXP,
+        		SIM_FAST,
+        		SIM_EXP
+        		);
+        
+        //Buttons Init
+        connectBtn = new Button("Connect");
+        startBtn = new Button("Start Sim");
+        loadMapBtn = new Button("Load Map");
+        resetMapBtn = new Button("Reset Map");
+        setWaypoint = new Button("Set Waypoint");
+        setRobotBtn = new Button("Set Robot Position");
+        
+        connectBtn.setMaxWidth(500);
+        startBtn.setMaxWidth(500);
+        loadMapBtn.setMaxWidth(500);
+        resetMapBtn.setMaxWidth(500);
+        setWaypoint.setMaxWidth(500);
+        setRobotBtn.setMaxWidth(500);
+        
+        
+		controlGrid.add(ipLbl, 0, 0, 1, 1);
+		controlGrid.add(ipTxt, 1, 0, 2, 1);
+		controlGrid.add(connectBtn, 3, 0, 1, 1);
+		controlGrid.add(modeCB, 0, 1, 3, 1);
+		controlGrid.add(startBtn, 3, 1, 1, 1);
+		controlGrid.add(loadMapBtn, 0, 3, 2, 1);
+		controlGrid.add(resetMapBtn, 2, 3, 2, 1);
+		controlGrid.add(setWaypoint, 0, 4, 4, 1);
+		controlGrid.add(setRobotBtn, 0, 5, 4, 1);
+        
+        controlGrid.setFillWidth(ipTxt, true);
+        controlGrid.setFillWidth(modeCB, true);
+        controlGrid.setFillWidth(startBtn, true);
+        controlGrid.setFillWidth(loadMapBtn, true);
+        controlGrid.setFillWidth(resetMapBtn, true);
+        controlGrid.setFillWidth(setWaypoint, true);
+        controlGrid.setFillWidth(setRobotBtn, true);
+        //Button Init
+        
         
         //Choosing where to place components on the Grid
         grid.add(mapGrid, 0, 0);
+        grid.add(controlGrid, 1, 0);
         
         //Font and Text Alignment
         
