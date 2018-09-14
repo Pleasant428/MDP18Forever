@@ -33,8 +33,8 @@ public class Simulator extends Application {
     
     //UI components
     private Button loadMapBtn, resetMapBtn, startBtn, connectBtn, setWaypoint, setRobotBtn;
-    private TextField ipTxt;
-    private Label ipLbl;
+    private TextField ipTxt, portTxt;
+    private Label ipLbl, portLbl;
     private ComboBox<String> modeCB;
     
     
@@ -73,9 +73,12 @@ public class Simulator extends Application {
         //Canvas MouseEvent
         mapGrid.setOnMouseClicked(MapClick);
         
+        
         //Lbl Init
         ipLbl = new Label("IP Address:");
         ipTxt = new TextField();
+        portLbl = new Label("Port:");
+        portTxt = new TextField();
         
         //ChoiceBox Init
         modeCB = new ComboBox<String>();
@@ -85,6 +88,7 @@ public class Simulator extends Application {
         		SIM_FAST,
         		SIM_EXP
         		);
+        modeCB.getSelectionModel().select(SIM_FAST);
         
         //Buttons Init
         connectBtn = new Button("Connect");
@@ -121,6 +125,8 @@ public class Simulator extends Application {
         controlGrid.setFillWidth(setRobotBtn, true);
         //Button Init
         
+        
+        startBtn.setOnMouseClicked(startBtnClick);
         
         //Choosing where to place components on the Grid
         grid.add(mapGrid, 0, 0);
@@ -175,12 +181,8 @@ public class Simulator extends Application {
         launch(args);
     }
 	
-	//Mouse Event Handler for 
+	//Mouse Event Handler for clicking and detecting Location
 	private EventHandler<MouseEvent> MapClick = new EventHandler<MouseEvent>() {
-    	
-    	/* (non-Javadoc)
-    	 * @see javafx.event.EventHandler#handle(javafx.event.Event)
-    	 */
     	public void handle(MouseEvent event) {
     		System.out.println("X = "+event.getX()+"\n");
     		System.out.println("Y = "+event.getY()+"\n");
@@ -198,5 +200,40 @@ public class Simulator extends Application {
     	}
     	
     };
+    
+    //Event Handler for StartButton
+    private EventHandler<MouseEvent> startBtnClick = new EventHandler<MouseEvent>(){
+    	
+    	public void handle(MouseEvent event) {
+    		
+    		String selectedMode = modeCB.getSelectionModel().getSelectedItem();
+			switch (selectedMode) {
+			case REAL_FAST:
+				System.out.println("RF Here");
+				break;
+
+			case REAL_EXP:
+				System.out.println("RE Here");
+				break;
+
+			case SIM_FAST:
+				System.out.println("SF Here");
+				break;
+
+			case SIM_EXP:
+				System.out.println("SE Here");
+				break;
+
+			}
+    		
+    		
+    		
+    	}
+    };
+    
+    //Sets all the 
+    private boolean resetMap(){
+    	for(gr)
+    }
         
 }

@@ -6,9 +6,10 @@ public class TestBed {
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-		net = new NetMgr("",8080);
+		net = new NetMgr("192.168.18.18", 8080);
 		net.startConn();
-		
-		Thread reading = new Thread();
+		String msg = "";
+		net.recieve(msg);
+		System.out.println(msg);
 	}
 }
