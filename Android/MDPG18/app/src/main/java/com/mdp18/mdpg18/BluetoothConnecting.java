@@ -14,10 +14,12 @@ import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ListView;
 
-
+import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.UUID;
 
 
 public class BluetoothConnecting extends AppCompatActivity implements AdapterView.OnItemClickListener{
@@ -25,6 +27,18 @@ public class BluetoothConnecting extends AppCompatActivity implements AdapterVie
 
     BluetoothAdapter mBluetoothAdapter;
     Button btnEnableDisable_Discoverable;
+
+    BluetoothConnectionService mBluetoothConnection;
+
+    Button btnStartConnection;
+    Button btnSend;
+
+    EditText etSend;
+
+    private static final UUID MY_UUID_INSECURE =
+            UUID.fromString("8ce255c0-200a-11e0-ac64-0800200c9a66");
+
+    BluetoothDevice mBTDevice;
 
     public ArrayList<BluetoothDevice> mBTDevices = new ArrayList<>();
 
@@ -134,6 +148,8 @@ public class BluetoothConnecting extends AppCompatActivity implements AdapterVie
                 //case1: bonded already
                 if (mDevice.getBondState() == BluetoothDevice.BOND_BONDED){
                     Log.d(TAG, "BroadcastReceiver: BOND_BONDED.");
+                    //inside BroadcastReceiver4
+                    mBTDevice = mDevice;
                 }
                 //case2: creating a bone
                 if (mDevice.getBondState() == BluetoothDevice.BOND_BONDING) {
@@ -169,13 +185,17 @@ public class BluetoothConnecting extends AppCompatActivity implements AdapterVie
         lvNewDevices = (ListView) findViewById(R.id.lvNewDevices);
         mBTDevices = new ArrayList<>();
 
+        btnStartConnection = (Button) findViewById(R.id.btnStartConnection);
+        btnSend = (Button) findViewById(R.id.btnSend);
+        etSend = (EditText) findViewById(R.id.editText);
+
         //Broadcasts when bond state changes (ie:pairing)
         IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
         registerReceiver(mBroadcastReceiver4, filter);
 
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
-        lvNewDevices.setOnItemClickListener(BluetoothConnecting.this);
+            lvNewDevices.setOnItemClickListener(BluetoothConnecting.this);
 
 
         btnONOFF.setOnClickListener(new View.OnClickListener() {
@@ -186,10 +206,36 @@ public class BluetoothConnecting extends AppCompatActivity implements AdapterVie
             }
         });
 
-        //assert getSupportActionBar() != null; //this tells the application that ActionBar is not null and therefore dont call an java null exceptions and crash the activity
-        //getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        //getSupportActionBar().setDisplayShowHomeEnabled(true);
+        btnStartConnection.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startConnection();
+            }
+        });
 
+        btnSend.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                byte[] bytes = etSend.getText().toString().getBytes(Charset.defaultCharset());
+                mBluetoothConnection.write(bytes);
+            }
+        });
+
+    }
+
+    //create method for starting connection
+//***remember the conncction will fail and app will crash if you haven't paired first
+    public void startConnection(){
+        startBTConnection(mBTDevice,MY_UUID_INSECURE);
+    }
+
+    /**
+     * starting chat service method
+     */
+    public void startBTConnection(BluetoothDevice device, UUID uuid){
+        Log.d(TAG, "startBTConnection: Initializing RFCOM Bluetooth Connection.");
+
+        mBluetoothConnection.startClient(device,uuid);
     }
 
 
@@ -262,14 +308,14 @@ public class BluetoothConnecting extends AppCompatActivity implements AdapterVie
      * NOTE: This will only execute on versions > LOLLIPOP because it is not needed otherwise.
      */
     private void checkBTPermissions() {
-        /**if(Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP){
+    /*    if(Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP){
             int permissionCheck = this.checkSelfPermission("Manifest.permission.ACCESS_FINE_LOCATION");
             permissionCheck += this.checkSelfPermission("Manifest.permission.ACCESS_COARSE_LOCATION");
             if (permissionCheck != 0) {
 
                 this.requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, 1001); //Any number
             }
-        }else{**/
+        }else{ */
             Log.d(TAG, "checkBTPermissions: No need to check permissions. SDK version < LOLLIPOP.");
 
     }
@@ -291,6 +337,9 @@ public class BluetoothConnecting extends AppCompatActivity implements AdapterVie
         if(Build.VERSION.SDK_INT > Build.VERSION_CODES.JELLY_BEAN_MR2){
             Log.d(TAG, "Trying to pair with " + deviceName);
             mBTDevices.get(i).createBond();
+
+            mBTDevice = mBTDevices.get(i);
+            mBluetoothConnection = new BluetoothConnectionService(BluetoothConnecting.this);
         }
     }
 }
