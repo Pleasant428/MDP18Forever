@@ -105,16 +105,22 @@ public class Simulator extends Application {
         setWaypoint.setMaxWidth(500);
         setRobotBtn.setMaxWidth(500);
         
-        
+        //Layer 1
 		controlGrid.add(ipLbl, 0, 0, 1, 1);
-		controlGrid.add(ipTxt, 1, 0, 2, 1);
-		controlGrid.add(connectBtn, 3, 0, 1, 1);
-		controlGrid.add(modeCB, 0, 1, 3, 1);
-		controlGrid.add(startBtn, 3, 1, 1, 1);
-		controlGrid.add(loadMapBtn, 0, 3, 2, 1);
-		controlGrid.add(resetMapBtn, 2, 3, 2, 1);
-		controlGrid.add(setWaypoint, 0, 4, 4, 1);
-		controlGrid.add(setRobotBtn, 0, 5, 4, 1);
+		controlGrid.add(ipTxt, 1, 0, 3, 1);
+		controlGrid.add(portLbl, 0, 1, 1, 1);
+		controlGrid.add(portTxt, 1, 1, 3, 1);
+		controlGrid.add(connectBtn, 0, 2, 4, 1);
+		//Layer 2
+		controlGrid.add(modeCB, 0, 4, 3, 1);
+		controlGrid.add(startBtn, 3, 4, 1, 1);
+		//Layer 3
+		controlGrid.add(loadMapBtn, 0, 5, 2, 1);
+		controlGrid.add(resetMapBtn, 2, 5, 2, 1);
+		//Layer 4
+		controlGrid.add(setWaypoint, 0, 7, 4, 1);
+		//Layer 5
+		controlGrid.add(setRobotBtn, 0, 8, 4, 1);
         
         controlGrid.setFillWidth(ipTxt, true);
         controlGrid.setFillWidth(modeCB, true);
@@ -225,15 +231,12 @@ public class Simulator extends Application {
 				break;
 
 			}
-    		
-    		
-    		
     	}
     };
     
     //Sets all the 
     private boolean resetMap(){
-    	for(gr)
+    	return false;
     }
         
 }
