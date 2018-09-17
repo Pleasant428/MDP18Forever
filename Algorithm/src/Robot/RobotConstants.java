@@ -1,5 +1,7 @@
 package Robot;
 
+import javafx.scene.paint.Color;
+
 public class RobotConstants {
 
 	// G values used for A* algorithm
@@ -12,7 +14,12 @@ public class RobotConstants {
 
 	public static final int LONG_MIN = 1;
 	public static final int LONG_MAX = 4;
-
+	
+	//Constants to render Robot
+	public static final Color ROBOT_BODY = Color.DARKRED;
+	public static final Color ROBOT_OUTLINE = Color.DARKGREY;
+	public static final Color ROBOT_DIRECTION = Color.WHITESMOKE;
+	
 	// Direction enum based on compass
 	public static enum Direction {
 		UP, RIGHT, DOWN, LEFT;
@@ -28,4 +35,6 @@ public class RobotConstants {
 		}
 
 	};
+	
+	
 }
