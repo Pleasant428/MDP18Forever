@@ -36,5 +36,14 @@ public class Map {
 	public Cell getCell(int row, int col) {
 		return grid[row][col];
 	}
+	
+	//Reset Map
+	public void resetMap() {
+		for(int row = 0; row < MapConstants.MAP_HEIGHT; row++) {
+			for(int col = 0; col < MapConstants.MAP_HEIGHT; col++) {
+				grid[row][col].setExplored(false);
+			}
+		}
+	}
 
 }

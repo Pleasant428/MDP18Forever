@@ -1,4 +1,8 @@
 package Robot;
+/**
+ * @author Saklani Pankaj
+ *
+ */
 
 import javafx.scene.paint.Color;
 
@@ -22,7 +26,7 @@ public class RobotConstants {
 	
 	// Direction enum based on compass
 	public static enum Direction {
-		UP, RIGHT, DOWN, LEFT;
+		UP, LEFT, DOWN, RIGHT;
 
 		// Used to Get the new direction, when robot turns right
 		public static Direction getNext(Direction currDirection) {

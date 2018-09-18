@@ -4,6 +4,11 @@ import java.awt.Point;
 import Robot.RobotConstants.Direction;
 import Map.*;
 
+/**
+ * @author Saklani Pankaj
+ *
+ */
+
 public class Sensor {
 	
 	//Ranges of the Sensors
@@ -54,30 +59,47 @@ public class Sensor {
 		this.sensorDir = sensorDir;
 	}
     
-	//Senses at which grid there is a obstacle -1 if none detected
+	//Detect method for simulator
+	//Senses where the obstacle is of the sensor if none detected return -1
 	//Detected within the min and max range of sensor
-	public int detectObstacle(Map map, boolean sim) {
-		if(!sim) {
-			
-			//Checking the range
-			for(int cur= minRange; cur <= maxRange; cur++) {
-				switch(sensorDir){
-				case UP:
-					if(cur - pos.y > 0)
-						return cur;
-					
-					break;
-				case RIGHT:
-					break;
-				case DOWN:
-					break;
-				case LEFT:
-					break;
-				}
-				
+	public int detect(Map map) {
+		// Checking the range
+		for (int cur = minRange; cur <= maxRange; cur++) {
+			switch (sensorDir) {
+			case UP:
+				if (pos.y + cur > MapConstants.MAP_HEIGHT - 1)
+					return -1;
+				else if (map.getCell(pos.y + cur, pos.x).isObstacle())
+					return cur;
+				break;
+			case RIGHT:
+				if (pos.x + cur > MapConstants.MAP_WIDTH - 1)
+					return -1;
+				else if (map.getCell(pos.y, pos.x + cur).isObstacle())
+					return cur;
+				break;
+			case DOWN:
+				if (pos.y - cur < 0)
+					return -1;
+				else if (map.getCell(pos.y - cur, pos.x).isObstacle())
+					return cur;
+				break;
+			case LEFT:
+				if (pos.x - cur < 0)
+					return -1;
+				else if (map.getCell(pos.y, pos.x - cur).isObstacle())
+					return cur;
+				break;
 			}
-			
 		}
+		return -1;
 	}
-
+	
+	//Detect method using the real sensor data
+	//KIV what is the sensor data when 
+	public int detect(int sensorData) {
+		
+		
+		return -1;
+	}
 }
