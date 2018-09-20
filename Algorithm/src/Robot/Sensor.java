@@ -12,6 +12,7 @@ import Map.*;
 public class Sensor {
 	
 	//Ranges of the Sensors
+	private String id;
 	private int minRange;
     private int maxRange;
 
@@ -20,12 +21,21 @@ public class Sensor {
 
     private Direction sensorDir;
 
-    public Sensor(int minRange, int maxRange, int sensorPosRow, int sensorPosCol, Direction sensorDirection) {
-        this.minRange = minRange;
+    public Sensor(String id, int minRange, int maxRange, int sensorPosRow, int sensorPosCol, Direction sensorDirection) {
+        this.id = id;
+    	this.minRange = minRange;
         this.maxRange = maxRange;
         this.pos = new Point(sensorPosCol, sensorPosRow);
         this.sensorDir = sensorDirection;
     }
+
+	public String getId() {
+		return id;
+	}
+
+	public void setId(String id) {
+		this.id = id;
+	}
 
 	public int getMinRange() {
 		return minRange;
@@ -45,6 +55,14 @@ public class Sensor {
 
 	public Point getPos() {
 		return pos;
+	}
+	
+	public int getRow() {
+		return pos.y;
+	}
+	
+	public int getCol() {
+		return pos.x;
 	}
 
 	public void setPos(int col, int row) {

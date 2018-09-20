@@ -24,7 +24,8 @@ import javafx.scene.text.*;
 public class Simulator extends Application {
 	
 	//Program Variables
-	private Map map;
+	private Map map; //Used to hold loaded map for sim
+	private Map exploredMap;
     private Point wayPoint;
 	
 	//GUI Components
@@ -47,6 +48,7 @@ public class Simulator extends Application {
 	public void start(Stage primaryStage) {
 		//Init for Map and Robot
 		map = new Map();
+		exploredMap = new Map();
 		
         //Setting the Title and Values for the Window
         primaryStage.setTitle("MDP Group 18: Algorithm Simulator");
@@ -72,6 +74,8 @@ public class Simulator extends Application {
         
         //Canvas MouseEvent
         mapGrid.setOnMouseClicked(MapClick);
+        resetMapBtn.setOnMouseClicked(resetMapBtnClick);
+        startBtn.setOnMouseClicked(startBtnClick);
         
         
         //Lbl Init
@@ -131,8 +135,6 @@ public class Simulator extends Application {
         controlGrid.setFillWidth(setRobotBtn, true);
         //Button Init
         
-        
-        startBtn.setOnMouseClicked(startBtnClick);
         
         //Choosing where to place components on the Grid
         grid.add(mapGrid, 0, 0);
@@ -234,9 +236,13 @@ public class Simulator extends Application {
     	}
     };
     
-    //Sets all the 
-    private boolean resetMap(){
-    	return false;
-    }
+  //Event Handler for resetMapBtn
+    private EventHandler<MouseEvent> resetMapBtnClick = new EventHandler<MouseEvent>() {
+    	public void handle(MouseEvent event) {
+    		exploredMap.resetMap();
+    		GraphicsContext gc = mapGrid.getGraphicsContext2D();
+            drawMap(gc);
+    	}  	
+    };
         
 }
