@@ -4,7 +4,11 @@
 
 const int LEFT_PULSE = 3; // LEFT M1 Pulse A
 const int RIGHT_PULSE = 11; // RIGHT M2 Pulse A
-const double MAX_SPEED = 200;
+const double MAX_SPEED = 250;
+const double START_SPEED = 25;
+const double SPEED_STEP = 30;
+const double SPEED_STEP_TICKS = 15;
+
 
 unsigned long previousTime_R = 0;
 unsigned long previousTime_L = 0;
@@ -28,7 +32,8 @@ double speed_L = 0.0;
 double speed_O = 0.0;
 
 DualVNH5019MotorShield md;
-AutoPID myPID(&tick_R, &tick_L, &speed_O, -350, 350, 4, 0.01, 0);
+AutoPID myPID(&tick_R, &tick_L, &speed_O, -350, 350, 4, 0.1, 0.025);
+//AutoPID myPID(&currentRPM_R, &currentRPM_L, &speed_O, -350, 350, 1.86, 0.04, 0);
 
 
 void setup() {
@@ -80,23 +85,26 @@ void moveForward(double distance) {
   initializeTick();
   initializeSpeed();
   initializeRPM();
-  double currentSpeed = 25;
+  double currentSpeed = START_SPEED;
   double lastTick_R = 0.0;
   while (tick_R < distance || tick_L < distance) {
-    if (((tick_R - lastTick_R > 20) && (currentSpeed < MAX_SPEED)) || currentSpeed == 25) {
-      currentSpeed = currentSpeed + 25;
+    if (((tick_R - lastTick_R > SPEED_STEP_TICKS) && (currentSpeed < MAX_SPEED)) || currentSpeed == START_SPEED) {
+      currentSpeed = currentSpeed + SPEED_STEP;
       lastTick_R = tick_R;
     }
     myPID.run();
     md.setSpeeds(currentSpeed - speed_O, currentSpeed + speed_O);
     Serial.print("R: ");
-    Serial.println(tick_R);
-    Serial.print("L: ");
-    Serial.println(tick_L);
-    Serial.print("O: ");
-    Serial.println(speed_O);
+    Serial.print(tick_R);
+    Serial.print(" L: ");
+    Serial.print(tick_L);
+    Serial.print(" O: ");
+    Serial.print(speed_O);
+    Serial.print(" S: ");
+    Serial.println(currentSpeed);
   }
   myPID.stop();
+  md.setSpeeds(0, 0);
   md.setBrakes(400, 400);
   initializeTime();
   initializeTick();

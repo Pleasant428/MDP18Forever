@@ -34,29 +34,30 @@ double kp = 4, ki = 0.5, kd = 0.005;
 
 DualVNH5019MotorShield md;
 //AutoPID myPID(&tick_R, &tick_L, &speed_O, -350, 350, 4.005, 0.5, 0.005);
-PID myPID(&currentRPM_R, &speed_O, &currentRPM_L, kp, ki, kd, DIRECT);
-PID_ATune aTune(&currentRPM_R, &speed_O);
+PID myPID(&tick_R, &speed_O, &tick_L, kp, ki, kd, DIRECT);
+PID_ATune aTune(&tick_R, &speed_O);
 
 
 void setup() {
   md.init();
   Serial.begin(9600);
   setupMotorEncoder();
-  myPID.SetMode(AUTOMATIC);
+  //  myPID.SetMode(AUTOMATIC);
   myPID.SetOutputLimits(-350, 350);
-  myPID.SetSampleTime(10);
+  //  myPID.SetSampleTime(10);
   //  myPID.setTimeStep(1);
   //  myPID.reset();
   //  moveForward(5000);
   tunePID();
+  //  md.setSpeeds(150, 150);
 }
 
 
 void loop() {
-  //  Serial.print("R: ");
-  //  Serial.println(currentRPM_R);
-  //  Serial.print("L: ");
-  //  Serial.println(currentRPM_L);
+  Serial.print("R: ");
+  Serial.print(currentRPM_R);
+  Serial.print("L: ");
+  Serial.println(currentRPM_L);
 
 }
 
@@ -117,8 +118,7 @@ void tunePID() {
   initializeTick();
   initializeSpeed();
   speed_O = 0;
-  aTune.SetOutputStep(100);
-  aTune.SetLookbackSec(20);
+  aTune.SetNoiseBand(1);
   while (1) {
     byte val = (aTune.Runtime());
     Serial.print("RT: ");
@@ -138,6 +138,10 @@ void tunePID() {
     }
     //    myPID.Compute();
     md.setSpeeds(150 - speed_O, 150 + speed_O);
+    Serial.print("R: ");
+    Serial.print(currentRPM_R);
+    Serial.print("L: ");
+    Serial.println(currentRPM_L);
     Serial.print("O: ");
     Serial.println(speed_O);
   }
