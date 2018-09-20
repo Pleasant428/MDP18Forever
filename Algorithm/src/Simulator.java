@@ -2,6 +2,9 @@ import java.awt.Point;
 import java.util.*;
 import Map.*;
 import Map.Map;
+import Robot.*;
+import Robot.RobotConstants.Direction;
+
 //JavaFX Librarys
 import javafx.application.Application;
 import javafx.geometry.*;
@@ -17,16 +20,20 @@ import javafx.stage.Stage;
 import javafx.collections.*;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.text.*;
 
 //Program Classes
 
-public class Simulator extends Application {
+public class Simulator extends Application{
 	
 	//Program Variables
 	private Map map; //Used to hold loaded map for sim
 	private Map exploredMap;
     private Point wayPoint;
+    private Robot robot;
+    private boolean sim = true;
 	
 	//GUI Components
     private int stage = 1;
@@ -50,6 +57,9 @@ public class Simulator extends Application {
 		map = new Map();
 		exploredMap = new Map();
 		
+		//Default Location at the startzone
+		robot = new Robot(sim,Direction.UP,1,1);
+		
         //Setting the Title and Values for the Window
         primaryStage.setTitle("MDP Group 18: Algorithm Simulator");
         GridPane grid = new GridPane();
@@ -65,18 +75,15 @@ public class Simulator extends Application {
         controlGrid.setHgap(10);
         controlGrid.setVgap(10);
         controlGrid.setPadding(new Insets(25, 25, 25, 25));
-       
-       
-        //Map Drawing Component
-        mapGrid = new Canvas(MapConstants.MAP_CELL_SZ*MapConstants.MAP_WIDTH + MapConstants.MAP_OFFSET,MapConstants.MAP_CELL_SZ*MapConstants.MAP_HEIGHT + MapConstants.MAP_OFFSET);
+         
+        //Drawing Component
+        mapGrid = new Canvas(MapConstants.MAP_CELL_SZ*MapConstants.MAP_WIDTH+1 + MapConstants.MAP_OFFSET,MapConstants.MAP_CELL_SZ*MapConstants.MAP_HEIGHT+1 + MapConstants.MAP_OFFSET);
         GraphicsContext gc = mapGrid.getGraphicsContext2D();
         drawMap(gc);
+        drawRobot(gc);
         
         //Canvas MouseEvent
         mapGrid.setOnMouseClicked(MapClick);
-        resetMapBtn.setOnMouseClicked(resetMapBtnClick);
-        startBtn.setOnMouseClicked(startBtnClick);
-        
         
         //Lbl Init
         ipLbl = new Label("IP Address:");
@@ -109,12 +116,17 @@ public class Simulator extends Application {
         setWaypoint.setMaxWidth(500);
         setRobotBtn.setMaxWidth(500);
         
+        //Button ActionListeners
+        resetMapBtn.setOnMouseClicked(resetMapBtnClick);
+        startBtn.setOnMouseClicked(startBtnClick);
+        
         //Layer 1
-		controlGrid.add(ipLbl, 0, 0, 1, 1);
-		controlGrid.add(ipTxt, 1, 0, 3, 1);
-		controlGrid.add(portLbl, 0, 1, 1, 1);
-		controlGrid.add(portTxt, 1, 1, 3, 1);
-		controlGrid.add(connectBtn, 0, 2, 4, 1);
+//		controlGrid.add(ipLbl, 0, 0, 1, 1);
+//		controlGrid.add(ipTxt, 1, 0, 3, 1);
+//		controlGrid.add(portLbl, 0, 1, 1, 1);
+//		controlGrid.add(portTxt, 1, 1, 3, 1);
+//		controlGrid.add(connectBtn, 0, 2, 4, 1);
+		
 		//Layer 2
 		controlGrid.add(modeCB, 0, 4, 3, 1);
 		controlGrid.add(startBtn, 3, 4, 1, 1);
@@ -146,9 +158,42 @@ public class Simulator extends Application {
         //Dimensions of the Window
         Scene scene = new Scene(grid, 800, 600);
         primaryStage.setScene(scene);
+        scene.setOnKeyPressed(new EventHandler<KeyEvent>() {
+        	public void handle(KeyEvent e) {
+        		System.out.println(e.getCode());
+        		switch(e.getCode()){
+        			case W:
+        				System.out.println(e.getCode());
+        				
+        				break;
+        			case S:
+        				break;
+        			case A:
+        				break;
+        			case E:
+        				break;
+        		}
+        	}
+        });
+       
         
         primaryStage.show();
         
+	}
+	
+	//Draw Robot
+	private void drawRobot(GraphicsContext gc) {
+		gc.setStroke(RobotConstants.ROBOT_OUTLINE);
+		gc.setLineWidth(2);
+		
+		gc.setFill(RobotConstants.ROBOT_BODY);
+		
+		int col = robot.getPosition().x-1;
+		int row = robot.getPosition().y+1;
+		
+		gc.strokeOval(col*MapConstants.MAP_CELL_SZ + MapConstants.MAP_OFFSET/2, (MapConstants.MAP_CELL_SZ-1)*MapConstants.MAP_HEIGHT - row*MapConstants.MAP_CELL_SZ + MapConstants.MAP_OFFSET/2, 3*MapConstants.MAP_CELL_SZ, 3*MapConstants.MAP_CELL_SZ);
+		gc.fillOval(col*MapConstants.MAP_CELL_SZ+ MapConstants.MAP_OFFSET/2, (MapConstants.MAP_CELL_SZ-1)*MapConstants.MAP_HEIGHT - row*MapConstants.MAP_CELL_SZ + MapConstants.MAP_OFFSET/2, 3*MapConstants.MAP_CELL_SZ, 3*MapConstants.MAP_CELL_SZ);
+		
 	}
 	
 	//Draw the Map Graphics Cells

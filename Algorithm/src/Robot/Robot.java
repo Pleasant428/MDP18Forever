@@ -19,14 +19,13 @@ public class Robot {
 	private boolean sim;
 	private Direction direction;
 	private Point pos;
-	private Point startPos;
 
 	public Robot(boolean sim, Direction dir, int row, int col) {
 		this.sim = sim;
 		this.direction = dir;
 		this.pos = new Point(col, row);
+		sensorList = new ArrayList<Sensor>();
 		
-
 		// Initializing the Sensors
 		/* ID information for sensors:
 		 * 
@@ -56,7 +55,14 @@ public class Robot {
 		//Right Sensor Prev Direction of Robot Direction
 		Sensor LR1 = new Sensor("SF1",RobotConstants.LONG_MIN, RobotConstants.LONG_MAX, row, col+1, dir);
 		
-		rotateSensors(dir)
+		sensorList.add(SF1);
+		sensorList.add(LF2);
+		sensorList.add(SF3);
+		sensorList.add(SL1);
+		sensorList.add(SL2);
+		sensorList.add(LR1);
+		
+		rotateSensors(dir);
 	
 	}
 	
@@ -86,9 +92,13 @@ public class Robot {
 			break;
 		}
 		
+		//Rotation Formula used: x = cos(a) * (x1 - x0) - sin(a) * (y1 - y0) + x0
+		//						 y = sin(a) * (x1 - x0) + cos(a) * (y1 - y0) + y0
 		for(Sensor s: sensorList) {
 			s.setSensorDir(dir);
-			
+			newCol = (int)(Math.cos(angle)*(s.getCol() - pos.x) - Math.sin(angle)*(s.getRow() - pos.y) + pos.x);
+			newRow = (int)(Math.sin(angle)*(s.getCol() - pos.x) - Math.cos(angle)*(s.getRow() - pos.y) + pos.x);
+			s.setPos(newCol, newRow);
 		}
 	}
 	
@@ -129,6 +139,10 @@ public class Robot {
 
 	public void setPosition(int row, int col) {
 		pos.setLocation(col, row);
+	}
+	
+	public Point getPosition() {
+		return pos;
 	}
 
 	// Robot Sense method for simulator

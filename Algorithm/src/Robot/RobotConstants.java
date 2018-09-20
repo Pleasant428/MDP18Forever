@@ -20,8 +20,8 @@ public class RobotConstants {
 	public static final int LONG_MAX = 4;
 	
 	//Constants to render Robot
-	public static final Color ROBOT_BODY = Color.DARKRED;
-	public static final Color ROBOT_OUTLINE = Color.DARKGREY;
+	public static final Color ROBOT_BODY = Color.rgb(139, 0, 0, 0.8);
+	public static final Color ROBOT_OUTLINE = Color.BLACK;
 	public static final Color ROBOT_DIRECTION = Color.WHITESMOKE;
 	
 	// Direction enum based on compass

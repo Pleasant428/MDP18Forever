@@ -24,7 +24,7 @@ public class Map {
 				grid[row][col] = new Cell(new Point(col,row));
 				
 				//Init Virtual wall
-				if(row==0||col==0||row==MapConstants.MAP_HEIGHT-1||col==MapConstants.MAP_HEIGHT-1) {
+				if(row==0||col==0||row==MapConstants.MAP_HEIGHT-1||col==MapConstants.MAP_WIDTH-1) {
 					grid[row][col].setVirtualWall(true);
 				}
 				
