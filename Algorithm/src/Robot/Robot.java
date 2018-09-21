@@ -18,6 +18,16 @@ public class Robot {
 	private ArrayList<Sensor> sensorList;
 	private boolean sim;
 	private Direction direction;
+	
+	
+	public Direction getDirection() {
+		return direction;
+	}
+
+	public void setDirection(Direction direction) {
+		this.direction = direction;
+	}
+
 	private Point pos;
 
 	public Robot(boolean sim, Direction dir, int row, int col) {
@@ -29,7 +39,7 @@ public class Robot {
 		// Initializing the Sensors
 		/* ID information for sensors:
 		 * 
-		 * SF1/SL1 LF2 	SF3
+		 * SF1/SL1 SF2 	SF3
 		 *  X 		X	LR1
 		 * SL2		X	 X
 		 * 
@@ -133,11 +143,15 @@ public class Robot {
 		for (Sensor s : sensorList) {
 			s.setPos(s.getCol()+ colInc*steps, s.getRow()+rowInc*steps);
 		}
+		System.out.println("x:"+pos.x+" y:"+pos.y);
+		System.out.println("col:"+colInc+" row:"+rowInc);
 		setPosition(pos.x+ colInc*steps, pos.y+rowInc*steps);
+		System.out.println("x:"+pos.x+" y:"+pos.y);
+		
 	}
 	
 
-	public void setPosition(int row, int col) {
+	public void setPosition(int col, int row) {
 		pos.setLocation(col, row);
 	}
 	

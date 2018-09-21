@@ -38,6 +38,7 @@ public class Simulator extends Application{
 	//GUI Components
     private int stage = 1;
     private Canvas mapGrid;
+    private GraphicsContext gc;
     
     //UI components
     private Button loadMapBtn, resetMapBtn, startBtn, connectBtn, setWaypoint, setRobotBtn;
@@ -78,7 +79,7 @@ public class Simulator extends Application{
          
         //Drawing Component
         mapGrid = new Canvas(MapConstants.MAP_CELL_SZ*MapConstants.MAP_WIDTH+1 + MapConstants.MAP_OFFSET,MapConstants.MAP_CELL_SZ*MapConstants.MAP_HEIGHT+1 + MapConstants.MAP_OFFSET);
-        GraphicsContext gc = mapGrid.getGraphicsContext2D();
+        gc = mapGrid.getGraphicsContext2D();
         drawMap(gc);
         drawRobot(gc);
         
@@ -160,19 +161,24 @@ public class Simulator extends Application{
         primaryStage.setScene(scene);
         scene.setOnKeyPressed(new EventHandler<KeyEvent>() {
         	public void handle(KeyEvent e) {
-        		System.out.println(e.getCode());
+        		System.out.println("Before:"+robot.getDirection());
         		switch(e.getCode()){
         			case W:
-        				System.out.println(e.getCode());
-        				
+        				robot.move(robot.getDirection(), true, 1);
         				break;
         			case S:
+        				robot.move(robot.getDirection(), false, 1);
         				break;
         			case A:
+        				robot.setDirection(Direction.getNext(robot.getDirection()));
         				break;
         			case E:
+        				robot.setDirection(Direction.getPrevious(robot.getDirection()));
         				break;
         		}
+        		System.out.println("AFTER:"+robot.getDirection());
+        		drawMap(gc);
+				drawRobot(gc);
         	}
         });
        
@@ -190,9 +196,32 @@ public class Simulator extends Application{
 		
 		int col = robot.getPosition().x-1;
 		int row = robot.getPosition().y+1;
+		int dirCol=0, dirRow=0;
 		
 		gc.strokeOval(col*MapConstants.MAP_CELL_SZ + MapConstants.MAP_OFFSET/2, (MapConstants.MAP_CELL_SZ-1)*MapConstants.MAP_HEIGHT - row*MapConstants.MAP_CELL_SZ + MapConstants.MAP_OFFSET/2, 3*MapConstants.MAP_CELL_SZ, 3*MapConstants.MAP_CELL_SZ);
 		gc.fillOval(col*MapConstants.MAP_CELL_SZ+ MapConstants.MAP_OFFSET/2, (MapConstants.MAP_CELL_SZ-1)*MapConstants.MAP_HEIGHT - row*MapConstants.MAP_CELL_SZ + MapConstants.MAP_OFFSET/2, 3*MapConstants.MAP_CELL_SZ, 3*MapConstants.MAP_CELL_SZ);
+		
+		gc.setFill(RobotConstants.ROBOT_DIRECTION);
+		switch(robot.getDirection()) {
+		case UP:
+			dirCol = robot.getPosition().x;
+			dirRow = robot.getPosition().y + 1;
+			break;
+		case DOWN:
+			dirCol = robot.getPosition().x;
+			dirRow = robot.getPosition().y - 1;
+			break;
+		case LEFT:
+			dirCol = robot.getPosition().x - 1;
+			dirRow = robot.getPosition().y;
+			break;
+		case RIGHT:
+			dirCol = robot.getPosition().x + 1;
+			dirRow = robot.getPosition().y;
+			break;
+		}
+		System.out.print("col: "+dirCol+" row:"+dirRow);
+		gc.fillOval(dirCol*MapConstants.MAP_CELL_SZ+ MapConstants.MAP_OFFSET/2, (MapConstants.MAP_CELL_SZ-1)*MapConstants.MAP_HEIGHT - dirRow*MapConstants.MAP_CELL_SZ+ MapConstants.MAP_OFFSET/2, MapConstants.MAP_CELL_SZ, MapConstants.MAP_CELL_SZ);
 		
 	}
 	
@@ -289,5 +318,7 @@ public class Simulator extends Application{
             drawMap(gc);
     	}  	
     };
+    
+    
         
 }
