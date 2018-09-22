@@ -60,6 +60,7 @@ public class Simulator extends Application{
 		
 		//Default Location at the startzone
 		robot = new Robot(sim,Direction.UP,1,1);
+		robot.sense(exploredMap, map);
 		
         //Setting the Title and Values for the Window
         primaryStage.setTitle("MDP Group 18: Algorithm Simulator");
@@ -161,7 +162,7 @@ public class Simulator extends Application{
         primaryStage.setScene(scene);
         scene.setOnKeyPressed(new EventHandler<KeyEvent>() {
         	public void handle(KeyEvent e) {
-        		System.out.println("Before:"+robot.getDirection());
+        		System.out.println("Robot Direction Before:"+robot.getDirection());
         		switch(e.getCode()){
         			case W:
         				robot.move(robot.getDirection(), true, 1);
@@ -171,12 +172,15 @@ public class Simulator extends Application{
         				break;
         			case A:
         				robot.setDirection(Direction.getNext(robot.getDirection()));
+        				robot.rotateSensors(true);
         				break;
-        			case E:
+        			case D:
         				robot.setDirection(Direction.getPrevious(robot.getDirection()));
+        				robot.rotateSensors(false);
         				break;
         		}
-        		System.out.println("AFTER:"+robot.getDirection());
+        		robot.sense(exploredMap, map);
+        		System.out.println("Robot Direction AFTER:"+robot.getDirection());
         		drawMap(gc);
 				drawRobot(gc);
         	}
@@ -223,6 +227,12 @@ public class Simulator extends Application{
 		System.out.print("col: "+dirCol+" row:"+dirRow);
 		gc.fillOval(dirCol*MapConstants.MAP_CELL_SZ+ MapConstants.MAP_OFFSET/2, (MapConstants.MAP_CELL_SZ-1)*MapConstants.MAP_HEIGHT - dirRow*MapConstants.MAP_CELL_SZ+ MapConstants.MAP_OFFSET/2, MapConstants.MAP_CELL_SZ, MapConstants.MAP_CELL_SZ);
 		
+		gc.setFill(Color.BLACK);
+		for(Sensor s: robot.getSensorList())
+		{
+			gc.fillText(s.getId(), s.getCol()*MapConstants.MAP_CELL_SZ+ MapConstants.MAP_OFFSET/2, (MapConstants.MAP_CELL_SZ)*MapConstants.MAP_HEIGHT - s.getRow()*MapConstants.MAP_CELL_SZ+ MapConstants.MAP_OFFSET/2);
+		}
+		
 	}
 	
 	//Draw the Map Graphics Cells
@@ -243,9 +253,9 @@ public class Simulator extends Application{
 					gc.setFill(MapConstants.GZ_COLOR);
 				else {
 					
-					if(map.getCell(row, col).isObstacle())
+					if(exploredMap.getCell(row, col).isObstacle())
 						gc.setFill(MapConstants.OB_COLOR);
-					else if(map.getCell(row, col).isExplored())
+					else if(exploredMap.getCell(row, col).isExplored())
 						gc.setFill(MapConstants.EX_COLOR);
 					else
 						gc.setFill(MapConstants.UE_COLOR);

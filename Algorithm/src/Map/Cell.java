@@ -13,7 +13,7 @@ import java.awt.Point;
 public class Cell {
 	// Position Variables
 	private Point pos;
-
+	
 	// Exploration Booleans
 	private boolean explored;
 	private boolean obstacle;
@@ -55,5 +55,11 @@ public class Cell {
 	}
 	public void setVirtualWall(boolean virtualWall) {
 		this.virtualWall = virtualWall;
+	}
+	public Point getPos() {
+		return pos;
+	}
+	public void setPos(Point pos) {
+		this.pos = pos;
 	}
 }

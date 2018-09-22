@@ -16,6 +16,14 @@ import Robot.RobotConstants.Direction;
 public class Robot {
 
 	private ArrayList<Sensor> sensorList;
+	public ArrayList<Sensor> getSensorList() {
+		return sensorList;
+	}
+
+	public void setSensorList(ArrayList<Sensor> sensorList) {
+		this.sensorList = sensorList;
+	}
+
 	private boolean sim;
 	private Direction direction;
 	
@@ -54,25 +62,46 @@ public class Robot {
 		*/
 		
 		//Front Sensors same direction (Init with respect to UP direction)
-		Sensor SF1 = new Sensor("SF1",RobotConstants.SHORT_MIN, RobotConstants.SHORT_MAX, row+1, col-1, dir);
-		Sensor LF2 = new Sensor("LF2",RobotConstants.LONG_MIN, RobotConstants.LONG_MAX, row+1, col, dir);
-		Sensor SF3 = new Sensor("SF3",RobotConstants.SHORT_MIN, RobotConstants.SHORT_MAX, row+1, col+1, dir);
+		Sensor SF1 = new Sensor("SF1",RobotConstants.SHORT_MIN, RobotConstants.SHORT_MAX, row+1, col-1, Direction.UP);
+		Sensor SF2 = new Sensor("SF2",RobotConstants.SHORT_MIN, RobotConstants.SHORT_MAX, row+1, col,  Direction.UP);
+		Sensor SF3 = new Sensor("SF3",RobotConstants.SHORT_MIN, RobotConstants.SHORT_MAX, row+1, col+1,  Direction.UP);
 		
 		//Left Sensor Next Direction of Direction
-		Sensor SL1 = new Sensor("SF1",RobotConstants.SHORT_MIN, RobotConstants.SHORT_MAX, row+1, col-1, dir);
-		Sensor SL2 = new Sensor("LF2",RobotConstants.LONG_MIN, RobotConstants.LONG_MAX, row-1, col-1, dir);
+		Sensor SL1 = new Sensor("SL1",RobotConstants.SHORT_MIN, RobotConstants.SHORT_MAX, row+1, col-1,  Direction.LEFT);
+		Sensor SL2 = new Sensor("SL2",RobotConstants.LONG_MIN, RobotConstants.LONG_MAX, row-1, col-1, Direction.LEFT);
 		
 		//Right Sensor Prev Direction of Robot Direction
-		Sensor LR1 = new Sensor("SF1",RobotConstants.LONG_MIN, RobotConstants.LONG_MAX, row, col+1, dir);
+		Sensor LR1 = new Sensor("LR1",RobotConstants.LONG_MIN, RobotConstants.LONG_MAX, row, col+1,  Direction.RIGHT);
 		
 		sensorList.add(SF1);
-		sensorList.add(LF2);
+		sensorList.add(SF2);
 		sensorList.add(SF3);
 		sensorList.add(SL1);
 		sensorList.add(SL2);
 		sensorList.add(LR1);
 		
-		rotateSensors(dir);
+		System.out.println("Before");
+		for (Sensor s : sensorList) {
+			System.out.println(s.getId()+" col: "+s.getCol()+" row:"+s.getRow()+" Direction: "+s.getSensorDir().name());
+		}
+		
+		switch(dir) {
+		case LEFT:
+			rotateSensors(true);
+			break;
+		case RIGHT:
+			rotateSensors(false);
+			break;
+		case DOWN:
+			rotateSensors(true);
+			rotateSensors(true);
+			break;
+		}
+		
+		System.out.println("After");
+		for (Sensor s : sensorList) {
+			System.out.println(s.getId()+" col: "+s.getCol()+" row:"+s.getRow()+" Direction: "+s.getSensorDir().name());
+		}
 	
 	}
 	
@@ -84,31 +113,29 @@ public class Robot {
 		return null;
 	}
 	
-	public void rotateSensors(Direction dir) {
+	public void rotateSensors(boolean left) {
 		double angle = 0;
-		int newRow, newCol;
-		switch(dir) {
-		case UP:
-			angle = 0;
-			break;
-		case LEFT:
-			angle = -Math.PI/2;
-			break;
-		case DOWN:
-			angle = Math.PI;
-			break;
-		case RIGHT:
+		int newCol, newRow;
+		
+		if(left)
 			angle = Math.PI/2;
-			break;
-		}
+		else
+			angle = -Math.PI/2;
 		
 		//Rotation Formula used: x = cos(a) * (x1 - x0) - sin(a) * (y1 - y0) + x0
 		//						 y = sin(a) * (x1 - x0) + cos(a) * (y1 - y0) + y0
 		for(Sensor s: sensorList) {
-			s.setSensorDir(dir);
-			newCol = (int)(Math.cos(angle)*(s.getCol() - pos.x) - Math.sin(angle)*(s.getRow() - pos.y) + pos.x);
-			newRow = (int)(Math.sin(angle)*(s.getCol() - pos.x) - Math.cos(angle)*(s.getRow() - pos.y) + pos.x);
+			System.out.println("Before "+s.getId()+"col: "+s.getCol()+" row:"+s.getRow()+" Direction: "+s.getSensorDir().name());
+			if(left)
+				s.setSensorDir(Direction.getNext(s.getSensorDir()));
+			else
+				s.setSensorDir(Direction.getPrevious(s.getSensorDir()));
+			
+			
+			newCol = (int)Math.round((Math.cos(angle)*(s.getCol() - pos.x) - Math.sin(angle)*(s.getRow() - pos.y) + pos.x));
+			newRow = (int)Math.round((Math.sin(angle)*(s.getCol() - pos.x) - Math.cos(angle)*(s.getRow() - pos.y) + pos.y));
 			s.setPos(newCol, newRow);
+			System.out.println("After "+s.getId()+"col: "+s.getCol()+" row:"+s.getRow()+" Direction: "+s.getSensorDir().name()+"\n");
 		}
 	}
 	
@@ -140,13 +167,16 @@ public class Robot {
 			colInc *= -1;
 		}
 		
-		for (Sensor s : sensorList) {
-			s.setPos(s.getCol()+ colInc*steps, s.getRow()+rowInc*steps);
-		}
 		System.out.println("x:"+pos.x+" y:"+pos.y);
 		System.out.println("col:"+colInc+" row:"+rowInc);
 		setPosition(pos.x+ colInc*steps, pos.y+rowInc*steps);
 		System.out.println("x:"+pos.x+" y:"+pos.y);
+		
+		for (Sensor s : sensorList) {
+			s.setPos(s.getCol()+ colInc*steps, s.getRow()+rowInc*steps);
+			System.out.println(s.getId()+" col: "+s.getCol()+" row:"+s.getRow()+" Direction: "+s.getSensorDir().name());
+		}
+		
 		
 	}
 	
@@ -189,16 +219,18 @@ public class Robot {
 				colInc = 0;
 				break;
 			}
+			System.out.println(sensor.getId()+" col: "+sensor.getCol()+" row:"+sensor.getRow()+" Direction: "+sensor.getSensorDir().name());
 			
 			//Discover each of the blocks infront of the sensor if possible
 			for (int i = sensor.getMinRange(); i <= sensor.getMaxRange(); i++) {
 				//Check if the block is valid otherwise exit (Edge of Map)
-				if (exploredMap.checkValidCell(sensor.getRow() + i, sensor.getCol())) {
+				if (exploredMap.checkValidCell(+ rowInc * i, sensor.getCol() + colInc * i)) {
 					//Change the cell to explored first
+					Cell cell = exploredMap.getCell(sensor.getRow() + rowInc * i, sensor.getCol() + colInc * i);
+					System.out.println("Exploring CELL ROW: "+cell.getPos().y+" COL: "+cell.getPos().x);
 					exploredMap.getCell(sensor.getRow() + rowInc * i, sensor.getCol() + colInc * i).setExplored(true);
 					if (i == obsBlock) {
-						exploredMap.getCell(sensor.getRow() + rowInc * i, sensor.getCol() + colInc * i)
-								.setObstacle(true);
+						exploredMap.getCell(sensor.getRow() + rowInc * i, sensor.getCol() + colInc * i).setObstacle(true);
 						break;
 					}
 				}
