@@ -62,4 +62,10 @@ public class Cell {
 	public void setPos(Point pos) {
 		this.pos = pos;
 	}
+
+	@Override
+	public String toString() {
+		return "Cell [pos=" + pos + ", explored=" + explored + ", obstacle=" + obstacle + ", virtualWall=" + virtualWall
+				+ ", isWayPoint=" + isWayPoint + "]";
+	}
 }

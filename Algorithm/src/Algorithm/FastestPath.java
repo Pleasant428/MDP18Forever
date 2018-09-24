@@ -9,5 +9,6 @@ package Algorithm;
  * 
 */
 public class FastestPath {
+	
 
 }

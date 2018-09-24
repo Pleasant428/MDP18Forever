@@ -1,6 +1,7 @@
 import java.awt.Point;
 import java.util.*;
 import Map.*;
+import Map.Cell;
 import Map.Map;
 import Robot.*;
 import Robot.RobotConstants.Direction;
@@ -165,10 +166,10 @@ public class Simulator extends Application{
         		System.out.println("Robot Direction Before:"+robot.getDirection());
         		switch(e.getCode()){
         			case W:
-        				robot.move(robot.getDirection(), true, 1);
+        				robot.move(robot.getDirection(), true, 1, exploredMap);
         				break;
         			case S:
-        				robot.move(robot.getDirection(), false, 1);
+        				robot.move(robot.getDirection(), false, 1, exploredMap);
         				break;
         			case A:
         				robot.setDirection(Direction.getNext(robot.getDirection()));
@@ -286,6 +287,9 @@ public class Simulator extends Application{
     		//Debug Text
     		System.out.println("Row = "+selectedRow+"\n");
     		System.out.println("Col = "+selectedCol+"\n");
+    		
+    		Cell cell = exploredMap.getCell(new Point(selectedCol,selectedRow));
+    		System.out.println(cell.toString());
     		
     		wayPoint = new Point(selectedCol,selectedRow);
     		

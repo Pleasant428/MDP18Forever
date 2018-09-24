@@ -45,7 +45,13 @@ public class Map {
 	
 	//Check if the row and col is within the map boundary
 	public boolean checkValidCell(int row, int col) {
-		return row>0&&col>0&&row<MapConstants.MAP_HEIGHT&&col<MapConstants.MAP_HEIGHT;
+		return row>=0&&col>=0&&row<MapConstants.MAP_HEIGHT&&col<MapConstants.MAP_WIDTH;
+	}
+	
+	
+	//Check if valid to move there cannot move to virtual wall
+	public boolean checkValidMove(int row, int col) {
+		return checkValidCell(row, col) && !getCell(row,col).isVirtualWall();
 	}
 	
 	

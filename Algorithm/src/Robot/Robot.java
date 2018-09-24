@@ -80,11 +80,6 @@ public class Robot {
 		sensorList.add(SL2);
 		sensorList.add(LR1);
 		
-		System.out.println("Before");
-		for (Sensor s : sensorList) {
-			System.out.println(s.getId()+" col: "+s.getCol()+" row:"+s.getRow()+" Direction: "+s.getSensorDir().name());
-		}
-		
 		switch(dir) {
 		case LEFT:
 			rotateSensors(true);
@@ -96,11 +91,6 @@ public class Robot {
 			rotateSensors(true);
 			rotateSensors(true);
 			break;
-		}
-		
-		System.out.println("After");
-		for (Sensor s : sensorList) {
-			System.out.println(s.getId()+" col: "+s.getCol()+" row:"+s.getRow()+" Direction: "+s.getSensorDir().name());
 		}
 	
 	}
@@ -140,7 +130,7 @@ public class Robot {
 	}
 	
 	//Movement Method for robot and Sensors
-	public void move(Direction dir, boolean forward, int steps) {
+	public void move(Direction dir, boolean forward, int steps, Map map) {
 		int rowInc = 0, colInc=0;
 		switch(dir) {
 		case UP:
@@ -167,14 +157,14 @@ public class Robot {
 			colInc *= -1;
 		}
 		
-		System.out.println("x:"+pos.x+" y:"+pos.y);
-		System.out.println("col:"+colInc+" row:"+rowInc);
-		setPosition(pos.x+ colInc*steps, pos.y+rowInc*steps);
-		System.out.println("x:"+pos.x+" y:"+pos.y);
-		
-		for (Sensor s : sensorList) {
-			s.setPos(s.getCol()+ colInc*steps, s.getRow()+rowInc*steps);
-			System.out.println(s.getId()+" col: "+s.getCol()+" row:"+s.getRow()+" Direction: "+s.getSensorDir().name());
+		if(map.checkValidMove(pos.y+rowInc*steps, pos.x+ colInc*steps))
+		{
+			setPosition(pos.x+ colInc*steps, pos.y+rowInc*steps);
+			
+			for (Sensor s : sensorList) {
+				s.setPos(s.getCol()+ colInc*steps, s.getRow()+rowInc*steps);
+				System.out.println(s.getId()+" col: "+s.getCol()+" row:"+s.getRow()+" Direction: "+s.getSensorDir().name());
+			}
 		}
 		
 		
@@ -219,12 +209,12 @@ public class Robot {
 				colInc = 0;
 				break;
 			}
-			System.out.println(sensor.getId()+" col: "+sensor.getCol()+" row:"+sensor.getRow()+" Direction: "+sensor.getSensorDir().name());
+			System.out.println(sensor.getId()+" col: "+sensor.getCol()+" row:"+sensor.getRow()+" Direction: "+sensor.getSensorDir().name()+" obsblock:"+obsBlock);
 			
 			//Discover each of the blocks infront of the sensor if possible
 			for (int i = sensor.getMinRange(); i <= sensor.getMaxRange(); i++) {
 				//Check if the block is valid otherwise exit (Edge of Map)
-				if (exploredMap.checkValidCell(+ rowInc * i, sensor.getCol() + colInc * i)) {
+				if (exploredMap.checkValidCell(sensor.getRow()+ rowInc * i, sensor.getCol() + colInc * i)) {
 					//Change the cell to explored first
 					Cell cell = exploredMap.getCell(sensor.getRow() + rowInc * i, sensor.getCol() + colInc * i);
 					System.out.println("Exploring CELL ROW: "+cell.getPos().y+" COL: "+cell.getPos().x);
