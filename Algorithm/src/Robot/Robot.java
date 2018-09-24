@@ -8,6 +8,7 @@ import java.util.ArrayList;
 
 import Map.*;
 import Robot.RobotConstants.Direction;
+import Robot.RobotConstants.Command;
 
 /**
  * @author Saklani Pankaj
@@ -179,6 +180,27 @@ public class Robot {
 			}
 		}
 		
+		
+	}
+	
+	//Moving using the Command enum
+	public void move(Command m, int steps, Map map) {
+		switch(m) {
+		case FORWARD:
+			move(direction, true, steps, map);
+			break;
+		case BACKWARD:
+			move(direction, true, steps, map);
+			break;
+		case TURN_LEFT:
+			direction = direction.getNext(direction);
+			rotateSensors(true);
+			break;
+		case TURN_RIGHT:
+			direction = direction.getNext(direction);
+			rotateSensors(true);
+			break;
+		}
 		
 	}
 	

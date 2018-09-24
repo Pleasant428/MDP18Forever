@@ -12,6 +12,8 @@ public class RobotConstants {
 	public static final int MOVE_COST = 1;
 	public static final int TURN_COST = 5;
 	public static final double INFINITE_COST = 10000000;
+	
+	public static final int MOVE_STEPS = 1;
 
 	// Sensors default range (In grids)
 	public static final int SHORT_MIN = 1;
@@ -40,6 +42,11 @@ public class RobotConstants {
 		}
 
 	};
+	
+	
+	public static enum Command{
+		FORWARD, TURN_LEFT, TURN_RIGHT, BACKWARD, ERROR;
+	}
 	
 	
 }

@@ -34,7 +34,7 @@ public class Cell {
 	}
 
 	public boolean setWayPoint(boolean isWayPoint) {
-		if(!obstacle&&explored) {
+		if(!obstacle && explored && !virtualWall) {
 			this.isWayPoint = isWayPoint;
 			return true;
 		}

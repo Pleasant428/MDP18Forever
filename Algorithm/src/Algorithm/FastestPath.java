@@ -4,6 +4,7 @@ import java.awt.Point;
 
 import Robot.*;
 import Robot.RobotConstants.Direction;
+import Robot.RobotConstants.Command;
 import Map.*;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -184,7 +185,7 @@ public class FastestPath {
 	}
 	
 	//Method to display path on Sim Map
-	private void displayFastestPath(ArrayList<Cell> path, boolean display) {
+	public void displayFastestPath(ArrayList<Cell> path, boolean display) {
 		System.out.println("The number of steps is: " + (path.size() - 1) + "\n");
 
 		Cell temp;
@@ -202,6 +203,76 @@ public class FastestPath {
 		}
 
 		System.out.println("\n");
+	}
+	
+	//Returns the movements required to execute the path
+	public ArrayList<Command> getPathMovement(ArrayList<Cell> path) {
+		ArrayList<Command> moves = new ArrayList<Command>();
+		
+		Command move;
+		Cell cell = path.get(0);
+		Cell newCell;
+		Direction cellDir;
+		Robot tempRobot = new Robot(true, robot.getDirection(), robot.getPosition().y,robot.getPosition().x);
+		
+		//Iterate through the path
+		for(int i=1; i< path.size(); i++) {
+			newCell = path.get(i);
+			cellDir = getCellDirection(cell.getPos(),newCell.getPos());
+			while(tempRobot.getDirection()!=cellDir) {
+				move = getTurnMovement(tempRobot.getDirection(), cellDir);
+				tempRobot.move(move, RobotConstants.MOVE_STEPS, exploredMap);
+				moves.add(move);
+			}
+			//Keep Moving Forward in the Path
+			move = Command.FORWARD;
+			tempRobot.move(move, RobotConstants.MOVE_STEPS, exploredMap);
+			moves.add(move);
+		}
+		
+		return moves;
+	}
+	
+	
+	public Command getTurnMovement(Direction botDir, Direction cellDir) {
+		Command move;
+		
+		switch(botDir) {
+		case UP:
+			if(cellDir == Direction.LEFT)
+				move = Command.TURN_RIGHT;
+			else
+				move = Command.TURN_LEFT;
+			break;
+			
+		case LEFT:
+			if(cellDir == Direction.UP)
+				move = Command.TURN_RIGHT;
+			else
+				move = Command.TURN_LEFT;
+			break;
+			
+		case RIGHT:
+			if(cellDir == Direction.UP)
+				move = Command.TURN_LEFT;
+			else
+				move = Command.TURN_RIGHT;
+			break;
+			
+		case DOWN:
+			if(cellDir == Direction.LEFT)
+				move = Command.TURN_LEFT;
+			else
+				move = Command.TURN_RIGHT;
+			break;
+			
+		default:
+			move = Command.ERROR;
+			break;
+		}
+		
+		return move;
+		
 	}
 
 }
