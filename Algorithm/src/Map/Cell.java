@@ -19,7 +19,16 @@ public class Cell {
 	private boolean obstacle;
 	private boolean virtualWall;
 	private boolean isWayPoint;
+	private boolean path;
 	
+	public boolean isPath() {
+		return path;
+	}
+
+	public void setPath(boolean path) {
+		this.path = path;
+	}
+
 	public boolean isWayPoint() {
 		return isWayPoint;
 	}
@@ -61,6 +70,11 @@ public class Cell {
 	}
 	public void setPos(Point pos) {
 		this.pos = pos;
+	}
+	
+	//Method to check if robot can move to this cell
+	public boolean movableCell() {
+		return explored && !obstacle && !virtualWall;
 	}
 
 	@Override

@@ -16,31 +16,23 @@ import Robot.RobotConstants.Direction;
 public class Robot {
 
 	private ArrayList<Sensor> sensorList;
-	public ArrayList<Sensor> getSensorList() {
-		return sensorList;
-	}
-
-	public void setSensorList(ArrayList<Sensor> sensorList) {
-		this.sensorList = sensorList;
-	}
 
 	private boolean sim;
+	private boolean reachedGoal;
 	private Direction direction;
-	
-	
-	public Direction getDirection() {
-		return direction;
+
+	public boolean isReachedGoal() {
+		return reachedGoal;
 	}
 
-	public void setDirection(Direction direction) {
-		this.direction = direction;
+	public void setReachedGoal(boolean reachedGoal) {
+		this.reachedGoal = reachedGoal;
 	}
-
-	private Point pos;
 
 	public Robot(boolean sim, Direction dir, int row, int col) {
 		this.sim = sim;
 		this.direction = dir;
+		this.reachedGoal = false;
 		this.pos = new Point(col, row);
 		sensorList = new ArrayList<Sensor>();
 		
@@ -94,6 +86,26 @@ public class Robot {
 		}
 	
 	}
+	
+	public ArrayList<Sensor> getSensorList() {
+		return sensorList;
+	}
+
+	public void setSensorList(ArrayList<Sensor> sensorList) {
+		this.sensorList = sensorList;
+	}
+	
+	
+	public Direction getDirection() {
+		return direction;
+	}
+
+	public void setDirection(Direction direction) {
+		this.direction = direction;
+	}
+
+	private Point pos;
+	
 	
 	public Sensor getSensor(String id) {
 		for(Sensor s: sensorList)

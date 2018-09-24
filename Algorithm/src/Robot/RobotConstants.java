@@ -11,6 +11,7 @@ public class RobotConstants {
 	// G values used for A* algorithm
 	public static final int MOVE_COST = 1;
 	public static final int TURN_COST = 5;
+	public static final double INFINITE_COST = 10000000;
 
 	// Sensors default range (In grids)
 	public static final int SHORT_MIN = 1;

@@ -1,5 +1,7 @@
 package Map;
 
+import java.awt.Point;
+
 import javafx.scene.paint.Color;
 /**
  * @author Saklani Pankaj
@@ -15,6 +17,7 @@ public class MapConstants {
 	public static final short MAP_WIDTH = 15;
 	public static final int GOALZONE_ROW = 18;
 	public static final int GOALZONE_COL = 13;
+	public static final Point GOALZONE = new Point(GOALZONE_COL,GOALZONE_ROW);
 	public static final int STARTZONE_ROW = 1;
 	public static final int STARTZONE_COL = 1;
 	

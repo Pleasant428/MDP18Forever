@@ -1,5 +1,6 @@
 package Map;
 import java.awt.Point;
+import java.util.ArrayList;
 /**
  * 
  */
@@ -76,5 +77,31 @@ public class Map {
 			}
 		}
 		return explored/total;
+	}
+	
+	
+	public ArrayList<Cell> getNeighbours(Cell c){
+		ArrayList<Cell> neighbours = new ArrayList<Cell>();
+	
+		//UP
+		if(checkValidCell(c.getPos().x, c.getPos().y+1) && checkValidMove(c.getPos().x, c.getPos().y+1)) {
+			neighbours.add(getCell(c.getPos().y+1, c.getPos().x));
+		}
+		//DOWN
+		if(checkValidCell(c.getPos().x, c.getPos().y-1) && checkValidMove(c.getPos().x, c.getPos().y-1)) {
+			neighbours.add(getCell(c.getPos().y-1, c.getPos().x));
+		}
+		
+		//RIGHT
+		if(checkValidCell(c.getPos().x+1, c.getPos().y) && checkValidMove(c.getPos().x+1, c.getPos().y)) {
+			neighbours.add(getCell(c.getPos().y+1, c.getPos().x));
+		}
+		
+		//LEFT
+		if(checkValidCell(c.getPos().x-1, c.getPos().y) && checkValidMove(c.getPos().x-1, c.getPos().y)) {
+			neighbours.add(getCell(c.getPos().y+1, c.getPos().x));
+		}
+		
+		return neighbours;
 	}
 }
