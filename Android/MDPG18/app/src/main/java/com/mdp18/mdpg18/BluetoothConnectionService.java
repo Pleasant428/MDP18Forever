@@ -1,27 +1,34 @@
 package com.mdp18.mdpg18;
 
-import android.app.ProgressDialog;
+import android.Manifest;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothServerSocket;
-import android.bluetooth.BluetoothSocket;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.os.Build;
+import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ListView;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.UUID;
 
 
-public class BluetoothConnectionService {
+public class BluetoothConnectionService extends AppCompatActivity implements AdapterView.OnItemClickListener{
     private static final String TAG = "BluetoothConnectionServ";
 
     private static final String appName = "MDPG18";
 
     private static final UUID mdpUUID =
-            UUID.fromString("0x00001101-0000-1000-8000-00805F9B34FB");
+            UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
 
     private final BluetoothAdapter mBluetoothAdapter;
     Context mContext;

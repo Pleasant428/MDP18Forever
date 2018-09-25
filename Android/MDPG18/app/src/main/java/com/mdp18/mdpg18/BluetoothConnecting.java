@@ -36,7 +36,7 @@ public class BluetoothConnecting extends AppCompatActivity implements AdapterVie
     EditText etSend;
 
     private static final UUID MY_UUID_INSECURE =
-            UUID.fromString("8ce255c0-200a-11e0-ac64-0800200c9a66");
+            UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
 
     BluetoothDevice mBTDevice;
 
@@ -195,7 +195,7 @@ public class BluetoothConnecting extends AppCompatActivity implements AdapterVie
 
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
-            lvNewDevices.setOnItemClickListener(BluetoothConnecting.this);
+        lvNewDevices.setOnItemClickListener(BluetoothConnecting.this);
 
 
         btnONOFF.setOnClickListener(new View.OnClickListener() {
@@ -316,7 +316,7 @@ public class BluetoothConnecting extends AppCompatActivity implements AdapterVie
                 this.requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, 1001); //Any number
             }
         }else{ */
-            Log.d(TAG, "checkBTPermissions: No need to check permissions. SDK version < LOLLIPOP.");
+        Log.d(TAG, "checkBTPermissions: No need to check permissions. SDK version < LOLLIPOP.");
 
     }
 

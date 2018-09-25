@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">Group18</string>
+
+    <!--- Activity names -->
+    <string name = "title_activity_mainscreen">MDP Group 18</string>
+    <string name = "title_activity_bluetooth">Connect to Bluetooth</string>
+
+    <!--- Action Bar strings -->
+    <string name = "action_bluetoothconnect">Connect To Bluetooth</string>
+    <string name = "action_setstringcmd">Set String Commands</string>
+    <string name = "action_initialisation">Initialise Start Point</string>
+
+</resources>
