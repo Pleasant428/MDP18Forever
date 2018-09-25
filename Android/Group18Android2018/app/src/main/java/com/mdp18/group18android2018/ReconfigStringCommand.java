@@ -1,24 +1,26 @@
 package com.mdp18.group18android2018;
 
 import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 
-public class MainActivity extends AppCompatActivity {
-    private static final String TAG = "MainActivity";
+public class ReconfigStringCommand extends AppCompatActivity{
+
+    private static final String TAG = "ReconfigStringCommand";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setTitle("Reconfigurable String Commands");
+        setContentView(R.layout.activity_reconfig);
     }
 
     @Override
     public boolean onCreateOptionsMenu (Menu menu) {
         // Inflate the menu if present
-        getMenuInflater().inflate(R.menu.menu_main, menu);
+        getMenuInflater().inflate(R.menu.menu_reconfig, menu);
         return true;
     }
 
@@ -26,11 +28,11 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected (MenuItem item) {
         switch (item.getItemId()){
             case R.id.btn_bluetoothconnect:
-                startActivity(new Intent(MainActivity.this,BluetoothConnect.class));
+                startActivity(new Intent(ReconfigStringCommand.this,BluetoothConnect.class));
                 return true;
 
-            case R.id.btn_reconfig:
-                startActivity(new Intent(MainActivity.this,ReconfigStringCommand.class));
+            case R.id.btn_mainscreen:
+                startActivity(new Intent(ReconfigStringCommand.this,MainActivity.class));
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -41,5 +43,4 @@ public class MainActivity extends AppCompatActivity {
     public void onBackPressed() {
 
     }
-
 }

@@ -8,7 +8,8 @@
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
-    <uses-permission android:name="android.permission.BLUETOOTH_PRIVILEGED" />
+    <uses-permission android:name="android.permission.BLUETOOTH_PRIVILEGED"/>
+
 
     <application
         android:allowBackup="true"
@@ -27,8 +28,12 @@
 
         <activity
             android:name=".BluetoothConnect"
-            android:label="Connect To Bluetooth"
-            android:parentActivityName=".MainActivity">
+            android:label="Bluetooth Connection">
+        </activity>
+
+        <activity
+            android:name=".ReconfigStringCommand"
+            android:label="Reconfigurable String Commands">
         </activity>
 
 

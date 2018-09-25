@@ -4,8 +4,10 @@
 
     <item
         android:id ="@+id/btn_bluetoothconnect"
-        android:icon="@mipmap/bluetooth"
-        android:title ="Connect to Bluetooth"
-        app:showAsAction="always"/>
+        android:title ="Connect to Bluetooth"/>
+
+    <item
+        android:id ="@+id/btn_reconfig"
+        android:title ="Strings Reconfiguration" />
 
 </menu>
