@@ -52,15 +52,18 @@ public class Map {
 	
 	//Check if valid to move there cannot move to virtual wall
 	public boolean checkValidMove(int row, int col) {
-		return checkValidCell(row, col) && !getCell(row,col).isVirtualWall();
+		return checkValidCell(row, col) && !getCell(row,col).isVirtualWall() && !getCell(row,col).isObstacle();
 	}
 	
 	
 	//Reset Map
 	public void resetMap() {
 		for(int row = 0; row < MapConstants.MAP_HEIGHT; row++) {
-			for(int col = 0; col < MapConstants.MAP_HEIGHT; col++) {
+			for(int col = 0; col < MapConstants.MAP_WIDTH; col++) {
 				grid[row][col].setExplored(false);
+				grid[row][col].setObstacle(false);
+				grid[row][col].setPath(false);
+				grid[row][col].setVirtualWall(false);
 			}
 		}
 	}

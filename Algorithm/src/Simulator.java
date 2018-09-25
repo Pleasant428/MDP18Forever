@@ -4,6 +4,7 @@ import Map.*;
 import Map.Cell;
 import Map.Map;
 import Robot.*;
+import Robot.RobotConstants.Command;
 import Robot.RobotConstants.Direction;
 
 //JavaFX Librarys
@@ -23,18 +24,26 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseButton;
 import javafx.scene.text.*;
 
 //Program Classes
-
+/**
+ * @author Saklani Pankaj
+ *
+ */
 public class Simulator extends Application{
 	
 	//Program Variables
 	private Map map; //Used to hold loaded map for sim
 	private Map exploredMap;
-    private Point wayPoint;
+    private Point wayPoint = null;
     private Robot robot;
     private boolean sim = true;
+    
+    private boolean setObstacle = false;
+    private boolean setWaypoint = false;
+    private boolean setRobot = false;
 	
 	//GUI Components
     private int stage = 1;
@@ -42,7 +51,7 @@ public class Simulator extends Application{
     private GraphicsContext gc;
     
     //UI components
-    private Button loadMapBtn, resetMapBtn, startBtn, connectBtn, setWaypoint, setRobotBtn;
+    private Button loadMapBtn, resetMapBtn, startBtn, connectBtn, setWaypointBtn, setRobotBtn, setObstacleBtn;
     private TextField ipTxt, portTxt;
     private Label ipLbl, portLbl;
     private ComboBox<String> modeCB;
@@ -82,8 +91,8 @@ public class Simulator extends Application{
         //Drawing Component
         mapGrid = new Canvas(MapConstants.MAP_CELL_SZ*MapConstants.MAP_WIDTH+1 + MapConstants.MAP_OFFSET,MapConstants.MAP_CELL_SZ*MapConstants.MAP_HEIGHT+1 + MapConstants.MAP_OFFSET);
         gc = mapGrid.getGraphicsContext2D();
-        drawMap(gc);
-        drawRobot(gc);
+        drawMap(!setObstacle);
+        drawRobot();
         
         //Canvas MouseEvent
         mapGrid.setOnMouseClicked(MapClick);
@@ -109,19 +118,45 @@ public class Simulator extends Application{
         startBtn = new Button("Start Sim");
         loadMapBtn = new Button("Load Map");
         resetMapBtn = new Button("Reset Map");
-        setWaypoint = new Button("Set Waypoint");
+        setWaypointBtn = new Button("Set Waypoint");
         setRobotBtn = new Button("Set Robot Position");
+        setObstacleBtn = new Button("Set Obstacles");
         
         connectBtn.setMaxWidth(500);
         startBtn.setMaxWidth(500);
         loadMapBtn.setMaxWidth(500);
         resetMapBtn.setMaxWidth(500);
-        setWaypoint.setMaxWidth(500);
+        setWaypointBtn.setMaxWidth(500);
         setRobotBtn.setMaxWidth(500);
+        setObstacleBtn.setMaxWidth(500);
         
         //Button ActionListeners
         resetMapBtn.setOnMouseClicked(resetMapBtnClick);
         startBtn.setOnMouseClicked(startBtnClick);
+        setRobotBtn.setOnMouseClicked(new EventHandler<MouseEvent>() {
+        	public void handle(MouseEvent e) {
+        		setRobot = !setRobot;
+        		setWaypoint = false;
+        		setObstacle = false;
+        	}
+        });
+        setWaypointBtn.setOnMouseClicked(new EventHandler<MouseEvent>() {
+        	public void handle(MouseEvent e) {
+        		setWaypoint = !setWaypoint;
+        		setObstacle = false;
+        		setRobot = false;
+        	}
+        });
+        setObstacleBtn.setOnMouseClicked(new EventHandler<MouseEvent>() {
+        	public void handle(MouseEvent e) {
+        		setObstacle = !setObstacle;
+        		setRobot = false;
+        		setWaypoint = false;
+        		drawMap(!setObstacle);
+        		drawRobot();
+        	}
+        });
+        
         
         //Layer 1
 //		controlGrid.add(ipLbl, 0, 0, 1, 1);
@@ -137,17 +172,19 @@ public class Simulator extends Application{
 		controlGrid.add(loadMapBtn, 0, 5, 2, 1);
 		controlGrid.add(resetMapBtn, 2, 5, 2, 1);
 		//Layer 4
-		controlGrid.add(setWaypoint, 0, 7, 4, 1);
+		controlGrid.add(setWaypointBtn, 0, 7, 4, 1);
 		//Layer 5
-		controlGrid.add(setRobotBtn, 0, 8, 4, 1);
+		controlGrid.add(setRobotBtn, 0, 8, 2, 1);
+		controlGrid.add(setObstacleBtn, 2, 8, 2, 1);
         
         controlGrid.setFillWidth(ipTxt, true);
         controlGrid.setFillWidth(modeCB, true);
         controlGrid.setFillWidth(startBtn, true);
         controlGrid.setFillWidth(loadMapBtn, true);
         controlGrid.setFillWidth(resetMapBtn, true);
-        controlGrid.setFillWidth(setWaypoint, true);
+        controlGrid.setFillWidth(setWaypointBtn, true);
         controlGrid.setFillWidth(setRobotBtn, true);
+        controlGrid.setFillWidth(setObstacleBtn, true);
         //Button Init
         
         
@@ -182,8 +219,8 @@ public class Simulator extends Application{
         		}
         		robot.sense(exploredMap, map);
         		System.out.println("Robot Direction AFTER:"+robot.getDirection());
-        		drawMap(gc);
-				drawRobot(gc);
+        		drawMap(!setObstacle);
+				drawRobot();
         	}
         });
        
@@ -193,7 +230,7 @@ public class Simulator extends Application{
 	}
 	
 	//Draw Robot
-	private void drawRobot(GraphicsContext gc) {
+	private void drawRobot() {
 		gc.setStroke(RobotConstants.ROBOT_OUTLINE);
 		gc.setLineWidth(2);
 		
@@ -237,7 +274,7 @@ public class Simulator extends Application{
 	}
 	
 	//Draw the Map Graphics Cells
-	private void drawMap(GraphicsContext gc) {
+	private void drawMap(boolean explored) {
 		//Basic Init for the Cells
 		gc.setStroke(MapConstants.CW_COLOR);
 		gc.setLineWidth(2);
@@ -253,13 +290,21 @@ public class Simulator extends Application{
 				else if(row >= MapConstants.GOALZONE_ROW-1 && col >= MapConstants.GOALZONE_COL-1)
 					gc.setFill(MapConstants.GZ_COLOR);
 				else {
-					
-					if(exploredMap.getCell(row, col).isObstacle())
-						gc.setFill(MapConstants.OB_COLOR);
-					else if(exploredMap.getCell(row, col).isExplored())
-						gc.setFill(MapConstants.EX_COLOR);
+					if(explored) {
+						if(exploredMap.getCell(row, col).isObstacle())
+							gc.setFill(MapConstants.OB_COLOR);
+						else if(exploredMap.getCell(row, col).isExplored())
+							gc.setFill(MapConstants.EX_COLOR);
+						else
+							gc.setFill(MapConstants.UE_COLOR);
+					}
 					else
-						gc.setFill(MapConstants.UE_COLOR);
+					{
+						if(map.getCell(row, col).isObstacle())
+							gc.setFill(MapConstants.OB_COLOR);
+						else
+							gc.setFill(MapConstants.EX_COLOR);
+					}
 				}
 				
 				//Draw the Cell on the Map based on the Position Indicated
@@ -269,7 +314,7 @@ public class Simulator extends Application{
 		}
 		
 	}
-	
+
 	public static void main(String[] args) {
         launch(args);
     }
@@ -288,14 +333,106 @@ public class Simulator extends Application{
     		System.out.println("Row = "+selectedRow+"\n");
     		System.out.println("Col = "+selectedCol+"\n");
     		
-    		Cell cell = exploredMap.getCell(new Point(selectedCol,selectedRow));
-    		System.out.println(cell.toString());
+    		if(setWaypoint)
+    			System.out.println(setWayPoint(selectedRow,selectedCol)? "New WayPoint set at row: "+selectedRow+" col: "+selectedCol : "Unable to put waypoint at obstacle or virtual wall!");
+
+    		if(setRobot)
+    			System.out.println(setRobotLocation(selectedRow,selectedCol)? "Robot Position has changed" : "Unable to put Robot at obstacle or virtual wall!");
     		
-    		wayPoint = new Point(selectedCol,selectedRow);
+    		if(setObstacle) {
+    			if(event.getButton() == MouseButton.PRIMARY)
+    				System.out.println(setObstacle(selectedRow,selectedCol)?"New Obstacle Added at row: "+selectedRow+" col: "+selectedCol : "Obstacle at location alredy exists!");
+    			else
+    				System.out.println(removeObstacle(selectedRow,selectedCol)?"Obstacle removed at row: "+selectedRow+" col: "+selectedCol : "Obstacle at location does not exists!");
+    			
+    		}
+    			
     		
+    		drawMap(!setObstacle);
+    		drawRobot();
     	}
     	
     };
+    
+    //Place Obstacle at Location
+    private boolean setObstacle(int row, int col) {
+    	//Check to make sure the cell is valid and is not a existing obstacle
+    	if(map.checkValidCell(row, col) && !map.getCell(row, col).isObstacle()) {
+    		map.getCell(row, col).setObstacle(true);
+    		
+    		//Set the virtual wall around the obstacle
+    		for(int r=row-1; r<=row+1; r++)
+    			for(int c=col-1; c<=col+1; c++) 
+    				map.getCell(r,c).setVirtualWall(true);
+    			
+    		return true;
+    	}
+    	return false;
+    }
+    
+  //Remove Obstacle at Location
+    private boolean removeObstacle(int row, int col) {
+    	//Check to make sure the cell is valid and is not a existing obstacle
+    	if(map.checkValidCell(row, col) && map.getCell(row, col).isObstacle()) {
+    		map.getCell(row, col).setObstacle(false);
+    		
+    		//Set the virtual wall around the obstacle
+    		for(int r=row-1; r<=row+1; r++)
+    			for(int c=col-1; c<=col+1; c++) 
+    				map.getCell(r,c).setVirtualWall(false);
+    		
+    		reinitVirtualWall();
+    		return true;
+    	}
+    	return false;
+    }
+    
+    //Reinit virtual walls around obstacle
+    private void reinitVirtualWall() {
+    	for(int row=0; row < MapConstants.MAP_HEIGHT; row++) {
+    		for(int col=0; col < MapConstants.MAP_WIDTH; col++) {
+    			if(map.getCell(row, col).isObstacle())
+    			{
+    				for(int r=row-1; r<=row+1; r++)
+    	    			for(int c=col-1; c<=col+1; c++) 
+    	    				map.getCell(r,c).setVirtualWall(true);
+    			}
+    		}
+    	}
+    }
+    
+    //Set the waypoint 
+    private boolean setWayPoint(int row, int col) {
+    	if(map.checkValidMove(row, col)) {
+    		if(wayPoint != null)
+    			map.getCell(wayPoint).setWayPoint(false);
+    		
+    		wayPoint = new Point(col,row);
+			map.getCell(wayPoint).setWayPoint(true);
+			return true;
+    	}
+    	else
+    		return false;
+    }
+    
+    //Set Robot Location and Rotate
+    private boolean setRobotLocation(int row, int col) {
+    	if(map.checkValidMove(row, col)) {
+    		Point point = new Point(col,row);
+    		if(robot.getPosition() == point) {
+    			robot.move(Command.TURN_LEFT, RobotConstants.MOVE_STEPS, exploredMap);
+    			System.out.println("Robot Direction Changed to "+robot.getDirection().name());
+    		}
+    		else {
+    			robot.setPosition(col, row);
+    			System.out.println("Robot moved to new position at row: "+row+" col:"+col);
+    		}
+    			
+    		
+    		return true;
+    	}
+    	return false;
+    }
     
     //Event Handler for StartButton
     private EventHandler<MouseEvent> startBtnClick = new EventHandler<MouseEvent>(){
@@ -327,9 +464,13 @@ public class Simulator extends Application{
   //Event Handler for resetMapBtn
     private EventHandler<MouseEvent> resetMapBtnClick = new EventHandler<MouseEvent>() {
     	public void handle(MouseEvent event) {
-    		exploredMap.resetMap();
+    		if(setObstacle)
+    			map.resetMap();
+    		else
+    			exploredMap.resetMap();
     		GraphicsContext gc = mapGrid.getGraphicsContext2D();
-            drawMap(gc);
+            drawMap(!setObstacle);
+            drawRobot();
     	}  	
     };
     

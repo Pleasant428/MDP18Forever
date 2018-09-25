@@ -17,6 +17,10 @@ import java.util.HashMap;
  * g(u) is calculated based on the direction of the robot, turning incurs a greater cost compared to going straight
  * 
 */
+/**
+ * @author Saklani Pankaj
+ *
+ */
 public class FastestPath {
 	
 	private Robot robot;
@@ -206,7 +210,7 @@ public class FastestPath {
 	}
 	
 	//Returns the movements required to execute the path
-	public ArrayList<Command> getPathMovement(ArrayList<Cell> path) {
+	public ArrayList<Command> getPathCommands(ArrayList<Cell> path) {
 		ArrayList<Command> moves = new ArrayList<Command>();
 		
 		Command move;

@@ -1,9 +1,11 @@
 package Algorithm;
 
 import java.awt.Point;
+import java.util.ArrayList;
 
 import Map.*;
 import Robot.*;
+import Robot.RobotConstants.Command;
 import Robot.RobotConstants.Direction;
 
 /**
@@ -66,21 +68,95 @@ public class Exploration {
 		startTime = System.currentTimeMillis();
 		endTime = startTime + timeLimit;
 		
+		//Loop to explore the map
 		while(areaExplored < coverageLimit || System.currentTimeMillis() < endTime) {
+			getMove();
+			areaExplored = exploredMap.exploredPercentage();
 			
+			//If robot reaches back to start location and has explored everything end
+			if(bot.getPosition() == start) {
+				if(areaExplored >=100)
+					break;
+			}
 		}
+		goToPoint(start);
+		
+	}
+	
+	//Fast Algo to a point (used to go back to start
+	public void goToPoint(Point loc) {
+		//bot already at start
+		if(bot.getPosition() == loc) {
+			while(bot.getDirection() != Direction.UP)
+				bot.move(Command.TURN_LEFT, RobotConstants.MOVE_STEPS, exploredMap);
+			
+			return;
+		}
+		ArrayList<Command> commands = new ArrayList<Command>();
+		ArrayList<Cell> path = new ArrayList<Cell>();
+		
+		FastestPath backToStart = new FastestPath(exploredMap,bot);
+		path = backToStart.run(bot.getPosition(), loc, bot.getDirection());
+		commands = backToStart.getPathCommands(path);
+		for(Command c: commands) {
+			bot.move(c,  RobotConstants.MOVE_STEPS, exploredMap);
+		}
+		
+		//Orient robot to face UP
+		while(bot.getDirection() != Direction.UP)
+			bot.move(Command.TURN_LEFT, RobotConstants.MOVE_STEPS, exploredMap);
 		
 	}
 	
 	public void getMove() {
-		//return go left
+		Direction dir = bot.getDirection();
+		//Check Left if free then turn left
+		if(movable(Direction.getNext(dir)))
+		{
+			bot.move(Command.TURN_LEFT, RobotConstants.MOVE_STEPS, exploredMap);
+		}
+		else if(movable((dir)))
+		{
+			bot.move(Command.FORWARD, RobotConstants.MOVE_STEPS, exploredMap);
+		}
+		else if(movable(Direction.getPrevious(dir)))
+		{
+			bot.move(Command.TURN_RIGHT, RobotConstants.MOVE_STEPS, exploredMap);
+		}
+		else {
+			bot.move(Command.BACKWARD, RobotConstants.MOVE_STEPS, exploredMap);
+		}
+			
 	}
 	
-	public boolean look(Direction dir) {
-		int rowInc, colInc;
+	//Returns true if a direction is movable to or not
+	public boolean movable(Direction dir) {
+		int rowInc = 0, colInc=0;
 		
-		//Look at different directions
-		return false;
+		switch(dir)
+		{
+		case UP: 
+			rowInc = 1;
+			colInc = 0;
+			break;
+			
+		case LEFT:
+			rowInc = 0;
+			colInc = -1;
+			break;
+			
+		case RIGHT:
+			rowInc = 0;
+			colInc = 1;
+			break;
+			
+		case DOWN:
+			rowInc = -1;
+			colInc = 0;
+			break;
+		}
+		return exploredMap.checkValidMove(bot.getPosition().y + rowInc, bot.getPosition().x + colInc);
+		
 	}
 	
 }
