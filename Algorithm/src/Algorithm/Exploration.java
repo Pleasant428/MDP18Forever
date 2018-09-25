@@ -2,6 +2,7 @@ package Algorithm;
 
 import java.awt.Point;
 import java.util.ArrayList;
+import java.util.concurrent.TimeUnit;
 
 import Map.*;
 import Robot.*;
@@ -68,9 +69,11 @@ public class Exploration {
 		startTime = System.currentTimeMillis();
 		endTime = startTime + timeLimit;
 		
-		//Loop to explore the map
-		while(areaExplored < coverageLimit || System.currentTimeMillis() < endTime) {
+		//Loop to explore the map 
+		while(areaExplored < coverageLimit && System.currentTimeMillis() < endTime) {
+			bot.sense(exploredMap, map);
 			getMove();
+			exploredMap.draw(true);
 			areaExplored = exploredMap.exploredPercentage();
 			
 			//If robot reaches back to start location and has explored everything end
@@ -87,9 +90,10 @@ public class Exploration {
 	public void goToPoint(Point loc) {
 		//bot already at start
 		if(bot.getPosition() == loc) {
-			while(bot.getDirection() != Direction.UP)
+			while(bot.getDirection() != Direction.UP) {
 				bot.move(Command.TURN_LEFT, RobotConstants.MOVE_STEPS, exploredMap);
-			
+				exploredMap.draw(true);
+			}
 			return;
 		}
 		ArrayList<Command> commands = new ArrayList<Command>();
@@ -100,12 +104,15 @@ public class Exploration {
 		commands = backToStart.getPathCommands(path);
 		for(Command c: commands) {
 			bot.move(c,  RobotConstants.MOVE_STEPS, exploredMap);
+			exploredMap.draw(true);
 		}
 		
 		//Orient robot to face UP
 		while(bot.getDirection() != Direction.UP)
+		{
 			bot.move(Command.TURN_LEFT, RobotConstants.MOVE_STEPS, exploredMap);
-		
+			exploredMap.draw(true);
+		}
 	}
 	
 	public void getMove() {
@@ -113,20 +120,29 @@ public class Exploration {
 		//Check Left if free then turn left
 		if(movable(Direction.getNext(dir)))
 		{
+			System.out.println("Left Direction "+Direction.getNext(dir).name());
 			bot.move(Command.TURN_LEFT, RobotConstants.MOVE_STEPS, exploredMap);
 		}
 		else if(movable((dir)))
 		{
+			System.out.println("Forward");
 			bot.move(Command.FORWARD, RobotConstants.MOVE_STEPS, exploredMap);
 		}
 		else if(movable(Direction.getPrevious(dir)))
 		{
+			System.out.println("Right");
 			bot.move(Command.TURN_RIGHT, RobotConstants.MOVE_STEPS, exploredMap);
 		}
 		else {
+			System.out.println("Backward");
 			bot.move(Command.BACKWARD, RobotConstants.MOVE_STEPS, exploredMap);
 		}
-			
+		try {
+			TimeUnit.MILLISECONDS.sleep(200);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	//Returns true if a direction is movable to or not
@@ -155,6 +171,7 @@ public class Exploration {
 			colInc = 0;
 			break;
 		}
+		System.out.println("Checking Cell: "+(bot.getPosition().y + rowInc)+", "+(bot.getPosition().x + colInc)+" validMove: "+exploredMap.checkValidMove(bot.getPosition().y + rowInc, bot.getPosition().x + colInc));
 		return exploredMap.checkValidMove(bot.getPosition().y + rowInc, bot.getPosition().x + colInc);
 		
 	}
