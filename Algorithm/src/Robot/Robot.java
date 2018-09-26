@@ -185,8 +185,6 @@ public class Robot {
 			setPosition(pos.x+ colInc*steps, pos.y+rowInc*steps);
 			
 		}
-		draw();
-		
 	}
 	
 	//Moving using the Command enum
@@ -196,7 +194,7 @@ public class Robot {
 			move(direction, true, steps, map);
 			break;
 		case BACKWARD:
-			move(direction, true, steps, map);
+			move(direction, false, steps, map);
 			break;
 		case TURN_LEFT:
 			direction = direction.getNext(direction);
@@ -264,6 +262,8 @@ public class Robot {
 					exploredMap.getCell(sensor.getRow() + rowInc * i, sensor.getCol() + colInc * i).setExplored(true);
 					if (i == obsBlock) {
 						exploredMap.getCell(sensor.getRow() + rowInc * i, sensor.getCol() + colInc * i).setObstacle(true);
+						
+						//Virtual Wall Initialized
 						for (int r = sensor.getRow() + rowInc * i - 1; r <= sensor.getRow() + rowInc * i + 1; r++)
 							for (int c = sensor.getCol() + colInc * i - 1; c <= sensor.getCol() + colInc * i + 1; c++)
 								if (exploredMap.checkValidCell(r, c))
@@ -277,12 +277,10 @@ public class Robot {
 		}
 
 	}
-	
-	public void setUpVirtualWall() {
-		
-	}
-	
+
+	//Draw Method for Robot
 	public void draw() {
+		System.out.println("Draw Called");
 		gc.setStroke(RobotConstants.ROBOT_OUTLINE);
 		gc.setLineWidth(2);
 

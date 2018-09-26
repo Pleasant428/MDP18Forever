@@ -505,7 +505,7 @@ public class Simulator extends Application {
 		@Override
 	    protected Integer call() throws Exception {
 			double coverageLimit=100;
-			int timeLimit = 360;
+			int timeLimit = 360000;
 			Exploration explore = new Exploration(exploredMap, map, robot,coverageLimit, timeLimit);
 			explore.exploration(robot.getPosition());
 			
@@ -513,13 +513,6 @@ public class Simulator extends Application {
 	    }
 	}
 
-	//Sim Exploration
-	private void simExploration() {
-		double coverageLimit=100;
-		int timeLimit = 360000;
-		Exploration explore = new Exploration(exploredMap, map, robot,coverageLimit, timeLimit);
-		explore.exploration(robot.getPosition());
-	}
 
 	// Event Handler for resetMapBtn
 	private EventHandler<MouseEvent> resetMapBtnClick = new EventHandler<MouseEvent>() {

@@ -72,7 +72,12 @@ public class Exploration {
 		//Loop to explore the map 
 		while(areaExplored < coverageLimit && System.currentTimeMillis() < endTime) {
 			bot.sense(exploredMap, map);
-			getMove();
+			try {
+				getMove();
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			exploredMap.draw(true);
 			areaExplored = exploredMap.exploredPercentage();
 			
@@ -115,13 +120,18 @@ public class Exploration {
 		}
 	}
 	
-	public void getMove() {
+	public void getMove() throws InterruptedException {
 		Direction dir = bot.getDirection();
 		//Check Left if free then turn left
 		if(movable(Direction.getNext(dir)))
 		{
 			System.out.println("Left Direction "+Direction.getNext(dir).name());
 			bot.move(Command.TURN_LEFT, RobotConstants.MOVE_STEPS, exploredMap);
+//			if(movable(bot.getDirection()))
+//			{
+//				System.out.println("Left Direction then forrwad "+bot.getDirection());
+//				bot.move(Command.FORWARD, RobotConstants.MOVE_STEPS, exploredMap);
+//			}
 		}
 		else if(movable((dir)))
 		{
@@ -132,17 +142,18 @@ public class Exploration {
 		{
 			System.out.println("Right");
 			bot.move(Command.TURN_RIGHT, RobotConstants.MOVE_STEPS, exploredMap);
+			TimeUnit.MILLISECONDS.sleep(200);
+			if(movable(bot.getDirection()))
+			{
+				System.out.println("Right Direction then forrwad "+bot.getDirection());
+				bot.move(Command.FORWARD, RobotConstants.MOVE_STEPS, exploredMap);
+			}
 		}
 		else {
 			System.out.println("Backward");
 			bot.move(Command.BACKWARD, RobotConstants.MOVE_STEPS, exploredMap);
 		}
-		try {
-			TimeUnit.MILLISECONDS.sleep(200);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		TimeUnit.MILLISECONDS.sleep(200);
 	}
 	
 	//Returns true if a direction is movable to or not
