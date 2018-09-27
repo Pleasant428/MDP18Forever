@@ -66,6 +66,9 @@ public class Simulator extends Application {
 	private final String REAL_EXP = "Real Exploration";
 	private final String SIM_FAST = "Simulation Fastest Path";
 	private final String SIM_EXP = "Simulation Exploration Path";
+	
+	//Threads for each of the tasks
+	private Thread realFastTask, realExpTask, simFastTask, simExpTask;
 
 	public void start(Stage primaryStage) {
 		// Init for Map and Robot
@@ -74,7 +77,10 @@ public class Simulator extends Application {
 
 		// Default Location at the startzone
 		robot = new Robot(sim, Direction.UP, 1, 1);
-		robot.sense(exploredMap, map);
+		
+		
+		//Threads
+		simExpTask = new Thread(new ExplorationTask());
 
 		// Setting the Title and Values for the Window
 		primaryStage.setTitle("MDP Group 18: Algorithm Simulator");
@@ -507,7 +513,7 @@ public class Simulator extends Application {
 			double coverageLimit=100;
 			int timeLimit = 360000;
 			Exploration explore = new Exploration(exploredMap, map, robot,coverageLimit, timeLimit);
-			explore.exploration(robot.getPosition());
+			explore.exploration(new Point(robot.getPosition()));
 			
 	        return 1;
 	    }

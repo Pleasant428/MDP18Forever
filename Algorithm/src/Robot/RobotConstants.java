@@ -14,6 +14,7 @@ public class RobotConstants {
 	public static final double INFINITE_COST = 10000000;
 	
 	public static final int MOVE_STEPS = 1;
+	public static final int MOVE_SPEED = 200;	//Delays before movement (Lower = faster) in milliseconds
 
 	// Sensors default range (In grids)
 	public static final int SHORT_MIN = 1;
@@ -39,6 +40,10 @@ public class RobotConstants {
 		// Used to Get the new direction, when robot turns left
 		public static Direction getPrevious(Direction currDirection) {
 			return values()[(currDirection.ordinal() + values().length - 1) % values().length];
+		}
+		
+		public static Direction reverse(Direction currDirection) {
+			return values()[(currDirection.ordinal() + 2) % values().length];
 		}
 
 	};

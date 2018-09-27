@@ -5,6 +5,7 @@ package Robot;
 
 import java.awt.Point;
 import java.util.ArrayList;
+import java.util.concurrent.TimeUnit;
 
 import Map.*;
 import Robot.RobotConstants.Direction;
@@ -71,12 +72,12 @@ public class Robot {
 		Sensor SF2 = new Sensor("SF2",RobotConstants.SHORT_MIN, RobotConstants.SHORT_MAX, row+1, col,  Direction.UP);
 		Sensor SF3 = new Sensor("SF3",RobotConstants.SHORT_MIN, RobotConstants.SHORT_MAX, row+1, col+1,  Direction.UP);
 		
-		//Left Sensor Next Direction of Direction
+		//RIGHT Sensor Next Direction of Direction
 		Sensor SR1 = new Sensor("SR1",RobotConstants.SHORT_MIN, RobotConstants.SHORT_MAX, row+1, col+1,  Direction.RIGHT);
 		Sensor SR2 = new Sensor("SR2",RobotConstants.SHORT_MIN, RobotConstants.SHORT_MAX, row-1, col+1, Direction.RIGHT);
 		
-		//Right Sensor Prev Direction of Robot Direction
-		Sensor LL1 = new Sensor("LL1",RobotConstants.LONG_MIN, RobotConstants.LONG_MAX, row, col-1,  Direction.LEFT);
+		//LEFT Sensor Prev Direction of Robot Direction
+		Sensor LL1 = new Sensor("LL1",RobotConstants.LONG_MIN, RobotConstants.LONG_MAX, row+1, col-1,  Direction.LEFT);
 		
 		sensorList.add(SF1);
 		sensorList.add(SF2);
@@ -189,6 +190,13 @@ public class Robot {
 	
 	//Moving using the Command enum
 	public void move(Command m, int steps, Map map) {
+		//Delay Movement for a 
+		try {
+			TimeUnit.MILLISECONDS.sleep(RobotConstants.MOVE_SPEED);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		
 		switch(m) {
 		case FORWARD:
 			move(direction, true, steps, map);
@@ -205,10 +213,10 @@ public class Robot {
 			rotateSensors(false);
 			break;
 		}
-		draw();
 	}
 	
-
+	
+	
 	public void setPosition(int col, int row) {
 		int colDiff = col - pos.x;
 		int rowDiff = row - pos.y;
@@ -226,7 +234,8 @@ public class Robot {
 	public void sense(Map exploredMap, Map map) {
 		int obsBlock;
 		int rowInc = 1, colInc = 1;
-
+		exploredMap.draw(true);
+		draw();
 		for (Sensor sensor : sensorList) {
 			// check if sensor detects any obstacle
 			obsBlock = sensor.detect(map);
@@ -255,6 +264,7 @@ public class Robot {
 			
 			//Discover each of the blocks infront of the sensor if possible
 			for (int i = sensor.getMinRange(); i <= sensor.getMaxRange(); i++) {
+				
 				//Check if the block is valid otherwise exit (Edge of Map)
 				if (exploredMap.checkValidCell(sensor.getRow()+ rowInc * i, sensor.getCol() + colInc * i)) {
 					//Change the cell to explored first
@@ -275,12 +285,12 @@ public class Robot {
 					break;
 			}
 		}
-
+		exploredMap.draw(true);
+		draw();
 	}
 
 	//Draw Method for Robot
 	public void draw() {
-		System.out.println("Draw Called");
 		gc.setStroke(RobotConstants.ROBOT_OUTLINE);
 		gc.setLineWidth(2);
 
