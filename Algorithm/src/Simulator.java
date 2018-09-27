@@ -57,8 +57,8 @@ public class Simulator extends Application {
 	private Button loadMapBtn, saveMapBtn, resetMapBtn, startBtn, connectBtn, setWaypointBtn, setRobotBtn,
 			setObstacleBtn;
 	private ScrollBar timeLimitSB, coverageLimitSB;
-	private TextField ipTxt, portTxt;
-	private Label ipLbl, portLbl;
+	private TextField ipTxt, portTxt, timeLimitTxt, coverageLimitTxt;
+	private Label ipLbl, portLbl, timeLimitLbl, coverageLimitLbl;
 	private ComboBox<String> modeCB;
 
 	// Mode Constants
@@ -78,7 +78,6 @@ public class Simulator extends Application {
 		// Default Location at the startzone
 		robot = new Robot(sim, Direction.UP, 1, 1);
 		
-		
 		//Threads
 		simExpTask = new Thread(new ExplorationTask());
 
@@ -89,14 +88,13 @@ public class Simulator extends Application {
 
 		// Grid Settings
 		grid.setAlignment(Pos.CENTER);
-		grid.setHgap(10);
-		grid.setVgap(10);
-		grid.setPadding(new Insets(25, 25, 25, 25));
+		grid.setHgap(5);
+		grid.setVgap(5);
+		grid.setPadding(new Insets(5, 5, 5, 5));
 
 		controlGrid.setAlignment(Pos.TOP_CENTER);
 		controlGrid.setHgap(10);
 		controlGrid.setVgap(10);
-		controlGrid.setPadding(new Insets(25, 25, 25, 25));
 
 		// Drawing Component
 		mapGrid = new Canvas(MapConstants.MAP_CELL_SZ * MapConstants.MAP_WIDTH + 1 + MapConstants.MAP_OFFSET,
@@ -117,7 +115,16 @@ public class Simulator extends Application {
 		ipTxt = new TextField();
 		portLbl = new Label("Port:");
 		portTxt = new TextField();
-
+		
+		timeLimitLbl = new Label("Time Limit: ");
+		coverageLimitLbl = new Label("Coverage Limit:");
+		timeLimitTxt = new TextField();
+		coverageLimitTxt = new TextField();
+		timeLimitTxt.setDisable(true);
+		coverageLimitTxt.setDisable(true);
+		timeLimitTxt.setMaxWidth(50);
+		coverageLimitTxt.setMaxWidth(50);
+		
 		// ChoiceBox Init
 		modeCB = new ComboBox<String>();
 		modeCB.getItems().addAll(SIM_EXP, SIM_FAST, REAL_EXP, REAL_FAST);
@@ -132,7 +139,15 @@ public class Simulator extends Application {
 		setWaypointBtn = new Button("Set Waypoint");
 		setRobotBtn = new Button("Set Robot Position");
 		setObstacleBtn = new Button("Set Obstacles");
-
+		
+		//ScrollBar
+		timeLimitSB = new ScrollBar();
+		coverageLimitSB = new ScrollBar();
+		timeLimitSB.setMin(60);
+		timeLimitSB.setMax(360);
+		coverageLimitSB.setMin(50);
+		coverageLimitSB.setMax(100);
+		
 		connectBtn.setMaxWidth(500);
 		startBtn.setMaxWidth(500);
 		loadMapBtn.setMaxWidth(500);
@@ -168,26 +183,42 @@ public class Simulator extends Application {
 				robot.draw();
 			}
 		});
+		
+		timeLimitSB.valueProperty().addListener(change -> {
+			timeLimitTxt.setText(""+(int)timeLimitSB.getValue()+" s"); 
+		  });
+		
+		coverageLimitSB.valueProperty().addListener(change -> {
+			coverageLimitTxt.setText(""+(int)coverageLimitSB.getValue()+"%"); 
+		  });
 
-		// Layer 1
+		// Layer 1 (6 Grids)
 		// controlGrid.add(ipLbl, 0, 0, 1, 1);
 		// controlGrid.add(ipTxt, 1, 0, 3, 1);
 		// controlGrid.add(portLbl, 0, 1, 1, 1);
 		// controlGrid.add(portTxt, 1, 1, 3, 1);
 		// controlGrid.add(connectBtn, 0, 2, 4, 1);
-
+		// Layer 2
+		controlGrid.add(timeLimitLbl, 0, 2, 1, 1);
+		controlGrid.add(timeLimitSB, 1, 2, 4, 1);
+		controlGrid.add(timeLimitTxt, 5, 2, 1, 1);
+		
+		controlGrid.add(coverageLimitLbl, 0, 3, 1, 1);
+		controlGrid.add(coverageLimitSB, 1, 3, 4, 1);
+		controlGrid.add(coverageLimitTxt, 5, 3, 1, 1);
+		
 		// Layer 2
 		controlGrid.add(modeCB, 0, 4, 3, 1);
-		controlGrid.add(startBtn, 3, 4, 1, 1);
+		controlGrid.add(startBtn, 3, 4, 3, 1);
 		// Layer 3
-		controlGrid.add(loadMapBtn, 0, 5, 2, 1);
-		controlGrid.add(saveMapBtn, 2, 5, 2, 1);
-		controlGrid.add(resetMapBtn, 0, 6, 4, 1);
+		controlGrid.add(loadMapBtn, 0, 5, 3, 1);
+		controlGrid.add(saveMapBtn, 3, 5, 3, 1);
+		controlGrid.add(resetMapBtn, 0, 6, 6, 1);
 		// Layer 4
-		controlGrid.add(setWaypointBtn, 0, 7, 4, 1);
+		controlGrid.add(setWaypointBtn, 0, 7, 6, 1);
 		// Layer 5
 		controlGrid.add(setRobotBtn, 0, 8, 2, 1);
-		controlGrid.add(setObstacleBtn, 2, 8, 2, 1);
+		controlGrid.add(setObstacleBtn, 2, 8, 4, 1);
 
 		controlGrid.setFillWidth(ipTxt, true);
 		controlGrid.setFillWidth(modeCB, true);
