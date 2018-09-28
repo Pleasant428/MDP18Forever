@@ -50,7 +50,7 @@ public class RobotConstants {
 	
 	
 	public static enum Command{
-		FORWARD, TURN_LEFT, TURN_RIGHT, BACKWARD, ERROR;
+		FORWARD, TURN_LEFT, TURN_RIGHT, BACKWARD, ERROR, fly;
 	}
 	
 	
