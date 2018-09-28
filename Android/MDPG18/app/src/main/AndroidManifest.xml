@@ -32,6 +32,7 @@
             android:label="@string/Connect to Bluetooth"
             android:parentActivityName=".MainActivity">
         </activity>
+
     </application>
 
 </manifest>
