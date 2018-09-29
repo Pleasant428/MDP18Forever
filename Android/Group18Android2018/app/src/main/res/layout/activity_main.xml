@@ -4,18 +4,18 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
     android:background="@color/colorBackground"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
     tools:context=".MainActivity">
 
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:layout_editor_absoluteX="42dp"
-        tools:layout_editor_absoluteY="67dp">
+        tools:layout_editor_absoluteX="69dp"
+        tools:layout_editor_absoluteY="16dp">
 
 
         <com.mdp18.group18android2018.PixelGridView
@@ -50,7 +50,7 @@
                     android:id="@+id/tv_status"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Current status"
+                    android:text="Robot status"
                     app:layout_constraintHorizontal_bias="0.228"
                     app:layout_constraintVertical_bias="0.422" />
 
@@ -65,11 +65,11 @@
                     android:text="" />
 
                 <TextView
-                    android:id="@+id/tv_string"
+                    android:id="@+id/tv_map_exploration"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_below="@id/et_status"
-                    android:text="String command" />
+                    android:text="Map Exploration" />
 
                 <EditText
                     android:id="@+id/et_stringcmd"
@@ -80,12 +80,28 @@
                     android:ems="15"
                     android:inputType="none"
                     android:text="" />
+
+                <ToggleButton
+                    android:id="@+id/tb_setStartCoord"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textOff="@string/setStart"
+                    android:textOn="@string/onStart"
+                    android:textSize="@dimen/font_size_small"/>
+
+                <ToggleButton
+                    android:id="@+id/tb_setWaypointCoord"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textOff="@string/setWaypoint"
+                    android:textOn="@string/onWaypoint"
+                    android:textSize="@dimen/font_size_small"/>
             </LinearLayout>
 
             <ImageButton
                 android:id="@+id/fwd_btn"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
+                android:layout_width="67dp"
+                android:layout_height="67dip"
                 android:layout_marginBottom="143dp"
                 android:background="@drawable/fwdarrowbtn"
                 android:clickable="true"
@@ -93,24 +109,24 @@
 
             <ImageButton
                 android:id="@+id/left_btn"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
+                android:layout_width="67dp"
+                android:layout_height="67dp"
                 android:background="@drawable/leftturnbtn"
                 android:clickable="true"
                 android:visibility="visible" />
 
             <ImageButton
                 android:id="@+id/right_btn"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
+                android:layout_width="67dp"
+                android:layout_height="67dp"
                 android:background="@drawable/rightturnbtn"
                 android:clickable="true"
                 android:visibility="visible" />
 
             <ImageButton
                 android:id="@+id/rev_btn"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
+                android:layout_width="67dp"
+                android:layout_height="67dp"
                 android:background="@drawable/reversearrowbtn"
                 android:clickable="true"
                 android:visibility="visible" />
@@ -120,6 +136,78 @@
 
 
     </RelativeLayout>
+
+
+    <ToggleButton
+        android:id="@+id/tb_autoManual"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:textOff="Auto"
+        android:textOn="Manual"
+        android:textSize="@dimen/font_size_small"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.413"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.976" />
+
+    <Button
+        android:id="@+id/btn_update"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:onClick="onClickUpdate"
+        android:text="Update"
+        android:textSize="@dimen/font_size_small"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.612"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.976" />
+
+    <Button
+        android:id="@+id/btn_exploration"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:onClick="onClickExploration"
+        android:text="Exploration"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.896"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.911" />
+
+    <Button
+        android:id="@+id/btn_fastestpath"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:onClick="onClickFastestPath"
+        android:text="FastestPath"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.902"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.989" />
+
 
 
 </android.support.constraint.ConstraintLayout>

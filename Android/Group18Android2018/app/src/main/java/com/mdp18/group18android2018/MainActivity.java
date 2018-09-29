@@ -12,10 +12,15 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
 import java.util.UUID;
 
@@ -24,8 +29,10 @@ public class MainActivity extends AppCompatActivity {
 
     PixelGridView mPGV;
     ImageButton forwardButton, leftRotateButton, rightRotateButton, reverseButton;
-    TextView tv_status, tv_string;
+    Button btn_update;
+    TextView tv_status, tv_map_exploration;
     EditText et_status, et_stringcmd;
+    ToggleButton tb_setWaypointCoord, tb_setStartCoord, tb_autoManual;
 
 
     // For bluetooth connection status
@@ -43,6 +50,9 @@ public class MainActivity extends AppCompatActivity {
 
         mPGV = findViewById(R.id.map);
         mPGV.initializeMap();
+
+        btn_update = (Button) findViewById(R.id.btn_update);
+        btn_update.setEnabled(false);
 
         // Forward button
         forwardButton = findViewById(R.id.fwd_btn);
@@ -78,7 +88,8 @@ public class MainActivity extends AppCompatActivity {
         });
 
         tv_status = findViewById(R.id.tv_status);
-        tv_string = findViewById(R.id.tv_string);
+        tv_map_exploration = findViewById(R.id.tv_map_exploration);
+
 
         // Set un-editable EditText for robot status
         et_status = findViewById(R.id.et_status);
@@ -89,6 +100,43 @@ public class MainActivity extends AppCompatActivity {
         et_stringcmd = findViewById(R.id.et_stringcmd);
         et_stringcmd.setFocusable(false);
         et_stringcmd.setClickable(false);
+
+        tb_setWaypointCoord = (ToggleButton) findViewById(R.id.tb_setWaypointCoord);
+        tb_setWaypointCoord.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    // The toggle is enabled
+                    Toast.makeText(MainActivity.this, "Select waypoint on map.", Toast.LENGTH_SHORT).show();
+                    mPGV.setWaypoint();
+                }
+            }
+        });
+        tb_setStartCoord = (ToggleButton) findViewById(R.id.tb_setStartCoord);
+        tb_setStartCoord.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    // The toggle is enabled
+                    Toast.makeText(MainActivity.this, "Select starting point on map.", Toast.LENGTH_SHORT).show();
+                    mPGV.setStartPoint();
+                }
+            }
+        });
+
+        tb_autoManual = (ToggleButton) findViewById(R.id.tb_autoManual);
+        tb_autoManual.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    // The toggle is enabled; Manual Mode
+                    btn_update.setEnabled(true);
+                    Toast.makeText(MainActivity.this, "Manual Mode enabled", Toast.LENGTH_SHORT).show();
+
+                } else {
+                    // The toggle is disabled; Auto Mode
+                    btn_update.setEnabled(false);
+                    Toast.makeText(MainActivity.this, "Auto Mode enabled", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
     }
 
     @Override
@@ -115,6 +163,26 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
+        Toast.makeText(MainActivity.this, "Please navigate with the menu on the top right corner!", Toast.LENGTH_SHORT).show();
+    }
+
+    public void onClickExploration(View view) {
+        Toast.makeText(MainActivity.this, "Exploration start.", Toast.LENGTH_SHORT).show();
+
+        // EXPLORATION CODE
+    }
+
+    public void onClickFastestPath(View view) {
+        Toast.makeText(MainActivity.this, "Fastest Path start.", Toast.LENGTH_SHORT).show();
+
+        // FASTEST PATH CODE
+    }
+
+    public void onClickUpdate(View view) {
+
+        // INSERT UPDATE CODE
+
+        Toast.makeText(MainActivity.this,"Update Complete!", Toast.LENGTH_SHORT).show();
 
     }
 

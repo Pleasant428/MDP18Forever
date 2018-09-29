@@ -105,7 +105,7 @@
             android:layout_marginBottom="187dp"
             android:background="@color/melon"
             android:onClick="Retrieve"
-            android:text="Retrieved Saved Commands"
+            android:text="Retrieve Saved Commands"
             android:textSize="@dimen/font_size_small" />
 
 

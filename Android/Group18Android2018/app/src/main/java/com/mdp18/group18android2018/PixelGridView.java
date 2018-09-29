@@ -5,7 +5,10 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
+
+import static android.content.ContentValues.TAG;
 
 public class PixelGridView extends View{
 
@@ -305,4 +308,15 @@ public class PixelGridView extends View{
 
         this.invalidate();
     }
+
+    public void setWaypoint() {
+        Log.d(TAG, "Setting Waypoint...");
+
+    }
+
+    public void setStartPoint() {
+        Log.d(TAG, "Setting Start Point...");
+
+    }
+
 }

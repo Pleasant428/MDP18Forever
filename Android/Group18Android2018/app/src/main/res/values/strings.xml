@@ -1,19 +1,12 @@
 <resources>
     <string name="app_name">Group 18 Remote Controller</string>
-    <string name="bluetooth_status">BT Connection: </string>
-    <string name="bluetooth_off">Bluetooth Off</string>
-    <string name="manual">Manual</string>
-    <string name="Robot_Status">Robot Status:</string>
-    <string name="Robot_Idle">Stop</string>
-    <string name="Robot_Moving">Moving</string>
-    <string name="Exploration">Exploration</string>
-    <string name="FastestPath">Fastest Path</string>
     <string name="btStatusOffline">NOT CONNECTED</string>
-    <string name="Explore">Explore</string>
-    <string name="Start_stp">Shortest Path</string>
-    <string name="Reconfigure">Reconfigure</string>
     <string name="searchDevice">Searching for devices...</string>
     <string name="searchDone">Device found:</string>
+    <string name="setWaypoint">Set Waypoint</string>
+    <string name="setStart">Set Start Point</string>
+    <string name="onWaypoint">Selecting Waypoint</string>
+    <string name="onStart">Selecting Start Point</string>
     <string name="reconfig_instruct">Enter your string commands below.
         Afterwards, to apply the commands to the robot, select F1 or F2.</string>
 </resources>
