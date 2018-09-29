@@ -7,7 +7,7 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:background="@color/colorBackground"
-    android:orientation="vertical"
     tools:context=".ReconfigStringCommand">
+
 
 </android.support.constraint.ConstraintLayout>

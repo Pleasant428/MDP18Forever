@@ -28,7 +28,8 @@
 
         <activity
             android:name=".BluetoothConnect"
-            android:label="Bluetooth Connection">
+            android:label="Bluetooth Connection"
+            android:windowSoftInputMode="adjustPan">
         </activity>
 
         <activity

@@ -1,5 +1,6 @@
 package com.mdp18.group18android2018;
 
+
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -15,6 +16,7 @@ public class ReconfigStringCommand extends AppCompatActivity{
         super.onCreate(savedInstanceState);
         setTitle("Reconfigurable String Commands");
         setContentView(R.layout.activity_reconfig);
+
     }
 
     @Override
