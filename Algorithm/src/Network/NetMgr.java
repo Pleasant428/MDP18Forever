@@ -112,8 +112,8 @@ public class NetMgr {
 				return recievedMsg;
 			}
 			
-		} catch (IOException e) {
-			System.out.println("Sending Message Failed (IOException)!");
+		} catch (Exception e) {
+			System.out.println("Recieving Message Failed (IOException)!");
 			e.printStackTrace();
 		}
 		
