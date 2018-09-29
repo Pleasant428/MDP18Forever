@@ -34,7 +34,8 @@
 
         <activity
             android:name=".ReconfigStringCommand"
-            android:label="Reconfigurable String Commands">
+            android:label="Reconfigurable String Commands"
+            android:windowSoftInputMode="stateHidden">
         </activity>
 
 

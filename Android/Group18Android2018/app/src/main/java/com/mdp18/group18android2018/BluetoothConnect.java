@@ -23,6 +23,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
@@ -250,7 +251,6 @@ public class BluetoothConnect extends AppCompatActivity{
         switch (item.getItemId()) {
             case R.id.btn_reconfig:
                 Intent intent = new Intent(BluetoothConnect.this, ReconfigStringCommand.class);
-                //intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
                 startActivity(intent);
         }
         return super.onOptionsItemSelected(item);
@@ -258,7 +258,9 @@ public class BluetoothConnect extends AppCompatActivity{
 
     @Override
     public void onBackPressed() {
-
+        Intent intent = new Intent(BluetoothConnect.this, MainActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+        startActivity(intent);
     }
 
     @Override

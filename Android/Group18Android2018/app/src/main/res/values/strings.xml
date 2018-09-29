@@ -11,15 +11,9 @@
     <string name="btStatusOffline">NOT CONNECTED</string>
     <string name="Explore">Explore</string>
     <string name="Start_stp">Shortest Path</string>
-    <string name="F1">F1</string>
-    <string name="F2">F2</string>
-    <string name="Change_f1">Change F1</string>
-    <string name="change_f2">Change F2</string>
     <string name="Reconfigure">Reconfigure</string>
     <string name="searchDevice">Searching for devices...</string>
     <string name="searchDone">Device found:</string>
-    <string name="Save">Save Commands</string>
-    <string name="Clear">Clear Commands</string>
-    <string name="Retrieve">Retrieve Commands</string>
-
+    <string name="reconfig_instruct">Enter your string commands below.
+        Afterwards, to apply the commands to the robot, select F1 or F2.</string>
 </resources>
