@@ -9,4 +9,22 @@
     <string name="onStart">Selecting Start Point</string>
     <string name="reconfig_instruct">Enter your string commands below.
         Afterwards, to apply the commands to the robot, select F1 or F2.</string>
+    <string name="dialog_message">You have selected</string>
+
+    <!-- Android Controller Navigation String Commands -->
+    <string name="navFwd">Android Controller: Move Forward</string>
+    <string name="navLeft">Android Controller: Turn Left</string>
+    <string name="navRight">Android Controller: Turn Right</string>
+    <string name="navRev">Android Controller: Move Backwards</string>
+
+    <!-- Message Senders and Receivers -->
+    <string name="arduino">Arduino</string>
+    <string name="algo">Algorithm</string>
+
+    <!-- String Commands from message senders -->
+    <string name="fwd"> Move Forward</string>
+    <string name="left"> Turn Left</string>
+    <string name="right"> Turn Right</string>
+    <string name="back"> Move Backwards</string>
+
 </resources>

@@ -22,7 +22,7 @@ import java.util.UUID;
 public class BluetoothConnectionService extends IntentService {
 
     private static final String TAG = "BTConnectionAService";
-    private static final String appName = "Mdp";
+    private static final String appName = "Group 18 Remote Controller";
 
     //UUID
     private static final UUID myUUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
@@ -33,15 +33,13 @@ public class BluetoothConnectionService extends IntentService {
     private ConnectThread myConnectThread;
     public  BluetoothDevice myDevice;
     private UUID deviceUUID;
-
     Context myContext;
-    ProgressDialog myProgressDialog;
 
     //CONSTRUCTOR
     public BluetoothConnectionService(BluetoothConnect bluetoothConnect) {
 
         super("BluetoothConnectionService");
-        // mHandler = new Handler(Looper.getMainLooper());
+
     }
 
 

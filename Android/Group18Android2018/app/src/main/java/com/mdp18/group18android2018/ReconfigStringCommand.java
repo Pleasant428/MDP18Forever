@@ -7,8 +7,10 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
@@ -19,17 +21,17 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.nio.charset.Charset;
 import java.util.UUID;
 
 public class ReconfigStringCommand extends AppCompatActivity{
 
     private static final String TAG = "ReconfigStringCommand";
 
-    Button btn_save, btn_reset, btn_retrieve;
+    Button btn_save, btn_reset, btn_retrieve, btn_f1, btn_f2;
     EditText et_f1, et_f2;
 
     SharedPreferences myPrefs;
-
 
     // For bluetooth connection status
     private static final UUID myUUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
@@ -45,9 +47,14 @@ public class ReconfigStringCommand extends AppCompatActivity{
         setTitle("Reconfigurable String Commands");
         setContentView(R.layout.activity_reconfig);
 
+        //REGISTER BROADCAST RECEIVER FOR IMCOMING MSG
+        LocalBroadcastManager.getInstance(this).registerReceiver(btConnectionReceiver, new IntentFilter("btConnectionStatus"));
+
         btn_save = (Button) findViewById(R.id.btn_save);
         btn_reset = (Button) findViewById(R.id.btn_reset);
         btn_retrieve = (Button) findViewById(R.id.btn_retrieve);
+        btn_f1 = (Button) findViewById(R.id.btn_f1);
+        btn_f2 = (Button) findViewById(R.id.btn_f2);
 
         myPrefs=getSharedPreferences("myPrefs", MODE_PRIVATE);
 
@@ -91,9 +98,37 @@ public class ReconfigStringCommand extends AppCompatActivity{
 
     public void onClickF1(){
 
+        btn_f1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                String tempF1 = myPrefs.getString("f1", "");
+                byte[] bytes = tempF1.getBytes(Charset.defaultCharset());
+                BluetoothChat.writeMsg(bytes);
+
+                Log.d(TAG, "Outgoing F1 string command: " + tempF1);
+
+                Toast.makeText(ReconfigStringCommand.this, "F1 string command sent.", Toast.LENGTH_SHORT).show();
+            }
+        });
+
     }
 
     public void onClickF2() {
+
+        btn_f2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                String tempF2 = myPrefs.getString("f2", "");
+                byte[] bytes = tempF2.getBytes(Charset.defaultCharset());
+                BluetoothChat.writeMsg(bytes);
+
+                Log.d(TAG, "Outgoing F2 string command: " + tempF2);
+
+                Toast.makeText(ReconfigStringCommand.this, "F2 string command sent.", Toast.LENGTH_SHORT).show();
+            }
+        });
 
     }
 

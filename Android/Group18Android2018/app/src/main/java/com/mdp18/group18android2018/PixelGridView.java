@@ -1,12 +1,16 @@
 package com.mdp18.group18android2018;
 
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
+import android.widget.Toast;
 
 import static android.content.ContentValues.TAG;
 
@@ -312,11 +316,52 @@ public class PixelGridView extends View{
     public void setWaypoint() {
         Log.d(TAG, "Setting Waypoint...");
 
+
+        // SET WAYPOINT CODE
+
+
+
+        Log.d(TAG, "Waypoint set to;");
+
     }
 
     public void setStartPoint() {
         Log.d(TAG, "Setting Start Point...");
 
+
+        // SET START POINT CODE
+
+
+
+
+        Log.d(TAG, "Start Point set to;");
+    }
+
+    // Keeps the updated map on app regardless of auto or manual mode
+    public void updateMap(String[] mapInfo, boolean updateMap) {
+
+        // UPDATE MAP CODE
+
+
+
+
+
+        // If updateMap = true, refresh map
+        if (updateMap) {
+            invalidate();
+        }
+    }
+
+    // To inverse row's coordinates
+    public int inverseRowCoord (int rowNum) {
+
+        return (19 - rowNum);
+    }
+
+
+    // Refresh map
+    public void refreshMap(){
+        invalidate();
     }
 
 }

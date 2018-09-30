@@ -64,7 +64,7 @@ public class BluetoothConnect extends AppCompatActivity{
     TextView incomingMsgTextView;
     Button bluetoothConnect;
     TextView deviceSearchStatus;
-    ProgressDialog myProgressDialog, connectionDialog;
+    ProgressDialog myProgressDialog;
     TextView pairedDeviceText;
     Intent connectIntent;
 
@@ -270,7 +270,6 @@ public class BluetoothConnect extends AppCompatActivity{
         unregisterReceiver(discoverabilityBroadcastReceiver);
         unregisterReceiver(discoveryBroadcastReceiver);
         unregisterReceiver(bondingBroadcastReceiver);
-        //unregisterReceiver(btConnectionReceiver);
         unregisterReceiver(discoveryStartedBroadcastReceiver);
         unregisterReceiver(discoveryEndedBroadcastReceiver);
         unregisterReceiver(enableBTBroadcastReceiver);
@@ -396,15 +395,11 @@ public class BluetoothConnect extends AppCompatActivity{
                         //START BLUETOOTH CONNECTION SERVICE WHICH WILL START THE ACCEPTTHREAD TO LISTEN FOR CONNECTION
                         connectIntent = new Intent(BluetoothConnect.this, BluetoothConnectionService.class);
                         connectIntent.putExtra("serviceType", "listen");
-                        //connectIntent.putExtra("device", device);
-                        //connectIntent.putExtra("id", uuid);
                         startService(connectIntent);
 
                         //CHECK PAIRED DEVICE LIST
                         checkPairedDevice();
 
-
-                        // myBluetoothConnection = new BluetoothConnectionService(Connect.this);
 
 
                         break;
@@ -498,13 +493,11 @@ public class BluetoothConnect extends AppCompatActivity{
 
                 //BONDING DEVICE
                 BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-                //BluetoothConnectionService.setMyDevice(device);
 
                 //BOUNDED ALREADY
                 if (device.getBondState() == BluetoothDevice.BOND_BONDED) {
 
                     Log.d(TAG, "BoundReceiver: Bond Bonded with: " + device.getName());
-                    //BluetoothConnectionService.setMyDevice(device);
 
                     myProgressDialog.dismiss();
 
@@ -555,7 +548,7 @@ public class BluetoothConnect extends AppCompatActivity{
         @Override
         public void onReceive(Context context, Intent intent) {
 
-            Log.d(TAG, "Receiving Msg!!!");
+            Log.d(TAG, "Receiving Message!");
 
             String msg = intent.getStringExtra("receivingMsg");
             incomingMsg.append(msg + "\n");
@@ -657,8 +650,6 @@ public class BluetoothConnect extends AppCompatActivity{
 
         Log.d(TAG, "StartBTConnection: Initializing RFCOM Bluetooth Connection");
 
-        //myBluetoothConnection.startClient(device, uuid);
-
         connectIntent = new Intent(BluetoothConnect.this, BluetoothConnectionService.class);
         connectIntent.putExtra("serviceType", "connect");
         connectIntent.putExtra("device", device);
@@ -688,46 +679,10 @@ public class BluetoothConnect extends AppCompatActivity{
             lvPairedDevices.setAdapter(myPairedDeviceListAdapter);
 
         } else {
-
-            /*String[] noDevice = {"No Device"};
-            ListAdapter emptyListAdapter = new ArrayAdapter<String>(this, R.layout.device_adapter_view,R.id.deviceName, noDevice);
-            lvPairedDevices.setAdapter(emptyListAdapter);*/
             pairedDeviceText.setText("No Paired Devices: ");
 
             Log.d(TAG, "NO PAIRED DEVICE!!");
         }
-    }
-
-    /*
-        CHECKING OF INCOMING MESSAGE TYPE (TO FILTER)
-    */
-    public String checkIncomingMsgType(String msg) {
-
-        String msgType = null;
-        String[] splitedMsg = msg.split(":");
-
-
-        switch (splitedMsg[0]) {
-
-            //RobotStatus
-            case "status":
-                // Statements
-                msgType = "robotstatus";
-                break; // optional
-
-            //Auto / Manual Refresh Of Map
-            case "maprefresh":
-                // Statements
-                msgType = "maprefresh";
-                break; // optional
-
-            default: // Optional
-                Log.d(TAG, "Checking Msg Type: Error - " + splitedMsg[0] + ":" + splitedMsg[1]);
-                break;
-            // Statements
-        }
-        return msgType;
-
     }
 
 

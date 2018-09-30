@@ -54,31 +54,29 @@
                     app:layout_constraintHorizontal_bias="0.228"
                     app:layout_constraintVertical_bias="0.422" />
 
-                <EditText
-                    android:id="@+id/et_status"
+                <TextView
+                    android:id="@+id/tv_mystatus"
                     android:layout_width="match_parent"
                     android:layout_height="32dp"
                     android:layout_below="@+id/tv_status"
                     android:background="@drawable/textbar"
                     android:ems="15"
-                    android:inputType="none"
                     android:text="" />
 
                 <TextView
                     android:id="@+id/tv_map_exploration"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_below="@id/et_status"
-                    android:text="Map Exploration" />
+                    android:layout_below="@id/tv_mystatus"
+                    android:text="String Commands" />
 
-                <EditText
-                    android:id="@+id/et_stringcmd"
+                <TextView
+                    android:id="@+id/tv_mystringcmd"
                     android:layout_width="match_parent"
                     android:layout_height="32dp"
                     android:layout_below="@+id/tv_string"
                     android:background="@drawable/textbar"
                     android:ems="15"
-                    android:inputType="none"
                     android:text="" />
 
                 <ToggleButton
