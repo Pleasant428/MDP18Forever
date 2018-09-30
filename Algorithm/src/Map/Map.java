@@ -41,7 +41,6 @@ public class Map {
 		grid = new Cell[MapConstants.MAP_HEIGHT][MapConstants.MAP_WIDTH];
 
 		initMap();
-
 	}
 	
 	

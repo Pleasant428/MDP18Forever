@@ -114,6 +114,8 @@ public class FastestPath {
 	
 	//Actual A* Algo running
 	public ArrayList<Cell> run(Point start, Point goal, Direction dir) {
+		
+		System.out.println("Starting Fastest Run");
 		//Temp Holder gor gCost
 		double gCost;
 		
@@ -129,6 +131,7 @@ public class FastestPath {
 		
 		//Loop through all the items in toVisit
 		while(!toVisit.isEmpty()) {
+			System.out.println("HERE");
 			cur = minCostCell(goal);
 			
 			if(prevCell.containsKey(cur))

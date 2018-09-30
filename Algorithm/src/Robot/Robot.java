@@ -154,7 +154,7 @@ public class Robot {
 	}
 	
 	//Movement Method for robot and Sensors
-	public void move(Direction dir, boolean forward, int steps, Map map) {
+	public void move(Direction dir, boolean forward, int steps, Map exploredMap) {
 		int rowInc = 0, colInc=0;
 		switch(dir) {
 		case UP:
@@ -181,7 +181,7 @@ public class Robot {
 			colInc *= -1;
 		}
 		
-		if(map.checkValidMove(pos.y+rowInc*steps, pos.x+ colInc*steps))
+		if(exploredMap.checkValidMove(pos.y+rowInc*steps, pos.x+ colInc*steps))
 		{
 			setPosition(pos.x+ colInc*steps, pos.y+rowInc*steps);
 			
@@ -189,7 +189,7 @@ public class Robot {
 	}
 	
 	//Moving using the Command enum
-	public void move(Command m, int steps, Map map) {
+	public void move(Command m, int steps, Map exploredMap) {
 		//Delay Movement for a 
 		try {
 			TimeUnit.MILLISECONDS.sleep(RobotConstants.MOVE_SPEED);
@@ -199,17 +199,17 @@ public class Robot {
 		
 		switch(m) {
 		case FORWARD:
-			move(direction, true, steps, map);
+			move(direction, true, steps, exploredMap);
 			break;
 		case BACKWARD:
-			move(direction, false, steps, map);
+			move(direction, false, steps, exploredMap);
 			break;
 		case TURN_LEFT:
-			direction = direction.getNext(direction);
+			direction = Direction.getNext(direction);
 			rotateSensors(true);
 			break;
 		case TURN_RIGHT:
-			direction = direction.getPrevious(direction);
+			direction = Direction.getPrevious(direction);
 			rotateSensors(false);
 			break;
 		}
