@@ -75,35 +75,108 @@ void setup() {
 
 
 void loop() {
-  //  Serial.print("F: ");
-  //  Serial.print(getFrontIR1());
-  //  Serial.print(", ");
-  //  Serial.print(getFrontIR2());
-  //  Serial.print(", ");
-  //  Serial.print(getFrontIR3());
-  //  Serial.println("");
-  //
-  //  Serial.print("F: ");
-  //  Serial.print(getFrontIR1_Block());
-  //  Serial.print(", ");
-  //  Serial.print(getFrontIR2_Block());
-  //  Serial.print(", ");
-  //  Serial.print(getFrontIR3_Block());
-  //  Serial.println("");
-  //
-  //  Serial.print(" R: ");
-  //  Serial.print(getRightIR1());
-  //  Serial.print(", ");
-  //  Serial.print  (getRightIR2());
-  //  Serial.print(" L: ");
-  //  Serial.println(getLeftIR1());
-  //  Serial.print(" R: ");
-  //  Serial.print(getRightIR1_Block());
-  //  Serial.print(", ");
-  //  Serial.print  (getRightIR2_Block());
-  //  Serial.print(" L: ");
-  //  Serial.println(getLeftIR1_Block());
+  
+  char command_buffer[12];
+  int i = 0
+  char newChar;
+  
+   while (1){
+    if (Serial.available()){
+      newChar = Serial.read();
+      command_buffer[i] = newChar;
+      i++;
+      if (newChar == '|'){
+        i = 1;
+        break;
+      }
+    }  
+  }
+  // Alg|Ard|0|{1-10} (Steps)
+  //2nd Character of the Array is the Command
+  char command = command_buffer[2];
+  int numOfSteps = atoi(command_buffer[3]);
 
+  // 0 : FORWARD
+  // 1: TURN_LEFT
+  // 2: TURN_RIGHT
+  // 3: BACKWARD
+  // 4: ALIGN_FRONT
+  // 5: ALIGN_RIGHT
+  // 6: SEND_SENSORS
+
+  switch (command) {
+  case '0':
+    {
+      moveForward(k*10);
+      break;
+    }
+    case '1':
+    {
+      for (int k = 0; k < numOfSteps; k++) {
+        turnLeft();
+      }
+      break;
+    }
+    case '2':
+    {
+      for (int k = 0; k < numOfSteps; k++) {
+        turnRight();
+      }
+      break;
+    }
+    case '3':
+   {
+      moveBackwards(k*10);
+      break;
+   }
+   case '4':
+   {
+      alignFront();
+      break;
+   }
+   case '5':
+   {
+      alignRight();
+      break;
+   }
+   case '6':
+   {
+      Serial.print("Ard|Alg|Sensor|1:");
+      Serial.print(getFrontIR1());
+      Serial.print(":");
+      Serial.print(getFrontIR1_Block());
+      Serial.print(",2:");
+      Serial.print(getFrontIR2());
+      Serial.print(":");
+      Serial.print(getFrontIR2_Block());
+      Serial.print(",3:");
+      Serial.print(getFrontIR3());
+      Serial.print(":");
+      Serial.print(getFrontIR3_Block());
+      Serial.print(",4:");
+      Serial.print(getRightIR1());
+      Serial.print(":");
+      Serial.print(getRightIR1_Block());
+      Serial.print(",5:");
+      Serial.print  (getRightIR2());
+      Serial.print(":");
+      Serial.print(getRightIR2_Block());
+      Serial.print(",6:");
+      Serial.println(getLeftIR1());
+      Serial.print(":");
+      Serial.print(getLeftIR1_Block()); 
+      Serial.println("");
+
+      break;
+   }
+    default:
+   {
+     break;
+   }
+    memset(command_buffer,0,sizeof(command_buffer));
+  }
+}
+  
 
 
 }
@@ -461,5 +534,3 @@ void checkList_A7() {
   turnLeft(45);
   moveForward(dist);
 }
-
-
