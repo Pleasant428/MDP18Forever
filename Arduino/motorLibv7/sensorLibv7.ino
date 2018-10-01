@@ -43,15 +43,17 @@ void setupSensorInterrupt() {
   MsTimer2::start();
 }
 
-void slowSensorInterrupt() {
-  MsTimer2::set(80, readSensors);
-  MsTimer2::start();
-}
-
-void restoreSensorInterrupt() {
-  MsTimer2::set(40, readSensors);
-  MsTimer2::start();
-}
+//void slowSensorInterrupt() {
+//  MsTimer2::stop();
+//  //  MsTimer2::set(80, readSensors);
+//  //  MsTimer2::start();
+//}
+//
+//void restoreSensorInterrupt() {
+//  MsTimer2::stop();
+//  MsTimer2::set(40, readSensors);
+//  MsTimer2::start();
+//}
 
 void readSensors() {
   readFrontSensor_1();

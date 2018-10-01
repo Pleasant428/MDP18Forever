@@ -17,8 +17,8 @@ const double kp = 7.68, ki = 1.05, kd = 0;
 //double kp = 0, ki = 0, kd = 0;
 //const double kp = 15, ki = 0, kd = 0;
 
-volatile double tick_R = 0;
-volatile double tick_L = 0;
+double tick_R = 0;
+double tick_L = 0;
 double speed_O = 0;
 double previous_tick_R = 0;
 double previous_error = 0;
@@ -126,7 +126,6 @@ void setupMotorEncoder() {
 void moveForward(long distance) {
   initializeTick();
   initializeMotor_Start();
-  slowSensorInterrupt();
   distance = cmToTicks(distance);
   double currentSpeed = 0;
   if (distance < 30) {
@@ -134,9 +133,8 @@ void moveForward(long distance) {
   } else {
     currentSpeed = MOVE_MAX_SPEED;
   }
-
   double offset = 0;
-  long last_R = 0;
+
   while (tick_R < distance || tick_L < distance) {
     Serial.println(millis());
     //    offset = computePID();
@@ -144,14 +142,12 @@ void moveForward(long distance) {
       md.setSpeeds(currentSpeed, currentSpeed - speed_O);
   }
   initializeMotor_End();
-  restoreSensorInterrupt();
 }
 
 void moveBackwards(long distance) {
   initializeTick();
   initializeMotor_Start();
   distance = cmToTicks(distance);
-  //  slowSensorInterrupt();
   double currentSpeed = 0;
   if (distance < 30) {
     currentSpeed = MOVE_MIN_SPEED;
@@ -159,13 +155,12 @@ void moveBackwards(long distance) {
     currentSpeed = MOVE_MAX_SPEED;
   }
   double offset = 0;
-  long last_R = 0;
+
   while (tick_R < distance || tick_L < distance) {
     //    offset = computePID();
     if (myPID.Compute())
       md.setSpeeds(-currentSpeed, -(currentSpeed - speed_O));
   }
-  //  restoreSensorInterrupt();
   initializeMotor_End();
 }
 
@@ -175,7 +170,7 @@ int moveForwardTillWall() {
   initializeMotor_Start();
   double currentSpeed = MOVE_MAX_SPEED;
   double offset = 0;
-  long last_R = 0;
+
   while (1) {
     if (getFrontIR1() <= (DIST_WALL_CENTER_BOX + 2.6) || getFrontIR2() <= (DIST_WALL_CENTER_BOX + 3.3)  || getFrontIR3() <= (DIST_WALL_CENTER_BOX + 2.3) ) {
       break;
@@ -197,7 +192,7 @@ void turnLeft() {
   initializeMotor_Start();
   double currentSpeed = TURN_MAX_SPEED;
   double offset = 0;
-  long last_R = 0;
+
   while (tick_R < TURN_TICKS || tick_L < TURN_TICKS) {
     //    offset = computePID();
     if (myPID.Compute())
@@ -211,7 +206,7 @@ void turnLeft(int degree) {
   initializeMotor_Start();
   double currentSpeed = TURN_MAX_SPEED;
   double offset = 0;
-  long last_R = 0;
+
   int turn_degree = ceil(ceil(TURN_TICKS / 90.0) * (degree * 0.98));
   if (debug) {
     Serial.print("(TL)Ticks: ");
@@ -230,7 +225,7 @@ void turnRight() {
   initializeMotor_Start();
   double currentSpeed = TURN_MAX_SPEED;
   double offset = 0;
-  long last_R = 0;
+
   while (tick_R < (TURN_TICKS + 10) || tick_L < (TURN_TICKS + 10)) {
     //    offset = computePID();
     if (myPID.Compute())
@@ -244,7 +239,7 @@ void turnRight(int degree) {
   initializeMotor_Start();
   double currentSpeed = TURN_MAX_SPEED;
   double offset = 0;
-  long last_R = 0;
+
   int turn_degree = ceil(ceil(TURN_TICKS / 90.0) * (degree * 0.98));
   if (debug) {
     Serial.print("(TR)Ticks: ");
@@ -263,7 +258,7 @@ void rotateLeft(long distance) {
   initializeMotor_Start();
   double currentSpeed = ROTATE_MAX_SPEED;
   double offset = 0;
-  long last_R = 0;
+
   while (tick_R < distance || tick_L < distance) {
     if (debug) {
       Serial.print("(RL)R: ");
@@ -283,7 +278,7 @@ void rotateRight(long distance) {
   initializeMotor_Start();
   double currentSpeed = ROTATE_MAX_SPEED;
   double offset = 0;
-  long last_R = 0;
+
   while (tick_R < distance || tick_L < distance) {
     if (debug) {
       Serial.print("(RR)R: ");
@@ -433,7 +428,6 @@ int moveForwardTillWallA7() {
   initializeMotor_Start();
   double currentSpeed = MOVE_MAX_SPEED;
   double offset = 0;
-  long last_R = 0;
   while (1) {
     if (getFrontIR1() <= (DIST_WALL_CENTER_BOX + 6.6) || getFrontIR2() <= (DIST_WALL_CENTER_BOX + 7.3)  || getFrontIR3() <= (DIST_WALL_CENTER_BOX + 6.3) ) {
       break;
