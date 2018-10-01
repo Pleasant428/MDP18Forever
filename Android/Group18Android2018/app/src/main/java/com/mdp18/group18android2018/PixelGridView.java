@@ -193,46 +193,64 @@ public class PixelGridView extends View{
     }
 
     public void robotPosMapping(Canvas canvas, int[] pos, int robotDirection){
+        boolean reachedWall = this.checkReachedWall(pos, robotDirection);
 
-        for (int i = Math.min(pos[1],pos[3]); i <= Math.max(pos[1],pos[3]); i++){
-            for (int j = Math.min(pos[0],pos[2]); j <= Math.max(pos[0],pos[2]); j++){
-                canvas.drawRect(i * cellWidth, j * cellHeight,
-                        (i + 1) * cellWidth, (j + 1) * cellHeight,
-                        yellowPaint);
+        if(!reachedWall){
+            for (int i = Math.min(pos[1],pos[3]); i <= Math.max(pos[1],pos[3]); i++){
+                for (int j = Math.min(pos[0],pos[2]); j <= Math.max(pos[0],pos[2]); j++){
+                    canvas.drawRect(i * cellWidth, j * cellHeight,
+                            (i + 1) * cellWidth, (j + 1) * cellHeight,
+                            yellowPaint);
+                }
+            }
+
+
+            // head color
+
+            // front
+            if (robotDirection == 0){
+                canvas.drawRect((pos[1] + 1) * cellWidth, pos[0] * cellHeight,
+                        (pos[3]) * cellWidth, (pos[2] - 1) * cellHeight,
+                        bluePaint);
+            }
+
+            // left
+            else if (robotDirection == 1){
+                canvas.drawRect((pos[1]) * cellWidth, (pos[0] + 1) * cellHeight,
+                        (pos[3] - 1) * cellWidth, (pos[2]) * cellHeight,
+                        bluePaint);
+            }
+
+            // back
+            else if (robotDirection == 2){
+                canvas.drawRect((pos[1] + 1) * cellWidth, (pos[0] + 2) * cellHeight,
+                        (pos[3]) * cellWidth, (pos[2] + 1) * cellHeight,
+                        bluePaint);
+            }
+
+            // right
+            else if (robotDirection == 3){
+                canvas.drawRect((pos[1] + 2) * cellWidth, (pos[0] + 1) * cellHeight,
+                        (pos[3] + 1) * cellWidth, (pos[2]) * cellHeight,
+                        bluePaint);
             }
         }
+        else return;
 
+    }
 
-        // head color
+    private boolean checkReachedWall(int[] pos, int direction) {
+        int[] boundaries = new int[4];
+        boundaries[0] = 0;
+        boundaries[1] = 0;
+        boundaries[2] = 19;
+        boundaries[3] = 14;
 
-        // front
-        if (robotDirection == 0){
-            canvas.drawRect((pos[1] + 1) * cellWidth, pos[0] * cellHeight,
-                    (pos[3]) * cellWidth, (pos[2] - 1) * cellHeight,
-                    bluePaint);
+        if(pos[direction] == boundaries[direction]){
+            return true;
         }
 
-        // left
-        else if (robotDirection == 1){
-            canvas.drawRect((pos[1]) * cellWidth, (pos[0] + 1) * cellHeight,
-                    (pos[3] - 1) * cellWidth, (pos[2]) * cellHeight,
-                    bluePaint);
-        }
-
-        // back
-        else if (robotDirection == 2){
-            canvas.drawRect((pos[1] + 1) * cellWidth, (pos[0] + 2) * cellHeight,
-                    (pos[3]) * cellWidth, (pos[2] + 1) * cellHeight,
-                    bluePaint);
-        }
-
-        // right
-        else if (robotDirection == 3){
-            canvas.drawRect((pos[1] + 2) * cellWidth, (pos[0] + 1) * cellHeight,
-                    (pos[3] + 1) * cellWidth, (pos[2]) * cellHeight,
-                    bluePaint);
-        }
-
+        return false;
     }
 
     public void moveForward(){
@@ -356,6 +374,21 @@ public class PixelGridView extends View{
     public int inverseRowCoord (int rowNum) {
 
         return (19 - rowNum);
+    }
+
+    public int[] convertTileToEdge (int row, int column){
+        int rowFormatConvert = inverseRowCoord(row);
+        int topEdge, leftEdge, bottomEdge, rightEdge;
+        topEdge = rowFormatConvert - 1;
+        leftEdge = column - 1;
+        bottomEdge = rowFormatConvert + 1;
+        rightEdge = column + 1;
+        int[] edges = new int[4];
+        edges[0] = topEdge;
+        edges[1] = leftEdge;
+        edges[2] = bottomEdge;
+        edges[3] = rightEdge;
+        return edges;
     }
 
 

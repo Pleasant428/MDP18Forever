@@ -196,7 +196,6 @@ public class PixelGridView extends View {
             }
         }
 
-
         // head color
 
         // front
@@ -229,6 +228,13 @@ public class PixelGridView extends View {
 
     }
 
+    public boolean checkReachedWall(){
+        int[] curPos = this.getCurPos();
+
+
+        return false;
+    }
+
     public void moveForward(){
         int[] pos = this.getCurPos();
         int dir = this.getRobotDirection();
@@ -254,8 +260,8 @@ public class PixelGridView extends View {
             pos[3]++;
         }
 
+        boolean reachedWall;
         this.setCurPos(pos);
-
         this.invalidate();
     }
 
