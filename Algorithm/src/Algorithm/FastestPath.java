@@ -139,31 +139,33 @@ public class FastestPath {
 			
 			visited.add(cur);
 			toVisit.remove(cur);
-			
+			System.out.println(visited.contains(exploredMap.getCell(goal)));
 			//Check If Goal Reached
 			if(visited.contains(exploredMap.getCell(goal))) {
 				path = getPath(start,goal);
+				System.out.println(path.toString());
 				return path;
 			}
 			
 			neighbours = exploredMap.getNeighbours(cur);
+			System.out.println(neighbours.size());
 			for(int i=0; i<neighbours.size(); i++) {
 				
 				//if cell has been visited skip
 				if(visited.contains(neighbours.get(i)))
 					continue;
 				
-				gCost = costG.get(cur)+ getCostG(cur.getPos(),neighbours.get(i).getPos(),curDir);
+				gCost = costG.get(cur.getPos())+ getCostG(cur.getPos(),neighbours.get(i).getPos(),curDir);
+				
 				//if the cell is not in toVisit
 				if(!toVisit.contains(neighbours.get(i))) {
-					
 					prevCell.put(neighbours.get(i), cur);
 					
 					costG.put(neighbours.get(i).getPos(), gCost);
 					toVisit.add(neighbours.get(i));
 				}
 				else {
-					double curGCost = costG.get(neighbours.get(i));
+					double curGCost = costG.get(neighbours.get(i).getPos());
 					//If path from current is shorter update costG of the neighbour cell;
 					if(gCost < curGCost) {
 						costG.replace(neighbours.get(i).getPos(), gCost);

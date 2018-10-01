@@ -23,13 +23,16 @@ public class Exploration {
 	private double areaExplored;
 	private long startTime;
 	private long endTime;
+	private int stepPerSecond;
+	private Point start;
 
-	public Exploration(Map exploredMap, Map map, Robot robot, double coverageLimit, int timeLimit) {
+	public Exploration(Map exploredMap, Map map, Robot robot, double coverageLimit, int timeLimit, int stepPerSecond) {
 		this.exploredMap = exploredMap;
 		this.map = map;
 		this.robot = robot;
 		this.coverageLimit = coverageLimit;
 		this.timeLimit = timeLimit;
+		this.stepPerSecond = stepPerSecond;
 	}
 
 	public Map getExploredMap() {
@@ -69,18 +72,29 @@ public class Exploration {
 		startTime = System.currentTimeMillis();
 		endTime = startTime + timeLimit;
 		double prevArea = exploredMap.exploredPercentage();
-
+		int moves = 1;
+		int checkingStep = 3;
+		this.start = start;
+		
 		// Loop to explore the map
 		do {
+			System.out.println(System.currentTimeMillis()-startTime);
 			getMove();
-			areaExplored = exploredMap.exploredPercentage();
-			// Entered a Loop or returned to start
-			if (prevArea == areaExplored || robot.getPosition().equals(start)) {
-				if(areaExplored >= 100)
-					break;
-				//goToUnexplored();
+			//Delay Movement for a 
+			try {
+				TimeUnit.MILLISECONDS.sleep(RobotConstants.MOVE_SPEED/stepPerSecond);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
 			}
-			prevArea = areaExplored;
+			areaExplored = exploredMap.exploredPercentage();
+			if(areaExplored >= 100)
+				break;
+			//returned to start
+			if (prevArea==areaExplored) {
+				goToUnexplored();
+			}
+			if(moves%checkingStep == 0)
+				prevArea = areaExplored;
 		} while (areaExplored < coverageLimit && System.currentTimeMillis() < endTime);
 
 		goToPoint(start);
@@ -99,8 +113,13 @@ public class Exploration {
 	// Fast Algo to a point (used to go back to start
 	public void goToPoint(Point loc) {
 		// robot already at start
-		if (robot.getPosition() == loc) {
+		if (robot.getPosition() == start) {
 			while (robot.getDirection() != Direction.UP) {
+				try {
+					TimeUnit.MILLISECONDS.sleep(RobotConstants.MOVE_SPEED/stepPerSecond);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
 				robot.move(Command.TURN_LEFT, RobotConstants.MOVE_STEPS, exploredMap);
 				robot.sense(exploredMap, map);
 			}
@@ -115,6 +134,11 @@ public class Exploration {
 		commands = backToStart.getPathCommands(path);
 		for (Command c : commands) {
 			System.out.println(c.toString());
+			try {
+				TimeUnit.MILLISECONDS.sleep(RobotConstants.MOVE_SPEED/stepPerSecond);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
 			robot.move(c, RobotConstants.MOVE_STEPS, exploredMap);
 			robot.sense(exploredMap, map);
 		}

@@ -184,19 +184,11 @@ public class Robot {
 		if(exploredMap.checkValidMove(pos.y+rowInc*steps, pos.x+ colInc*steps))
 		{
 			setPosition(pos.x+ colInc*steps, pos.y+rowInc*steps);
-			
 		}
 	}
 	
 	//Moving using the Command enum
 	public void move(Command m, int steps, Map exploredMap) {
-		//Delay Movement for a 
-		try {
-			TimeUnit.MILLISECONDS.sleep(RobotConstants.MOVE_SPEED);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-		
 		switch(m) {
 		case FORWARD:
 			move(direction, true, steps, exploredMap);
@@ -215,7 +207,14 @@ public class Robot {
 		}
 	}
 	
-	
+	public void setStartPos(int col, int row, Map exploredMap) {
+		setPosition(col,row);
+		exploredMap.setAllExplored(false);
+		for(int r=row-1; r <= row+1; r++) {
+			for(int c=col-1; c<= col+1; c++)
+				exploredMap.getCell(r, c).setExplored(true);
+		}
+	}
 	
 	public void setPosition(int col, int row) {
 		int colDiff = col - pos.x;

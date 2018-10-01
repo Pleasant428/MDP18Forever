@@ -58,6 +58,15 @@ public class Map {
 			}
 		}
 	}
+	
+	//Set all cells as explored based on boolean true is all explord false is all unexplored
+	public void setAllExplored(boolean explored) {
+		for (int row = 0; row < MapConstants.MAP_HEIGHT; row++) {
+			for (int col = 0; col < MapConstants.MAP_WIDTH; col++) {
+				grid[row][col].setExplored(explored);
+			}
+		}
+	}
 
 	// Returns the Cell
 	public Cell getCell(int row, int col) {
@@ -114,7 +123,7 @@ public class Map {
 
 	// Check if valid to move there cannot move to virtual wall
 	public boolean checkValidMove(int row, int col) {
-		return checkValidCell(row, col) && !getCell(row, col).isVirtualWall() && !getCell(row, col).isObstacle();
+		return checkValidCell(row, col) && !getCell(row, col).isVirtualWall() && !getCell(row, col).isObstacle() && getCell(row,col).isExplored();
 	}
 
 	// Reset Map

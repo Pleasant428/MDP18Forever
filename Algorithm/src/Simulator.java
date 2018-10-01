@@ -1,4 +1,5 @@
 import java.awt.Point;
+import java.io.File;
 import java.util.*;
 
 import Algorithm.*;
@@ -20,6 +21,7 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.shape.*;
 import javafx.scene.paint.Color;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.collections.*;
 import javafx.concurrent.Task;
@@ -56,10 +58,11 @@ public class Simulator extends Application {
 	// UI components
 	private Button loadMapBtn, saveMapBtn, resetMapBtn, startBtn, connectBtn, setWaypointBtn, setRobotBtn,
 			setObstacleBtn;
-	private ScrollBar timeLimitSB, coverageLimitSB;
-	private TextField ipTxt, portTxt, timeLimitTxt, coverageLimitTxt;
-	private Label ipLbl, portLbl, timeLimitLbl, coverageLimitLbl;
+	private ScrollBar timeLimitSB, coverageLimitSB, stepsSB;
+	private TextField ipTxt, portTxt, timeLimitTxt, coverageLimitTxt, stepsTxt;
+	private Label ipLbl, portLbl, timeLimitLbl, coverageLimitLbl, stepsLbl;
 	private ComboBox<String> modeCB;
+	private FileChooser fileChooser;
 
 	// Mode Constants
 	private final String REAL_FAST = "Real Fastest Path";
@@ -73,10 +76,13 @@ public class Simulator extends Application {
 	public void start(Stage primaryStage) {
 		// Init for Map and Robot
 		map = new Map();
+		//Set to all explored for loading and saving map
+		map.setAllExplored(true);
 		exploredMap = new Map();
 
 		// Default Location at the startzone
 		robot = new Robot(sim, Direction.UP, 1, 1);
+		robot.setStartPos(robot.getPosition().x, robot.getPosition().y, exploredMap);
 		
 		//Threads
 		simExpTask = new Thread(new ExplorationTask());
@@ -122,6 +128,10 @@ public class Simulator extends Application {
 		coverageLimitTxt = new TextField();
 		timeLimitTxt.setDisable(true);
 		coverageLimitTxt.setDisable(true);
+		stepsLbl = new Label("Steps: ");
+		stepsTxt = new TextField();
+		stepsTxt.setDisable(true);
+		stepsTxt.setMaxWidth(50);
 		timeLimitTxt.setMaxWidth(50);
 		coverageLimitTxt.setMaxWidth(50);
 		
@@ -140,13 +150,20 @@ public class Simulator extends Application {
 		setRobotBtn = new Button("Set Robot Position");
 		setObstacleBtn = new Button("Set Obstacles");
 		
+		//File Chooser
+		fileChooser = new FileChooser();
+		
 		//ScrollBar
 		timeLimitSB = new ScrollBar();
 		coverageLimitSB = new ScrollBar();
-		timeLimitSB.setMin(60);
-		timeLimitSB.setMax(360);
-		coverageLimitSB.setMin(50);
+		stepsSB = new ScrollBar();
+		stepsSB.setMin(1);
+		stepsSB.setMax(10);
+		timeLimitSB.setMin(10);
+		timeLimitSB.setMax(240);
+		coverageLimitSB.setMin(10);
 		coverageLimitSB.setMax(100);
+		
 		
 		connectBtn.setMaxWidth(500);
 		startBtn.setMaxWidth(500);
@@ -183,6 +200,26 @@ public class Simulator extends Application {
 				robot.draw();
 			}
 		});
+		loadMapBtn.setOnMouseClicked(new EventHandler<MouseEvent>() {
+			public void handle(MouseEvent e) {
+				fileChooser.setTitle("Choose file to load from");
+				File file = fileChooser.showOpenDialog(primaryStage);
+				if( file != null) {
+					System.out.println(file.getAbsolutePath());
+					MapDescriptor.loadMapFromDisk(map, file.getAbsolutePath());
+				}
+			}
+		});
+		saveMapBtn.setOnMouseClicked(new EventHandler<MouseEvent>() {
+			public void handle(MouseEvent e) {
+				fileChooser.setTitle("Choose file to save to");
+				File file = fileChooser.showOpenDialog(primaryStage);
+				if( file != null) {
+					System.out.println(file.getAbsolutePath());
+					MapDescriptor.saveMapToDisk(map, file.getAbsolutePath());
+				}
+			}
+		});
 		
 		timeLimitSB.valueProperty().addListener(change -> {
 			timeLimitTxt.setText(""+(int)timeLimitSB.getValue()+" s"); 
@@ -190,6 +227,10 @@ public class Simulator extends Application {
 		
 		coverageLimitSB.valueProperty().addListener(change -> {
 			coverageLimitTxt.setText(""+(int)coverageLimitSB.getValue()+"%"); 
+		  });
+		
+		stepsSB.valueProperty().addListener(change -> {
+			stepsTxt.setText(""+(int)stepsSB.getValue()); 
 		  });
 
 		// Layer 1 (6 Grids)
@@ -207,18 +248,24 @@ public class Simulator extends Application {
 		controlGrid.add(coverageLimitSB, 1, 3, 4, 1);
 		controlGrid.add(coverageLimitTxt, 5, 3, 1, 1);
 		
+		controlGrid.add(stepsLbl, 0, 4, 1, 1);
+		controlGrid.add(stepsSB, 1, 4, 4, 1);
+		controlGrid.add(stepsTxt, 5, 4, 1, 1);
+		
 		// Layer 2
-		controlGrid.add(modeCB, 0, 4, 3, 1);
-		controlGrid.add(startBtn, 3, 4, 3, 1);
+		controlGrid.add(modeCB, 0, 5, 3, 1);
+		controlGrid.add(startBtn, 3, 5, 3, 1);
+		
+		
 		// Layer 3
-		controlGrid.add(loadMapBtn, 0, 5, 3, 1);
-		controlGrid.add(saveMapBtn, 3, 5, 3, 1);
-		controlGrid.add(resetMapBtn, 0, 6, 6, 1);
+		controlGrid.add(loadMapBtn, 0, 6, 3, 1);
+		controlGrid.add(saveMapBtn, 3, 6, 3, 1);
+		controlGrid.add(resetMapBtn, 0, 7, 6, 1);
 		// Layer 4
-		controlGrid.add(setWaypointBtn, 0, 7, 6, 1);
+		controlGrid.add(setWaypointBtn, 0, 8, 6, 1);
 		// Layer 5
-		controlGrid.add(setRobotBtn, 0, 8, 2, 1);
-		controlGrid.add(setObstacleBtn, 2, 8, 4, 1);
+		controlGrid.add(setRobotBtn, 0, 9, 2, 1);
+		controlGrid.add(setObstacleBtn, 2, 9, 4, 1);
 
 		controlGrid.setFillWidth(ipTxt, true);
 		controlGrid.setFillWidth(modeCB, true);
@@ -498,7 +545,7 @@ public class Simulator extends Application {
 				robot.move(Command.TURN_LEFT, RobotConstants.MOVE_STEPS, exploredMap);
 				System.out.println("Robot Direction Changed to " + robot.getDirection().name());
 			} else {
-				robot.setPosition(col, row);
+				robot.setStartPos(col, row, exploredMap);
 				System.out.println("Robot moved to new position at row: " + row + " col:" + col);
 			}
 
@@ -541,10 +588,21 @@ public class Simulator extends Application {
 	class ExplorationTask extends Task<Integer>{
 		@Override
 	    protected Integer call() throws Exception {
-			double coverageLimit=100;
-			int timeLimit = 360000;
-			Exploration explore = new Exploration(exploredMap, map, robot,coverageLimit, timeLimit);
-			explore.exploration(new Point(robot.getPosition()));
+			System.out.println("coverage: "+coverageLimitSB.getValue());
+			System.out.println("time: "+timeLimitSB.getValue());
+			double coverageLimit= (int)(coverageLimitSB.getValue());
+			int timeLimit = (int)(timeLimitSB.getValue()*1000);
+			int steps = (int)(stepsSB.getValue());
+			//Limits not set
+			if(coverageLimit == 0)
+				coverageLimit = 100;
+			if(timeLimit == 0)
+				timeLimit = 240000;
+			if(steps == 0)
+				steps = 5;
+			
+			Exploration explore = new Exploration(exploredMap, map, robot,coverageLimit, timeLimit,steps);
+			explore.exploration(new Point(MapConstants.STARTZONE_COL,MapConstants.STARTZONE_COL));
 			
 	        return 1;
 	    }

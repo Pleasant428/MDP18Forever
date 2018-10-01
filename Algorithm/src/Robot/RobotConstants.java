@@ -14,14 +14,14 @@ public class RobotConstants {
 	public static final double INFINITE_COST = 10000000;
 	
 	public static final int MOVE_STEPS = 1;
-	public static final int MOVE_SPEED = 200;	//Delays before movement (Lower = faster) in milliseconds
+	public static final int MOVE_SPEED = 1000;	//Delays before movement (Lower = faster) in milliseconds
 
 	// Sensors default range (In grids)
 	public static final int SHORT_MIN = 1;
 	public static final int SHORT_MAX = 2;
 
-	public static final int LONG_MIN = 3;
-	public static final int LONG_MAX = 4;
+	public static final int LONG_MIN = 1;
+	public static final int LONG_MAX = 5;
 	
 	//Constants to render Robot
 	public static final Color ROBOT_BODY = Color.rgb(139, 0, 0, 0.8);
