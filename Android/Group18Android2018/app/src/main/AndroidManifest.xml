@@ -37,7 +37,8 @@
             android:label="Reconfigurable String Commands"
             android:windowSoftInputMode="stateHidden">
         </activity>
-
+        <service android:name=".BluetoothConnectionService" >
+        </service>
 
     </application>
 

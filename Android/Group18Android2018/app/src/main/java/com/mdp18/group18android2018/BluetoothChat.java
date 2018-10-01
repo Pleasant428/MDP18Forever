@@ -31,6 +31,7 @@ public class BluetoothChat {
     public static BluetoothDevice getBluetoothDevice(){
         return myBluetoothConnectionDevice;
     }
+
     public static void startChat(BluetoothSocket socket) {
 
         Log.d(TAG, "ConnectedThread: Starting");
@@ -48,6 +49,7 @@ public class BluetoothChat {
         }
         myInputStream = tempIn;
         myOutPutStream = tempOut;
+
 
         //Buffer store for the stream
         byte[] buffer = new byte[1024];
@@ -67,6 +69,7 @@ public class BluetoothChat {
                 Intent incomingMsgIntent = new Intent("Waiting for incoming msg...");
                 incomingMsgIntent.putExtra("receivingMsg", incomingMessage);
                 LocalBroadcastManager.getInstance(myContext).sendBroadcast(incomingMsgIntent);
+
 
             } catch (IOException e) {
 
@@ -137,7 +140,7 @@ public class BluetoothChat {
         // Create temporary object
         // ConnectedThread temp;
 
-        // Synchronize a copy of the ConnectedThread
+        // Synchronize a copy of the Connected
         Log.d(TAG, "write: Write Called.");
         //perform the write
         write(out);

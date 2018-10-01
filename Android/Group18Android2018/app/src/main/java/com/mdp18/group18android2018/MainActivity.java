@@ -46,7 +46,6 @@ public class MainActivity extends AppCompatActivity {
     BluetoothDevice myBTConnectionDevice;
     static String connectedDevice;
     boolean connectedState;
-    TextView connectionStatusBox;
     boolean currentActivity;
 
 
@@ -60,6 +59,7 @@ public class MainActivity extends AppCompatActivity {
 
         //REGISTER BROADCAST RECEIVER FOR IMCOMING MSG
         LocalBroadcastManager.getInstance(this).registerReceiver(incomingMessageReceiver, new IntentFilter("Incoming Message"));
+
 
         mPGV = findViewById(R.id.map);
         mPGV.initializeMap();
@@ -515,7 +515,7 @@ public class MainActivity extends AppCompatActivity {
                 Log.d("MainActivity:", "Device Disconnected");
                 connectedDevice = null;
                 connectedState = false;
-                connectionStatusBox.setText(R.string.btStatusOffline);
+
 
                 if (currentActivity) {
 
@@ -551,7 +551,6 @@ public class MainActivity extends AppCompatActivity {
                 connectedDevice = myBTConnectionDevice.getName();
                 connectedState = true;
                 Log.d("MainActivity:", "Device Connected " + connectedState);
-                connectionStatusBox.setText(connectedDevice);
                 Toast.makeText(MainActivity.this, "Connection Established: " + myBTConnectionDevice.getName(),
                         Toast.LENGTH_SHORT).show();
             }
