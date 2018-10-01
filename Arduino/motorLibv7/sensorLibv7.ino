@@ -118,7 +118,7 @@ void readFrontSensor_1() {
       return;
     }
   }
-  frontIR1_Block = 99;
+  frontIR1_Block = 9;
 }
 
 void readFrontSensor_2() {
@@ -137,7 +137,7 @@ void readFrontSensor_2() {
       return;
     }
   }
-  frontIR2_Block = 99;
+  frontIR2_Block = 9;
 }
 
 void readFrontSensor_3() {
@@ -156,7 +156,7 @@ void readFrontSensor_3() {
       return;
     }
   }
-  frontIR3_Block = 99;
+  frontIR3_Block = 9;
 }
 
 void readRightSensor_1() {
@@ -175,7 +175,7 @@ void readRightSensor_1() {
       return;
     }
   }
-  rightIR1_Block = 99;
+  rightIR1_Block = 9;
 }
 
 void readRightSensor_2() {
@@ -194,7 +194,7 @@ void readRightSensor_2() {
       return;
     }
   }
-  rightIR2_Block = 99;
+  rightIR2_Block = 9;
 }
 
 void readLeftSensor_1() {
@@ -213,5 +213,5 @@ void readLeftSensor_1() {
       return;
     }
   }
-  leftIR1_Block = 99;
+  leftIR1_Block = 9;
 }
