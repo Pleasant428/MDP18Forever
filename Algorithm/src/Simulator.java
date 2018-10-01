@@ -1,6 +1,7 @@
 import java.awt.Point;
 import java.io.File;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 import Algorithm.*;
 import Map.*;
@@ -74,7 +75,7 @@ public class Simulator extends Application {
 	private Thread realFastTask, realExpTask, simFastTask, simExpTask;
 
 	public void start(Stage primaryStage) {
-		// Init for Map and Robot
+		//Init for Map and Robot
 		map = new Map();
 		//Set to all explored for loading and saving map
 		map.setAllExplored(true);
@@ -180,6 +181,11 @@ public class Simulator extends Application {
 		setRobotBtn.setOnMouseClicked(new EventHandler<MouseEvent>() {
 			public void handle(MouseEvent e) {
 				setRobot = !setRobot;
+				if(!setRobot)
+					setRobotBtn.setText("Set Robot Position");
+				else
+					setRobotBtn.setText("Confirm Robot Position");
+				
 				setWaypoint = false;
 				setObstacle = false;
 			}
@@ -194,6 +200,17 @@ public class Simulator extends Application {
 		setObstacleBtn.setOnMouseClicked(new EventHandler<MouseEvent>() {
 			public void handle(MouseEvent e) {
 				setObstacle = !setObstacle;
+				if(!setObstacle) {
+					setObstacleBtn.setText("Set Obstacles");
+					loadMapBtn.setText("Load Explored Map");
+					saveMapBtn.setText("Save Explored Map");
+				}
+				else {
+					setObstacleBtn.setText("Confirm Obstacles");
+					loadMapBtn.setText("Load Map");
+					saveMapBtn.setText("Save Map");
+				}
+					
 				setRobot = false;
 				setWaypoint = false;
 				drawMap(!setObstacle);
@@ -202,22 +219,39 @@ public class Simulator extends Application {
 		});
 		loadMapBtn.setOnMouseClicked(new EventHandler<MouseEvent>() {
 			public void handle(MouseEvent e) {
-				fileChooser.setTitle("Choose file to load from");
-				File file = fileChooser.showOpenDialog(primaryStage);
-				if( file != null) {
-					System.out.println(file.getAbsolutePath());
-					MapDescriptor.loadMapFromDisk(map, file.getAbsolutePath());
+				if(setObstacle) {
+					fileChooser.setTitle("Choose file to load Map from");
+					File file = fileChooser.showOpenDialog(primaryStage);
+					if( file != null) {
+						MapDescriptor.loadMapFromDisk(map, file.getAbsolutePath());
+					}
+				}
+				else {
+					fileChooser.setTitle("Choose file to load ExploredMap to");
+					File file = fileChooser.showOpenDialog(primaryStage);
+					if( file != null) {
+						MapDescriptor.loadMapFromDisk(exploredMap, file.getAbsolutePath());
+					}
 				}
 			}
 		});
 		saveMapBtn.setOnMouseClicked(new EventHandler<MouseEvent>() {
 			public void handle(MouseEvent e) {
-				fileChooser.setTitle("Choose file to save to");
-				File file = fileChooser.showOpenDialog(primaryStage);
-				if( file != null) {
-					System.out.println(file.getAbsolutePath());
-					MapDescriptor.saveMapToDisk(map, file.getAbsolutePath());
+				if(setObstacle) {
+					fileChooser.setTitle("Choose file to save Map to");
+					File file = fileChooser.showOpenDialog(primaryStage);
+					if( file != null) {
+						MapDescriptor.saveMapToDisk(map, file.getAbsolutePath());
+					}
 				}
+				else {
+					fileChooser.setTitle("Choose file to save ExploredMap to");
+					File file = fileChooser.showOpenDialog(primaryStage);
+					if( file != null) {
+						MapDescriptor.saveMapToDisk(exploredMap, file.getAbsolutePath());
+					}
+				}
+				
 			}
 		});
 		
@@ -541,7 +575,7 @@ public class Simulator extends Application {
 	private boolean setRobotLocation(int row, int col) {
 		if (map.checkValidMove(row, col)) {
 			Point point = new Point(col, row);
-			if (robot.getPosition() == point) {
+			if (robot.getPosition().equals(point)) {
 				robot.move(Command.TURN_LEFT, RobotConstants.MOVE_STEPS, exploredMap);
 				System.out.println("Robot Direction Changed to " + robot.getDirection().name());
 			} else {
@@ -571,6 +605,7 @@ public class Simulator extends Application {
 
 			case SIM_FAST:
 				System.out.println("SF Here");
+				
 				break;
 
 			case SIM_EXP:
@@ -605,6 +640,32 @@ public class Simulator extends Application {
 			explore.exploration(new Point(MapConstants.STARTZONE_COL,MapConstants.STARTZONE_COL));
 			
 	        return 1;
+	    }
+	}
+	
+	class FastTask extends Task<Integer>{
+		@Override
+	    protected Integer call() throws Exception {
+			FastestPath fp = new FastestPath(exploredMap, robot);
+			ArrayList<Cell> path = fp.run(new Point(MapConstants.STARTZONE_COL,MapConstants.STARTZONE_COL), new Point(MapConstants.GOALZONE_ROW,MapConstants.GOALZONE_COL), robot.getDirection());
+			ArrayList<Command> commands = fp.getPathCommands(path);
+			
+			int steps = (int)(stepsSB.getValue());
+			//Limits not set
+			if(steps == 0)
+				steps = 5;
+			
+			for (Command c : commands) {
+				try {
+					TimeUnit.MILLISECONDS.sleep(RobotConstants.MOVE_SPEED/steps);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+				robot.move(c, RobotConstants.MOVE_STEPS, exploredMap);
+				robot.sense(exploredMap, map);
+			}
+			
+			return 1;
 	    }
 	}
 
