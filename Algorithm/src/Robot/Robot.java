@@ -5,9 +5,13 @@ package Robot;
 
 import java.awt.Point;
 import java.util.ArrayList;
+import java.util.concurrent.TimeUnit;
 
 import Map.*;
 import Robot.RobotConstants.Direction;
+import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.paint.Color;
+import Robot.RobotConstants.Command;
 
 /**
  * @author Saklani Pankaj
@@ -16,21 +20,40 @@ import Robot.RobotConstants.Direction;
 public class Robot {
 
 	private ArrayList<Sensor> sensorList;
+
 	private boolean sim;
+	private boolean reachedGoal;
 	private Direction direction;
-	private Point pos;
-	private Point startPos;
+	
+	private GraphicsContext gc;
+
+	public GraphicsContext getGc() {
+		return gc;
+	}
+
+	public void setGc(GraphicsContext gc) {
+		this.gc = gc;
+	}
+
+	public boolean isReachedGoal() {
+		return reachedGoal;
+	}
+
+	public void setReachedGoal(boolean reachedGoal) {
+		this.reachedGoal = reachedGoal;
+	}
 
 	public Robot(boolean sim, Direction dir, int row, int col) {
 		this.sim = sim;
 		this.direction = dir;
+		this.reachedGoal = false;
 		this.pos = new Point(col, row);
+		sensorList = new ArrayList<Sensor>();
 		
-
 		// Initializing the Sensors
 		/* ID information for sensors:
 		 * 
-		 * SF1/SL1 LF2 	SF3
+		 * SF1/SL1 SF2 	SF3
 		 *  X 		X	LR1
 		 * SL2		X	 X
 		 * 
@@ -45,20 +68,58 @@ public class Robot {
 		*/
 		
 		//Front Sensors same direction (Init with respect to UP direction)
-		Sensor SF1 = new Sensor("SF1",RobotConstants.SHORT_MIN, RobotConstants.SHORT_MAX, row+1, col-1, dir);
-		Sensor LF2 = new Sensor("LF2",RobotConstants.LONG_MIN, RobotConstants.LONG_MAX, row+1, col, dir);
-		Sensor SF3 = new Sensor("SF3",RobotConstants.SHORT_MIN, RobotConstants.SHORT_MAX, row+1, col+1, dir);
+		Sensor SF1 = new Sensor("SF1",RobotConstants.SHORT_MIN, RobotConstants.SHORT_MAX, row+1, col-1, Direction.UP);
+		Sensor SF2 = new Sensor("SF2",RobotConstants.SHORT_MIN, RobotConstants.SHORT_MAX, row+1, col,  Direction.UP);
+		Sensor SF3 = new Sensor("SF3",RobotConstants.SHORT_MIN, RobotConstants.SHORT_MAX, row+1, col+1,  Direction.UP);
 		
-		//Left Sensor Next Direction of Direction
-		Sensor SL1 = new Sensor("SF1",RobotConstants.SHORT_MIN, RobotConstants.SHORT_MAX, row+1, col-1, dir);
-		Sensor SL2 = new Sensor("LF2",RobotConstants.LONG_MIN, RobotConstants.LONG_MAX, row-1, col-1, dir);
+		//RIGHT Sensor Next Direction of Direction
+		Sensor SR1 = new Sensor("SR1",RobotConstants.SHORT_MIN, RobotConstants.SHORT_MAX, row+1, col+1,  Direction.RIGHT);
+		Sensor SR2 = new Sensor("SR2",RobotConstants.SHORT_MIN, RobotConstants.SHORT_MAX, row-1, col+1, Direction.RIGHT);
 		
-		//Right Sensor Prev Direction of Robot Direction
-		Sensor LR1 = new Sensor("SF1",RobotConstants.LONG_MIN, RobotConstants.LONG_MAX, row, col+1, dir);
+		//LEFT Sensor Prev Direction of Robot Direction
+		Sensor LL1 = new Sensor("LL1",RobotConstants.LONG_MIN, RobotConstants.LONG_MAX, row+1, col-1,  Direction.LEFT);
 		
-		rotateSensors(dir)
+		sensorList.add(SF1);
+		sensorList.add(SF2);
+		sensorList.add(SF3);
+		sensorList.add(SR1);
+		sensorList.add(SR2);
+		sensorList.add(LL1);
+		
+		switch(dir) {
+		case LEFT:
+			rotateSensors(true);
+			break;
+		case RIGHT:
+			rotateSensors(false);
+			break;
+		case DOWN:
+			rotateSensors(true);
+			rotateSensors(true);
+			break;
+		}
 	
 	}
+	
+	public ArrayList<Sensor> getSensorList() {
+		return sensorList;
+	}
+
+	public void setSensorList(ArrayList<Sensor> sensorList) {
+		this.sensorList = sensorList;
+	}
+	
+	
+	public Direction getDirection() {
+		return direction;
+	}
+
+	public void setDirection(Direction direction) {
+		this.direction = direction;
+	}
+
+	private Point pos;
+	
 	
 	public Sensor getSensor(String id) {
 		for(Sensor s: sensorList)
@@ -68,32 +129,32 @@ public class Robot {
 		return null;
 	}
 	
-	public void rotateSensors(Direction dir) {
+	public void rotateSensors(boolean left) {
 		double angle = 0;
-		int newRow, newCol;
-		switch(dir) {
-		case UP:
-			angle = 0;
-			break;
-		case LEFT:
-			angle = -Math.PI/2;
-			break;
-		case DOWN:
-			angle = Math.PI;
-			break;
-		case RIGHT:
-			angle = Math.PI/2;
-			break;
-		}
+		int newCol, newRow;
 		
+		if(left)
+			angle = Math.PI/2;
+		else
+			angle = -Math.PI/2;
+		
+		//Rotation Formula used: x = cos(a) * (x1 - x0) - sin(a) * (y1 - y0) + x0
+		//						 y = sin(a) * (x1 - x0) + cos(a) * (y1 - y0) + y0
 		for(Sensor s: sensorList) {
-			s.setSensorDir(dir);
+			if(left)
+				s.setSensorDir(Direction.getNext(s.getSensorDir()));
+			else
+				s.setSensorDir(Direction.getPrevious(s.getSensorDir()));
 			
+			
+			newCol = (int)Math.round((Math.cos(angle)*(s.getCol() - pos.x) - Math.sin(angle)*(s.getRow() - pos.y) + pos.x));
+			newRow = (int)Math.round((Math.sin(angle)*(s.getCol() - pos.x) - Math.cos(angle)*(s.getRow() - pos.y) + pos.y));
+			s.setPos(newCol, newRow);
 		}
 	}
 	
 	//Movement Method for robot and Sensors
-	public void move(Direction dir, boolean forward, int steps) {
+	public void move(Direction dir, boolean forward, int steps, Map exploredMap) {
 		int rowInc = 0, colInc=0;
 		switch(dir) {
 		case UP:
@@ -120,22 +181,61 @@ public class Robot {
 			colInc *= -1;
 		}
 		
-		for (Sensor s : sensorList) {
-			s.setPos(s.getCol()+ colInc*steps, s.getRow()+rowInc*steps);
+		if(exploredMap.checkValidMove(pos.y+rowInc*steps, pos.x+ colInc*steps))
+		{
+			setPosition(pos.x+ colInc*steps, pos.y+rowInc*steps);
+			
 		}
-		setPosition(pos.x+ colInc*steps, pos.y+rowInc*steps);
 	}
 	
-
-	public void setPosition(int row, int col) {
+	//Moving using the Command enum
+	public void move(Command m, int steps, Map exploredMap) {
+		//Delay Movement for a 
+		try {
+			TimeUnit.MILLISECONDS.sleep(RobotConstants.MOVE_SPEED);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		
+		switch(m) {
+		case FORWARD:
+			move(direction, true, steps, exploredMap);
+			break;
+		case BACKWARD:
+			move(direction, false, steps, exploredMap);
+			break;
+		case TURN_LEFT:
+			direction = Direction.getNext(direction);
+			rotateSensors(true);
+			break;
+		case TURN_RIGHT:
+			direction = Direction.getPrevious(direction);
+			rotateSensors(false);
+			break;
+		}
+	}
+	
+	
+	
+	public void setPosition(int col, int row) {
+		int colDiff = col - pos.x;
+		int rowDiff = row - pos.y;
 		pos.setLocation(col, row);
+		for (Sensor s : sensorList) {
+			s.setPos(s.getCol()+ colDiff, s.getRow()+rowDiff);
+		}
+	}
+	
+	public Point getPosition() {
+		return pos;
 	}
 
 	// Robot Sense method for simulator
 	public void sense(Map exploredMap, Map map) {
 		int obsBlock;
 		int rowInc = 1, colInc = 1;
-
+		exploredMap.draw(true);
+		draw();
 		for (Sensor sensor : sensorList) {
 			// check if sensor detects any obstacle
 			obsBlock = sensor.detect(map);
@@ -164,19 +264,80 @@ public class Robot {
 			
 			//Discover each of the blocks infront of the sensor if possible
 			for (int i = sensor.getMinRange(); i <= sensor.getMaxRange(); i++) {
+				
 				//Check if the block is valid otherwise exit (Edge of Map)
-				if (exploredMap.checkValidCell(sensor.getRow() + i, sensor.getCol())) {
+				if (exploredMap.checkValidCell(sensor.getRow()+ rowInc * i, sensor.getCol() + colInc * i)) {
 					//Change the cell to explored first
+					Cell cell = exploredMap.getCell(sensor.getRow() + rowInc * i, sensor.getCol() + colInc * i);
 					exploredMap.getCell(sensor.getRow() + rowInc * i, sensor.getCol() + colInc * i).setExplored(true);
 					if (i == obsBlock) {
-						exploredMap.getCell(sensor.getRow() + rowInc * i, sensor.getCol() + colInc * i)
-								.setObstacle(true);
+						exploredMap.getCell(sensor.getRow() + rowInc * i, sensor.getCol() + colInc * i).setObstacle(true);
+						
+						//Virtual Wall Initialized
+						for (int r = sensor.getRow() + rowInc * i - 1; r <= sensor.getRow() + rowInc * i + 1; r++)
+							for (int c = sensor.getCol() + colInc * i - 1; c <= sensor.getCol() + colInc * i + 1; c++)
+								if (exploredMap.checkValidCell(r, c))
+									exploredMap.getCell(r, c).setVirtualWall(true);
 						break;
 					}
 				}
 				else
 					break;
 			}
+		}
+		exploredMap.draw(true);
+		draw();
+	}
+
+	//Draw Method for Robot
+	public void draw() {
+		gc.setStroke(RobotConstants.ROBOT_OUTLINE);
+		gc.setLineWidth(2);
+
+		gc.setFill(RobotConstants.ROBOT_BODY);
+
+		int col = pos.x - 1;
+		int row = pos.y + 1;
+		int dirCol = 0, dirRow = 0;
+
+		gc.strokeOval(col * MapConstants.MAP_CELL_SZ + MapConstants.MAP_OFFSET / 2,
+				(MapConstants.MAP_CELL_SZ - 1) * MapConstants.MAP_HEIGHT - row * MapConstants.MAP_CELL_SZ
+						+ MapConstants.MAP_OFFSET / 2,
+				3 * MapConstants.MAP_CELL_SZ, 3 * MapConstants.MAP_CELL_SZ);
+		gc.fillOval(col * MapConstants.MAP_CELL_SZ + MapConstants.MAP_OFFSET / 2,
+				(MapConstants.MAP_CELL_SZ - 1) * MapConstants.MAP_HEIGHT - row * MapConstants.MAP_CELL_SZ
+						+ MapConstants.MAP_OFFSET / 2,
+				3 * MapConstants.MAP_CELL_SZ, 3 * MapConstants.MAP_CELL_SZ);
+
+		gc.setFill(RobotConstants.ROBOT_DIRECTION);
+		switch (direction) {
+		case UP:
+			dirCol = pos.x;
+			dirRow = pos.y + 1;
+			break;
+		case DOWN:
+			dirCol = pos.x;
+			dirRow = pos.y - 1;
+			break;
+		case LEFT:
+			dirCol = pos.x - 1;
+			dirRow = pos.y;
+			break;
+		case RIGHT:
+			dirCol = pos.x + 1;
+			dirRow = pos.y;
+			break;
+		}
+		gc.fillOval(dirCol * MapConstants.MAP_CELL_SZ + MapConstants.MAP_OFFSET / 2,
+				(MapConstants.MAP_CELL_SZ - 1) * MapConstants.MAP_HEIGHT - dirRow * MapConstants.MAP_CELL_SZ
+						+ MapConstants.MAP_OFFSET / 2,
+				MapConstants.MAP_CELL_SZ, MapConstants.MAP_CELL_SZ);
+
+		gc.setFill(Color.BLACK);
+		for (Sensor s : sensorList) {
+			gc.fillText(s.getId(), s.getCol() * MapConstants.MAP_CELL_SZ + MapConstants.MAP_OFFSET / 2,
+					(MapConstants.MAP_CELL_SZ) * MapConstants.MAP_HEIGHT - s.getRow() * MapConstants.MAP_CELL_SZ
+							+ MapConstants.MAP_OFFSET / 2);
 		}
 
 	}

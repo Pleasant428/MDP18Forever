@@ -13,19 +13,28 @@ import java.awt.Point;
 public class Cell {
 	// Position Variables
 	private Point pos;
-
+	
 	// Exploration Booleans
 	private boolean explored;
 	private boolean obstacle;
 	private boolean virtualWall;
 	private boolean isWayPoint;
+	private boolean path;
 	
+	public boolean isPath() {
+		return path;
+	}
+
+	public void setPath(boolean path) {
+		this.path = path;
+	}
+
 	public boolean isWayPoint() {
 		return isWayPoint;
 	}
 
 	public boolean setWayPoint(boolean isWayPoint) {
-		if(!obstacle&&explored) {
+		if(!obstacle && explored && !virtualWall) {
 			this.isWayPoint = isWayPoint;
 			return true;
 		}
@@ -55,5 +64,22 @@ public class Cell {
 	}
 	public void setVirtualWall(boolean virtualWall) {
 		this.virtualWall = virtualWall;
+	}
+	public Point getPos() {
+		return pos;
+	}
+	public void setPos(Point pos) {
+		this.pos = pos;
+	}
+	
+	//Method to check if robot can move to this cell
+	public boolean movableCell() {
+		return explored && !obstacle && !virtualWall;
+	}
+
+	@Override
+	public String toString() {
+		return "Cell [pos=" + pos + ", explored=" + explored + ", obstacle=" + obstacle + ", virtualWall=" + virtualWall
+				+ ", isWayPoint=" + isWayPoint + "]";
 	}
 }
