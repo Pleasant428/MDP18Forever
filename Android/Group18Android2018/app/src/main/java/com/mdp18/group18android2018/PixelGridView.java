@@ -83,11 +83,12 @@ public class PixelGridView extends View{
 
     }
 
-    public void setCurPos(int[] pos){
-        this.frontCurPos = pos[0];
-        this.leftCurPos = pos[1];
-        this.backCurPos = pos[2];
-        this.rightCurPos = pos[3];
+    public void setCurPos(int row, int column){
+        int[] edges = convertTileToEdge(row, column);
+        this.frontCurPos = edges[0];
+        this.leftCurPos = edges[1];
+        this.backCurPos = edges[2];
+        this.rightCurPos = edges[3];
     }
 
     public int[] getCurPos(){
