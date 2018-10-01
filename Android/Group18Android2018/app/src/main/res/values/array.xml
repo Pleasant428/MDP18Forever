@@ -5,10 +5,10 @@
         <item
             >Up</item>
         <item
-            >Down</item>
-        <item
             >Left</item>
         <item
             >Right</item>
+        <item
+            >Down</item>
     </string-array>
 </resources>
