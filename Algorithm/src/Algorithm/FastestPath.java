@@ -72,9 +72,9 @@ public class FastestPath {
 	//Get the direction of cellB from cellA
 	private Direction getCellDirection(Point cellA, Point cellB){
 		if(cellA.y - cellB.y > 0)
-			return Direction.UP;
-		else if(cellA.y - cellB.y < 0)
 			return Direction.DOWN;
+		else if(cellA.y - cellB.y < 0)
+			return Direction.UP;
 		else if(cellA.x - cellB.x > 0)
 			return Direction.LEFT;
 		else
@@ -131,7 +131,6 @@ public class FastestPath {
 		
 		//Loop through all the items in toVisit
 		while(!toVisit.isEmpty()) {
-			System.out.println("HERE");
 			cur = minCostCell(goal);
 			
 			if(prevCell.containsKey(cur))
@@ -140,6 +139,7 @@ public class FastestPath {
 			visited.add(cur);
 			toVisit.remove(cur);
 			System.out.println(visited.contains(exploredMap.getCell(goal)));
+			
 			//Check If Goal Reached
 			if(visited.contains(exploredMap.getCell(goal))) {
 				path = getPath(start,goal);
@@ -148,13 +148,13 @@ public class FastestPath {
 			}
 			
 			neighbours = exploredMap.getNeighbours(cur);
-			System.out.println(neighbours.size());
 			for(int i=0; i<neighbours.size(); i++) {
 				
 				//if cell has been visited skip
 				if(visited.contains(neighbours.get(i)))
 					continue;
 				
+				System.out.println(neighbours.get(i).toString());
 				gCost = costG.get(cur.getPos())+ getCostG(cur.getPos(),neighbours.get(i).getPos(),curDir);
 				
 				//if the cell is not in toVisit
@@ -205,7 +205,7 @@ public class FastestPath {
 			temp.setPath(display);
 			
 			//Output Path on console
-			if(i == (path.size()-1))
+			if(i != (path.size()-1))
 				System.out.print("(" + temp.getPos().y + ", " + temp.getPos().x + ") --> ");
 			else
 				System.out.print("(" + temp.getPos().y + ", " + temp.getPos().x + ")");
@@ -216,22 +216,25 @@ public class FastestPath {
 	
 	//Returns the movements required to execute the path
 	public ArrayList<Command> getPathCommands(ArrayList<Cell> path) {
+		Robot tempRobot = new Robot(true, robot.getDirection(), robot.getPosition().y,robot.getPosition().x);
 		ArrayList<Command> moves = new ArrayList<Command>();
 		
 		Command move;
-		Cell cell = path.get(0);
+		Cell cell = exploredMap.getCell(tempRobot.getPosition());
 		Cell newCell;
 		Direction cellDir;
-		Robot tempRobot = new Robot(true, robot.getDirection(), robot.getPosition().y,robot.getPosition().x);
+		
 		
 		//Iterate through the path
-		for(int i=1; i< path.size(); i++) {
+		for(int i=0; i< path.size(); i++) {
 			newCell = path.get(i);
 			cellDir = getCellDirection(cell.getPos(),newCell.getPos());
+			System.out.println(cellDir);
 			while(tempRobot.getDirection()!=cellDir) {
 				move = getTurnMovement(tempRobot.getDirection(), cellDir);
 				tempRobot.move(move, RobotConstants.MOVE_STEPS, exploredMap);
 				moves.add(move);
+				System.out.println("robot dir: "+tempRobot.getDirection()+" celldir: "+cellDir);
 			}
 			//Keep Moving Forward in the Path
 			move = Command.FORWARD;
@@ -239,6 +242,7 @@ public class FastestPath {
 			moves.add(move);
 		}
 		
+		System.out.println(moves.toString());
 		return moves;
 	}
 	
@@ -270,9 +274,9 @@ public class FastestPath {
 			
 		case DOWN:
 			if(cellDir == Direction.LEFT)
-				move = Command.TURN_LEFT;
-			else
 				move = Command.TURN_RIGHT;
+			else
+				move = Command.TURN_LEFT;
 			break;
 			
 		default:

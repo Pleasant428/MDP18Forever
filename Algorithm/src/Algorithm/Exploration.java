@@ -79,13 +79,13 @@ public class Exploration {
 		// Loop to explore the map
 		do {
 			System.out.println(System.currentTimeMillis()-startTime);
-			getMove();
-			//Delay Movement for a 
 			try {
-				TimeUnit.MILLISECONDS.sleep(RobotConstants.MOVE_SPEED/stepPerSecond);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
+				getMove();
+			} catch (InterruptedException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
 			}
+			
 			areaExplored = exploredMap.exploredPercentage();
 			if(areaExplored >= 100)
 				break;
@@ -113,14 +113,14 @@ public class Exploration {
 	// Fast Algo to a point (used to go back to start
 	public void goToPoint(Point loc) {
 		// robot already at start
-		if (robot.getPosition() == start) {
+		if (robot.getPosition().equals(start)) {
 			while (robot.getDirection() != Direction.UP) {
 				try {
 					TimeUnit.MILLISECONDS.sleep(RobotConstants.MOVE_SPEED/stepPerSecond);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
-				robot.move(Command.TURN_LEFT, RobotConstants.MOVE_STEPS, exploredMap);
+				robot.move(Command.TURN_RIGHT, RobotConstants.MOVE_STEPS, exploredMap);
 				robot.sense(exploredMap, map);
 			}
 			return;
@@ -130,10 +130,8 @@ public class Exploration {
 
 		FastestPath backToStart = new FastestPath(exploredMap, robot);
 		path = backToStart.run(robot.getPosition(), loc, robot.getDirection());
-		System.out.println(path.size());
 		commands = backToStart.getPathCommands(path);
 		for (Command c : commands) {
-			System.out.println(c.toString());
 			try {
 				TimeUnit.MILLISECONDS.sleep(RobotConstants.MOVE_SPEED/stepPerSecond);
 			} catch (InterruptedException e) {
@@ -145,21 +143,28 @@ public class Exploration {
 
 		// Orient robot to face UP
 		while (robot.getDirection() != Direction.UP) {
-			robot.move(Command.TURN_LEFT, RobotConstants.MOVE_STEPS, exploredMap);
+			try {
+				TimeUnit.MILLISECONDS.sleep(RobotConstants.MOVE_SPEED/stepPerSecond);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			robot.move(Command.TURN_RIGHT, RobotConstants.MOVE_STEPS, exploredMap);
 			robot.sense(exploredMap, map);
 		}
 	}
 
-	public void getMove() {
+	public void getMove() throws InterruptedException {
 		Direction dir = robot.getDirection();
-
+		
 		// Check Right if free then turn Right
 		if (movable(Direction.getPrevious(dir))) {
 			System.out.println("Right");
+			TimeUnit.MILLISECONDS.sleep(RobotConstants.MOVE_SPEED/stepPerSecond);
 			robot.move(Command.TURN_RIGHT, RobotConstants.MOVE_STEPS, exploredMap);
 			robot.sense(exploredMap, map);
 			if (movable(robot.getDirection())) {
 				// System.out.println("Right Direction then forrwad "+robot.getDirection());
+				TimeUnit.MILLISECONDS.sleep(RobotConstants.MOVE_SPEED/stepPerSecond);
 				robot.move(Command.FORWARD, RobotConstants.MOVE_STEPS, exploredMap);
 				robot.sense(exploredMap, map);
 			}
@@ -167,16 +172,19 @@ public class Exploration {
 		// Check front if free move forward
 		else if (movable(dir)) {
 			System.out.println("Forward");
+			TimeUnit.MILLISECONDS.sleep(RobotConstants.MOVE_SPEED/stepPerSecond);
 			robot.move(Command.FORWARD, RobotConstants.MOVE_STEPS, exploredMap);
 			robot.sense(exploredMap, map);
 		}
 		// Check left free and move left
 		else if (movable(Direction.getNext(dir))) {
 			System.out.println("Left Direction " + Direction.getNext(dir).name());
+			TimeUnit.MILLISECONDS.sleep(RobotConstants.MOVE_SPEED/stepPerSecond);
 			robot.move(Command.TURN_LEFT, RobotConstants.MOVE_STEPS, exploredMap);
 			robot.sense(exploredMap, map);
 			if (movable(robot.getDirection())) {
 				// System.out.println("Left Direction then forrwad "+robot.getDirection());
+				TimeUnit.MILLISECONDS.sleep(RobotConstants.MOVE_SPEED/stepPerSecond);
 				robot.move(Command.FORWARD, RobotConstants.MOVE_STEPS, exploredMap);
 				robot.sense(exploredMap, map);
 			}
@@ -187,16 +195,19 @@ public class Exploration {
 			// Keep Moving back till either can turn right/ left
 			while (!movable(Direction.getPrevious(dir)) && !movable(Direction.getNext(dir))) {
 				System.out.println("Backward While");
+				TimeUnit.MILLISECONDS.sleep(RobotConstants.MOVE_SPEED/stepPerSecond);
 				robot.move(Command.BACKWARD, RobotConstants.MOVE_STEPS, exploredMap);
 				robot.sense(exploredMap, map);
 			}
 			// Turn left if possible
 			if (movable(Direction.getNext(dir))) {
 				System.out.println("Backward Turn Left");
+				TimeUnit.MILLISECONDS.sleep(RobotConstants.MOVE_SPEED/stepPerSecond);
 				robot.move(Command.TURN_LEFT, RobotConstants.MOVE_STEPS, exploredMap);
 				robot.sense(exploredMap, map);
 				if (movable(robot.getDirection())) {
 					// System.out.println("Left Direction then forrwad "+robot.getDirection());
+					TimeUnit.MILLISECONDS.sleep(RobotConstants.MOVE_SPEED/stepPerSecond);
 					robot.move(Command.FORWARD, RobotConstants.MOVE_STEPS, exploredMap);
 					robot.sense(exploredMap, map);
 				}
@@ -204,6 +215,7 @@ public class Exploration {
 			// All other cases turn right
 			else {
 				System.out.println("Backward Turn Right");
+				TimeUnit.MILLISECONDS.sleep(RobotConstants.MOVE_SPEED/stepPerSecond);
 				robot.move(Command.TURN_RIGHT, RobotConstants.MOVE_STEPS, exploredMap);
 				robot.sense(exploredMap, map);
 			}

@@ -159,12 +159,12 @@ public class Map {
 
 		// RIGHT
 		if (checkValidCell(c.getPos().x + 1, c.getPos().y) && checkValidMove(c.getPos().x + 1, c.getPos().y)) {
-			neighbours.add(getCell(c.getPos().y + 1, c.getPos().x));
+			neighbours.add(getCell(c.getPos().y, c.getPos().x + 1));
 		}
 
 		// LEFT
 		if (checkValidCell(c.getPos().x - 1, c.getPos().y) && checkValidMove(c.getPos().x - 1, c.getPos().y)) {
-			neighbours.add(getCell(c.getPos().y + 1, c.getPos().x));
+			neighbours.add(getCell(c.getPos().y, c.getPos().x - 1));
 		}
 
 		return neighbours;
