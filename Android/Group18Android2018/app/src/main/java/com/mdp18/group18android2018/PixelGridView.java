@@ -216,6 +216,7 @@ public class PixelGridView extends View{
                 selectStartPosition = false;
                 invalidate();
 
+
             }
 
             else if (selectWayPoint){

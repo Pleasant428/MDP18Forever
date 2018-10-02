@@ -166,11 +166,9 @@ public class MainActivity extends AppCompatActivity {
         tb_setWaypointCoord.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if (isChecked) {
-                    // The toggle is enabled
-                    Toast.makeText(MainActivity.this, "Select waypoint on map.", Toast.LENGTH_SHORT).show();
+                    // The toggle is enabled : To select waypoint on map
                     mPGV.selectWayPoint();
                     tb_setWaypointCoord.toggle();
-                    Toast.makeText(MainActivity.this, "Waypoint set to ", Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -178,12 +176,10 @@ public class MainActivity extends AppCompatActivity {
         tb_setStartCoord.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if (isChecked) {
-                    // The toggle is enabled
-                    Toast.makeText(MainActivity.this, "Select starting point on map.", Toast.LENGTH_SHORT).show();
+                    // The toggle is enabled: To select start point on map
                     mPGV.selectStartPoint();
                     setStartDirection();
                     tb_setStartCoord.toggle();
-                    Toast.makeText(MainActivity.this, "Start Point set to ", Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -364,18 +360,15 @@ public class MainActivity extends AppCompatActivity {
                             endFastestPath();
                             break;
 
-
-                        // Action: STOP
-                        case "10":
-                            stopEverything();
-                            break;
-
-
                         // Action: ROBOT_POS
-                        case "11":
-                            //int row = Integer.parseInt(filteredMsg[3],0,1);
-                            //int col = ;
-                            //mPGV.setCurPos();
+                        case "10":
+//                            int row = Integer.parseInt(filteredMsg[3],0,1);
+//                            int col = ;
+//                            int[] robotPos = mPGV.convertRobotPosToEdge(row, col);
+//                            mPGV.setCurPos(robotPos);
+//                            mPGV.invalidate();
+
+
                             break;
 
 
@@ -425,11 +418,8 @@ public class MainActivity extends AppCompatActivity {
 
         Toast.makeText(MainActivity.this, "Exploration stopped", Toast.LENGTH_SHORT).show();
         String stopExp = "And|Alg|7";
-        String stopRobot = "And|Ard|";
         byte[] bytes = stopExp.getBytes(Charset.defaultCharset());
         BluetoothChat.writeMsg(bytes);
-        byte[] bytess = stopRobot.getBytes(Charset.defaultCharset());
-        BluetoothChat.writeMsg(bytess);
         Log.d(TAG, "Android Controller: Stop Exploration");
         tv_mystringcmd.setText(R.string.stopexp);
         tv_mystatus.setText(R.string.stop);
@@ -457,11 +447,8 @@ public class MainActivity extends AppCompatActivity {
 
         Toast.makeText(MainActivity.this, "Exploration stopped", Toast.LENGTH_SHORT).show();
         String stopFP = "And|Alg|9";
-        String stopRobot = "And|Ard|";
         byte[] bytes = stopFP.getBytes(Charset.defaultCharset());
         BluetoothChat.writeMsg(bytes);
-        byte[] bytess = stopRobot.getBytes(Charset.defaultCharset());
-        BluetoothChat.writeMsg(bytess);
         Log.d(TAG, "Android Controller: Stop Fastest Path");
         tv_mystringcmd.setText(R.string.stopfp);
         tv_mystatus.setText(R.string.stop);
@@ -473,19 +460,6 @@ public class MainActivity extends AppCompatActivity {
         tv_mystringcmd.setText(R.string.endfp);
         tv_mystatus.setText(R.string.stop);
         Toast.makeText(MainActivity.this, "Fastest Path ended", Toast.LENGTH_SHORT).show();
-    }
-
-    public void stopEverything() {
-
-        // Outgoing msg to Arduino to stop robot
-        String stopRobot = "And|Ard|";
-        byte[] bytes = stopRobot.getBytes(Charset.defaultCharset());
-        BluetoothChat.writeMsg(bytes);
-        // Stop updating map
-        updateMap = false;
-        // Display status
-        tv_mystringcmd.setText(R.string.stop);
-        tv_mystatus.setText(R.string.stop);
     }
 
     // Manual Mode; Update button
