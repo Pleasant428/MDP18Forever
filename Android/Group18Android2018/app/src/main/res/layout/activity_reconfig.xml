@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:tools="http://schemas.android.com/tools"
@@ -10,108 +11,150 @@
     android:background="@color/colorBackground"
     tools:context=".ReconfigStringCommand">
 
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginTop="30dp"
-        android:layout_marginBottom="30dp"
-        android:layout_marginRight="30dp"
-        android:layout_marginLeft="30dp">
+    <TextView
+        android:id="@+id/tv_instruction"
+        android:layout_width="482dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="16dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:text="@string/reconfig_instruct"
+        android:textSize="@dimen/font_size_medium"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.072" />
 
-        <TextView
-            android:id="@+id/tv_instruction"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:layout_centerHorizontal="true"
-            android:layout_marginTop="74dp"
-            android:text="@string/reconfig_instruct"
-            android:textSize="@dimen/font_size_medium" />
+    <Button
+        android:id="@+id/btn_f1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="212dp"
+        android:background="@color/melon"
+        android:clickable="true"
+        android:onClick="onClickF1"
+        android:text="F1"
+        android:textSize="30dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
-        <Button
-            android:id="@+id/btn_f1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:layout_marginTop="200dp"
-            android:text="F1"
-            android:textSize="30dp"
-            android:clickable="true"
-            android:background="@color/melon"
-            android:onClick="onClickF1"/>
+    <Button
+        android:id="@+id/btn_f2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_marginBottom="8dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"
+        android:background="@color/melon"
+        android:clickable="true"
+        android:onClick="onClickF2"
+        android:text="F2"
+        android:textSize="30dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btn_f1"
+        app:layout_constraintVertical_bias="0.113" />
 
-        <Button
-            android:id="@+id/btn_f2"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:layout_marginTop="294dp"
-            android:text="F2"
-            android:textSize="30dp"
-            android:background="@color/melon"
-            android:clickable="true"
-            android:onClick="onClickF2"/>
+    <EditText
+        android:id="@+id/et_f1"
+        android:layout_width="400dp"
+        android:layout_height="60dp"
+        android:layout_alignBottom="@+id/btn_f1"
+        android:layout_alignParentEnd="true"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/textbar"
+        android:hint="Edit F1"
+        android:textSize="@dimen/font_size_medium"
+        app:layout_constraintBottom_toTopOf="@+id/et_f2"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/btn_f1"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.836" />
 
-        <EditText
-            android:id="@+id/et_f1"
-            android:layout_width="400dp"
-            android:layout_height="60dp"
-            android:layout_alignBottom="@+id/tv_f1"
-            android:layout_alignParentEnd="true"
-            android:layout_marginEnd="13dp"
-            android:background="@drawable/textbar"
-            android:hint="Edit F1"
-            android:textSize="@dimen/font_size_medium" />
+    <EditText
+        android:id="@+id/et_f2"
+        android:layout_width="400dp"
+        android:layout_height="60dp"
+        android:layout_alignBottom="@+id/btn_f2"
+        android:layout_alignStart="@+id/et_f1"
+        android:layout_marginBottom="420dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:background="@drawable/textbar"
+        android:hint="Edit F2"
+        android:textSize="@dimen/font_size_medium"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/btn_f2" />
 
-        <EditText
-            android:id="@+id/et_f2"
-            android:layout_width="400dp"
-            android:layout_height="60dp"
-            android:layout_alignBottom="@+id/tv_f2"
-            android:layout_alignParentEnd="true"
-            android:layout_marginEnd="13dp"
-            android:background="@drawable/textbar"
-            android:hint="Edit F2"
-            android:textSize="@dimen/font_size_medium" />
+    <Button
+        android:id="@+id/btn_save"
+        android:layout_width="127dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignTop="@+id/btn_reset"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:background="@color/melon"
+        android:onClick="Save"
+        android:text="Save Commands"
+        android:textSize="@dimen/font_size_small"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.466"
+        app:layout_constraintStart_toEndOf="@+id/btn_reset"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.607" />
 
-        <Button
-            android:id="@+id/btn_save"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
-            android:layout_alignTop="@+id/btn_reset"
-            android:layout_marginEnd="84dp"
-            android:background="@color/melon"
-            android:onClick="Save"
-            android:text="Save Commands"
-            android:textSize="@dimen/font_size_small" />
+    <Button
+        android:id="@+id/btn_reset"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginBottom="8dp"
+        android:layout_marginStart="104dp"
+        android:layout_marginTop="8dp"
+        android:background="@color/lightgrey"
+        android:onClick="Reset"
+        android:text="Reset Commands"
+        android:textSize="@dimen/font_size_small"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.612" />
 
-        <Button
-            android:id="@+id/btn_reset"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_marginBottom="275dp"
-            android:layout_toEndOf="@+id/tv_f1"
-            android:background="@color/lightgrey"
-            android:onClick="Reset"
-            android:text="Reset Commands"
-            android:textSize="@dimen/font_size_small" />
-
-        <Button
-            android:id="@+id/btn_retrieve"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_centerHorizontal="true"
-            android:layout_marginBottom="187dp"
-            android:background="@color/melon"
-            android:onClick="Retrieve"
-            android:text="Retrieve Saved Commands"
-            android:textSize="@dimen/font_size_small" />
-
-
-    </RelativeLayout>
+    <Button
+        android:id="@+id/btn_retrieve"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:background="@color/melon"
+        android:onClick="Retrieve"
+        android:text="Retrieve Saved Commands"
+        android:textSize="@dimen/font_size_small"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.737" />
 
 
 </android.support.constraint.ConstraintLayout>

@@ -10,5 +10,7 @@
             >Down</item>
         <item
             >Right</item>
+        <item
+            >Down</item>
     </string-array>
 </resources>

@@ -9,6 +9,8 @@ import android.bluetooth.BluetoothSocket;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
+import android.os.Message;
+import android.provider.SyncStateContract;
 import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
@@ -18,6 +20,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.util.UUID;
+
+import static android.bluetooth.BluetoothAdapter.STATE_CONNECTED;
 
 public class BluetoothConnectionService extends IntentService {
 
@@ -31,16 +35,19 @@ public class BluetoothConnectionService extends IntentService {
 
     private AcceptThread myAcceptThread;
     private ConnectThread myConnectThread;
+
     public  BluetoothDevice myDevice;
     private UUID deviceUUID;
     Context myContext;
 
+
     //CONSTRUCTOR
-    public BluetoothConnectionService(BluetoothConnect bluetoothConnect) {
+    public BluetoothConnectionService() {
 
         super("BluetoothConnectionService");
 
     }
+
 
 
     //HANDLE INTENT FOR SERVICE. START THIS METHOD WHEN THE SERVICE IS CREATED
@@ -77,6 +84,7 @@ public class BluetoothConnectionService extends IntentService {
         //Local server socket
         private final BluetoothServerSocket myServerSocket;
 
+
         public AcceptThread() {
             BluetoothServerSocket temp = null;
 
@@ -86,7 +94,7 @@ public class BluetoothConnectionService extends IntentService {
                 Log.d(TAG, "AcceptThread: Setting up server using: " + myUUID);
 
             } catch (IOException e) {
-
+                e.printStackTrace();
             }
 
             myServerSocket = temp;
@@ -96,7 +104,7 @@ public class BluetoothConnectionService extends IntentService {
 
             Log.d(TAG, "AcceptThread: Running");
 
-            BluetoothSocket socket = null;
+            BluetoothSocket socket;
             Intent connectionStatusIntent;
 
             try {
@@ -230,10 +238,6 @@ public class BluetoothConnectionService extends IntentService {
             }
 
             try {
-                //Dismiss Progress Dialog when connection established
-                //myProgressDialog.dismiss();
-                //mHandler.post(new DisplayToast(getApplicationContext(),"Connection Established With: "+myDevice.getName()));
-
 
             } catch (NullPointerException e) {
                 e.printStackTrace();
@@ -252,6 +256,9 @@ public class BluetoothConnectionService extends IntentService {
         }
     }
 
+
+
+
     //START ACCEPTTHREAD AND LISTEN FOR INCOMING CONNECTION
     public synchronized void startAcceptThread() {
 
@@ -262,6 +269,8 @@ public class BluetoothConnectionService extends IntentService {
             myConnectThread.cancel();
             myConnectThread = null;
         }
+
+        // Start the thread to listen on a BluetoothServerSocket
         if (myAcceptThread == null) {
             myAcceptThread = new AcceptThread();
             myAcceptThread.start();
@@ -282,6 +291,5 @@ public class BluetoothConnectionService extends IntentService {
         myConnectThread.start();
 
     }
-
 
 }

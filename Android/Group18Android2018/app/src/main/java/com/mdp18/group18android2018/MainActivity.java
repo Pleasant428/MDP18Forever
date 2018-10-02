@@ -38,7 +38,7 @@ public class MainActivity extends AppCompatActivity {
     ImageButton forwardButton, leftRotateButton, rightRotateButton, reverseButton;
     Button btn_update;
     TextView tv_status, tv_map_exploration, tv_mystatus, tv_mystringcmd;
-    ToggleButton tb_setWaypointCoord, tb_setStartCoord, tb_autoManual;
+    ToggleButton tb_setWaypointCoord, tb_setStartCoord, tb_autoManual, tb_fastestpath, tb_exploration;
 
 
     // For bluetooth connection status
@@ -46,7 +46,6 @@ public class MainActivity extends AppCompatActivity {
     BluetoothDevice myBTConnectionDevice;
     static String connectedDevice;
     boolean connectedState;
-    TextView connectionStatusBox;
     boolean currentActivity;
 
 
@@ -61,6 +60,7 @@ public class MainActivity extends AppCompatActivity {
         //REGISTER BROADCAST RECEIVER FOR IMCOMING MSG
         LocalBroadcastManager.getInstance(this).registerReceiver(incomingMessageReceiver, new IntentFilter("Incoming Message"));
 
+
         mPGV = findViewById(R.id.map);
         mPGV.initializeMap();
 
@@ -73,17 +73,18 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 
-                // Check BT connectionIf not connected to any bluetooth device
+                // Check BT connection If not connected to any bluetooth device
                 if(connectedDevice == null) {
                     Toast.makeText(MainActivity.this, "Please connect to bluetooth device first!", Toast.LENGTH_SHORT).show();
                 } else {
 
                     //If already connected to a bluetooth device
-                    String navigate = "And|Ard|0|1";
+                    String navigate = "And|Ard|W";
                     byte[] bytes = navigate.getBytes(Charset.defaultCharset());
                     BluetoothChat.writeMsg(bytes);
                     Log.d(TAG, "Android Controller: Move Forward {once} sent");
                     tv_mystringcmd.setText(R.string.navFwd);
+                    mPGV.moveForward();
                 }
             }
         });
@@ -99,11 +100,12 @@ public class MainActivity extends AppCompatActivity {
                 } else {
 
                     //If already connected to a bluetooth device
-                    String navigate = "And|Ard|1|";
+                    String navigate = "And|Ard|A";
                     byte[] bytes = navigate.getBytes(Charset.defaultCharset());
                     BluetoothChat.writeMsg(bytes);
                     Log.d(TAG, "Android Controller: Turn Left sent");
                     tv_mystringcmd.setText(R.string.navLeft);
+                    mPGV.rotateLeft();
                 }
             }
         });
@@ -119,11 +121,12 @@ public class MainActivity extends AppCompatActivity {
                 } else {
 
                     //If already connected to a bluetooth device
-                    String navigate = "And|Ard|2|";
+                    String navigate = "And|Ard|S";
                     byte[] bytes = navigate.getBytes(Charset.defaultCharset());
                     BluetoothChat.writeMsg(bytes);
                     Log.d(TAG, "Android Controller: Turn Right sent");
                     tv_mystringcmd.setText(R.string.navRight);
+                    mPGV.rotateRight();
                 }
             }
         });
@@ -138,11 +141,12 @@ public class MainActivity extends AppCompatActivity {
                 } else {
 
                     //If already connected to a bluetooth device
-                    String navigate = "And|Ard|3|1";
+                    String navigate = "And|Ard|D";
                     byte[] bytes = navigate.getBytes(Charset.defaultCharset());
                     BluetoothChat.writeMsg(bytes);
                     Log.d(TAG, "Android Controller: Move Backwards sent");
                     tv_mystringcmd.setText(R.string.navRev);
+                    mPGV.moveBackwards();
                 }
             }
         });
@@ -199,6 +203,34 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+
+        tb_exploration = (ToggleButton) findViewById(R.id.tb_exploration);
+        tb_exploration.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    // The toggle is enabled; Start Exploration Mode
+                    startExploration();
+
+                } else {
+                    // The toggle is disabled; Stop Exploration Mode
+                    stopExploration();
+                }
+            }
+        });
+
+        tb_fastestpath = (ToggleButton) findViewById(R.id.tb_fastestpath);
+        tb_fastestpath.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    // The toggle is enabled; Start Fastest Path Mode
+                    startFastestPath();
+
+                } else {
+                    // The toggle is disabled; Stop Fastest Path Mode
+                    stopFastestPath();
+                }
+            }
+        });
     }
 
     @Override
@@ -248,74 +280,109 @@ public class MainActivity extends AppCompatActivity {
 
                     // Message: Action
                     Log.d(TAG, "Incoming Message filtered: " + filteredMsg[2]);
+
+                    // Data (coordinates)
+                    String[] mazeInfo = msgDelimiter(filteredMsg[3], ",");
+
                     switch (filteredMsg[2]) {
 
                         // Action: FORWARD
                         case "0":
+                            for (int counter = Integer.parseInt(filteredMsg[3]); counter >= 1; counter-- ) {
+                                mPGV.moveForward();
+                                tv_mystringcmd.setText(R.string.fwd);
+                                tv_mystatus.setText(R.string.moving);}
                             break;
 
 
                         // Action: TURN_LEFT
                         case "1":
+                            for (int counter = Integer.parseInt(filteredMsg[3]); counter >= 1; counter-- ) {
+                                mPGV.rotateLeft();
+                                tv_mystringcmd.setText(R.string.left);
+                                tv_mystatus.setText(R.string.moving);}
                             break;
 
 
                         // Action: TURN_RIGHT
                         case "2":
+                            for (int counter = Integer.parseInt(filteredMsg[3]); counter >= 1; counter-- ) {
+                                mPGV.rotateRight();
+                                tv_mystringcmd.setText(R.string.right);
+                                tv_mystatus.setText(R.string.moving);
+                            }
                             break;
 
 
                         // Action: BACKWARDS
                         case "3":
+                            for (int counter = Integer.parseInt(filteredMsg[3]); counter >= 1; counter-- ) {
+                                mPGV.moveBackwards();
+                                tv_mystringcmd.setText(R.string.back);
+                                tv_mystatus.setText(R.string.moving);
+                            }
                             break;
 
 
                         // Action: CALIBRATE
                         case "4":
+                            tv_mystatus.setText(R.string.calibrating);
+                            tv_mystringcmd.setText(R.string.calibrating);
                             break;
 
 
                         // Action: ERROR
                         case "5":
+                            tv_mystatus.setText(R.string.error);
+                            tv_mystringcmd.setText(R.string.error);
                             break;
 
 
                         // Action: STARTEXP
                         case "6":
+                            startExploration();
                             break;
 
 
                         // Action: ENDEXP
                         case "7":
+                            endExploration();
                             break;
 
                         // Action: STARTFAST
                         case "8":
+                            startFastestPath();
                             break;
 
 
                         // Action: ENDFAST
                         case "9":
+                            endFastestPath();
                             break;
 
 
                         // Action: STOP
                         case "10":
+                            stopEverything();
                             break;
 
 
                         // Action: ROBOT_POS
                         case "11":
+                            //int row = Integer.parseInt(filteredMsg[3],0,1);
+                            //int col = ;
+                            //mPGV.setCurPos();
                             break;
 
 
                         // Action: MD1
-                        case "MD1":
+                        case "md1":
+
                             break;
 
 
                         // Action: MD2
-                        case "MD2":
+                        case "md2":
                             break;
                     }
                 }
@@ -323,6 +390,7 @@ public class MainActivity extends AppCompatActivity {
 
         }
     };
+
 
     public void setStartDirection() {
         AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
@@ -339,23 +407,82 @@ public class MainActivity extends AppCompatActivity {
         builder.create().show();
     }
 
-    public void onClickExploration(View view) {
-        Toast.makeText(MainActivity.this, "Exploration start.", Toast.LENGTH_SHORT).show();
-
-        // EXPLORATION CODE
-
-
-        Toast.makeText(MainActivity.this, "Exploration completed.", Toast.LENGTH_SHORT).show();
+    public void startExploration() {
+        Toast.makeText(MainActivity.this, "Exploration started", Toast.LENGTH_SHORT).show();
+        String startExp = "And|Alg|6";
+        byte[] bytes = startExp.getBytes(Charset.defaultCharset());
+        BluetoothChat.writeMsg(bytes);
+        Log.d(TAG, "Android Controller: Start Exploration");
+        tv_mystringcmd.setText(R.string.startexp);
+        tv_mystatus.setText(R.string.moving);
     }
 
-    public void onClickFastestPath(View view) {
-        Toast.makeText(MainActivity.this, "Fastest Path start.", Toast.LENGTH_SHORT).show();
+    public void stopExploration() {
 
-        // FASTEST PATH CODE
+        Toast.makeText(MainActivity.this, "Exploration stopped", Toast.LENGTH_SHORT).show();
+        String stopExp = "And|Alg|7";
+        String stopRobot = "And|Ard|";
+        byte[] bytes = stopExp.getBytes(Charset.defaultCharset());
+        BluetoothChat.writeMsg(bytes);
+        byte[] bytess = stopRobot.getBytes(Charset.defaultCharset());
+        BluetoothChat.writeMsg(bytess);
+        Log.d(TAG, "Android Controller: Stop Exploration");
+        tv_mystringcmd.setText(R.string.stopexp);
+        tv_mystatus.setText(R.string.stop);
 
-        Toast.makeText(MainActivity.this, "Fastest Path completed.", Toast.LENGTH_SHORT).show();
     }
 
+    public void endExploration() {
+        Log.d(TAG, "Algorithm: End Exploration.");
+        tv_mystringcmd.setText(R.string.endexp);
+        tv_mystatus.setText(R.string.stop);
+        Toast.makeText(MainActivity.this, "Exploration ended", Toast.LENGTH_SHORT).show();
+    }
+
+    public void startFastestPath() {
+        Toast.makeText(MainActivity.this, "Fastest Path started", Toast.LENGTH_SHORT).show();
+        String startFP = "And|Alg|8";
+        byte[] bytes = startFP.getBytes(Charset.defaultCharset());
+        BluetoothChat.writeMsg(bytes);
+        Log.d(TAG, "Android Controller: Start Fastest Path");
+        tv_mystringcmd.setText(R.string.startfp);
+        tv_mystatus.setText(R.string.moving);
+    }
+
+    public void stopFastestPath() {
+
+        Toast.makeText(MainActivity.this, "Exploration stopped", Toast.LENGTH_SHORT).show();
+        String stopFP = "And|Alg|9";
+        String stopRobot = "And|Ard|";
+        byte[] bytes = stopFP.getBytes(Charset.defaultCharset());
+        BluetoothChat.writeMsg(bytes);
+        byte[] bytess = stopRobot.getBytes(Charset.defaultCharset());
+        BluetoothChat.writeMsg(bytess);
+        Log.d(TAG, "Android Controller: Stop Fastest Path");
+        tv_mystringcmd.setText(R.string.stopfp);
+        tv_mystatus.setText(R.string.stop);
+
+    }
+
+    public void endFastestPath() {
+        Log.d(TAG, "Algorithm: Fastest Path Ended.");
+        tv_mystringcmd.setText(R.string.endfp);
+        tv_mystatus.setText(R.string.stop);
+        Toast.makeText(MainActivity.this, "Fastest Path ended", Toast.LENGTH_SHORT).show();
+    }
+
+    public void stopEverything() {
+
+        // Outgoing msg to Arduino to stop robot
+        String stopRobot = "And|Ard|";
+        byte[] bytes = stopRobot.getBytes(Charset.defaultCharset());
+        BluetoothChat.writeMsg(bytes);
+        // Stop updating map
+        updateMap = false;
+        // Display status
+        tv_mystringcmd.setText(R.string.stop);
+        tv_mystatus.setText(R.string.stop);
+    }
 
     // Manual Mode; Update button
     public void onClickUpdate(View view) {
@@ -388,7 +515,7 @@ public class MainActivity extends AppCompatActivity {
                 Log.d("MainActivity:", "Device Disconnected");
                 connectedDevice = null;
                 connectedState = false;
-                connectionStatusBox.setText(R.string.btStatusOffline);
+
 
                 if (currentActivity) {
 
@@ -424,7 +551,6 @@ public class MainActivity extends AppCompatActivity {
                 connectedDevice = myBTConnectionDevice.getName();
                 connectedState = true;
                 Log.d("MainActivity:", "Device Connected " + connectedState);
-                connectionStatusBox.setText(connectedDevice);
                 Toast.makeText(MainActivity.this, "Connection Established: " + myBTConnectionDevice.getName(),
                         Toast.LENGTH_SHORT).show();
             }

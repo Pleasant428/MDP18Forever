@@ -14,6 +14,9 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
+import android.provider.SyncStateContract;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.NavUtils;
 import android.support.v4.content.ContextCompat;
@@ -108,21 +111,23 @@ public class BluetoothConnect extends AppCompatActivity{
         IntentFilter intentFilter = new IntentFilter(myBluetoothAdapter.ACTION_SCAN_MODE_CHANGED);
         registerReceiver(discoverabilityBroadcastReceiver, intentFilter);
 
+        //REGISTER DISCOVERED DEVICE BROADCAST RECEIVER
+        IntentFilter discoverDevicesIntent = new IntentFilter(BluetoothDevice.ACTION_FOUND);
+        registerReceiver(discoveryBroadcastReceiver, discoverDevicesIntent);
+
+        //REGISTER END DISCOVERING BROADCAST RECEIVER
+        IntentFilter discoverEndedIntent = new IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
+        registerReceiver(discoveryEndedBroadcastReceiver, discoverEndedIntent);
+
         //REGISTER ENABLE/DISABLE BT BROADCAST RECEIVER
         IntentFilter BTIntent = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
         registerReceiver(enableBTBroadcastReceiver, BTIntent);
 
-        //REGISTER DISCOVERED DEVICE BROADCAST RECEIVER
-        IntentFilter discoverDevicesIntent = new IntentFilter(BluetoothDevice.ACTION_FOUND);
-        registerReceiver(discoveryBroadcastReceiver, discoverDevicesIntent);
 
         //REGISTER START DISCOVERING BROADCAST RECEIVER
         IntentFilter discoverStartedIntent = new IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_STARTED);
         registerReceiver(discoveryStartedBroadcastReceiver, discoverStartedIntent);
 
-        //REGISTER END DISCOVERING BROADCAST RECEIVER
-        IntentFilter discoverEndedIntent = new IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
-        registerReceiver(discoveryEndedBroadcastReceiver, discoverEndedIntent);
 
         myBTDevicesArrayList = new ArrayList<>();
         myBTPairedDevicesArrayList = new ArrayList<>();
@@ -627,7 +632,6 @@ public class BluetoothConnect extends AppCompatActivity{
 
             myBluetoothAdapter.startDiscovery();
             Log.d(TAG, "BTDiscovery: enable discovery");
-
 
         }
         if (!myBluetoothAdapter.isDiscovering()) {

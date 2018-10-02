@@ -17,14 +17,24 @@
     <string name="navRight">Android Controller: Turn Right</string>
     <string name="navRev">Android Controller: Move Backwards</string>
 
-    <!-- Message Senders and Receivers -->
-    <string name="arduino">Arduino</string>
-    <string name="algo">Algorithm</string>
 
     <!-- String Commands from message senders -->
-    <string name="fwd"> Move Forward</string>
-    <string name="left"> Turn Left</string>
-    <string name="right"> Turn Right</string>
-    <string name="back"> Move Backwards</string>
+    <string name="fwd">Move Forward</string>
+    <string name="left">Turn Left</string>
+    <string name="right">Turn Right</string>
+    <string name="back">Move Backwards</string>
+
+    <!-- myStatus strings -->
+    <string name="neutral"> </string>
+    <string name="moving">Moving</string>
+    <string name="stop">Stopped</string>
+    <string name="calibrating">Calibrating robot...</string>
+    <string name="startexp">Start Exploration</string>
+    <string name="stopexp">Stop Exploration</string>
+    <string name="stopfp">Stop Fastest Path</string>
+    <string name="endexp">End Exploration</string>
+    <string name="startfp">Start Fastest Path</string>
+    <string name="endfp">End Fastest Path</string>
+    <string name="error">Error!</string>
 
 </resources>
