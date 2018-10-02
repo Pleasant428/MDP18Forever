@@ -9,19 +9,13 @@ import android.bluetooth.BluetoothSocket;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
-import android.os.Message;
-import android.provider.SyncStateContract;
 import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.nio.charset.Charset;
 import java.util.UUID;
 
-import static android.bluetooth.BluetoothAdapter.STATE_CONNECTED;
 
 public class BluetoothConnectionService extends IntentService {
 
@@ -38,6 +32,8 @@ public class BluetoothConnectionService extends IntentService {
 
     public  BluetoothDevice myDevice;
     private UUID deviceUUID;
+    private Handler mHandler;
+    ProgressDialog myProgressDialog;
     Context myContext;
 
 

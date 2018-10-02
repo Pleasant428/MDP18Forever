@@ -54,6 +54,10 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        connectedDevice = null;
+        connectedState = false;
+        currentActivity = true;
+
         //REGISTER BROADCAST RECEIVER FOR INCOMING MSG
         LocalBroadcastManager.getInstance(this).registerReceiver(btConnectionReceiver, new IntentFilter("btConnectionStatus"));
 
