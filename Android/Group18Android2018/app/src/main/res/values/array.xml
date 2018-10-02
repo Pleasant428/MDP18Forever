@@ -5,9 +5,9 @@
         <item
             >Up</item>
         <item
-            >Down</item>
-        <item
             >Left</item>
+        <item
+            >Down</item>
         <item
             >Right</item>
     </string-array>

@@ -160,7 +160,7 @@ public class MainActivity extends AppCompatActivity {
                 if (isChecked) {
                     // The toggle is enabled
                     Toast.makeText(MainActivity.this, "Select waypoint on map.", Toast.LENGTH_SHORT).show();
-                    mPGV.setWaypoint();
+                    mPGV.selectWayPoint();
                     tb_setWaypointCoord.toggle();
                     Toast.makeText(MainActivity.this, "Waypoint set to ", Toast.LENGTH_SHORT).show();
                 }
@@ -172,7 +172,7 @@ public class MainActivity extends AppCompatActivity {
                 if (isChecked) {
                     // The toggle is enabled
                     Toast.makeText(MainActivity.this, "Select starting point on map.", Toast.LENGTH_SHORT).show();
-                    mPGV.setStartPoint();
+                    mPGV.selectStartPoint();
                     setStartDirection();
                     tb_setStartCoord.toggle();
                     Toast.makeText(MainActivity.this, "Start Point set to ", Toast.LENGTH_SHORT).show();

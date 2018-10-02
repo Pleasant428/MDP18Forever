@@ -9,8 +9,11 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Toast;
+
+import java.util.ArrayList;
 
 import static android.content.ContentValues.TAG;
 
@@ -21,7 +24,10 @@ public class PixelGridView extends View{
     private int frontStartPos, backStartPos, leftStartPos, rightStartPos;
     private int frontCurPos, backCurPos, leftCurPos, rightCurPos;
     private int robotDirection;
+    private ArrayList<int[]> wayPoints = new ArrayList<int[]>();
+    private boolean selectStartPosition = false, selectWayPoint = false;
     private Paint blackPaint = new Paint();
+    private Paint cyanPaint = new Paint();
     private Paint redPaint = new Paint();
     private Paint greenPaint = new Paint();
     private Paint yellowPaint = new Paint();
@@ -43,6 +49,7 @@ public class PixelGridView extends View{
         yellowPaint.setColor(Color.YELLOW);
         greenPaint.setColor(Color.GREEN);
         bluePaint.setColor(Color.BLUE);
+        cyanPaint.setColor(Color.CYAN);
 
     }
 
@@ -80,7 +87,20 @@ public class PixelGridView extends View{
         this.leftCurPos = leftStartPos;
         this.backCurPos = backStartPos;
         this.rightCurPos = rightStartPos;
+    }
 
+    public void setStartPos(int row, int column){
+        int[] startEdges = convertRobotPosToEdge(row, column);
+        this.setStartPos(startEdges[0], startEdges[1], startEdges[2], startEdges[3]);
+    }
+
+    public int[] getStartPos(){
+        int[] startPos = new int[4];
+        startPos[0] = this.frontStartPos;
+        startPos[1] = this.leftStartPos;
+        startPos[2] = this.backStartPos;
+        startPos[3] = this.rightStartPos;
+        return startPos;
     }
 
     public void setCurPos(int row, int column){
@@ -115,6 +135,10 @@ public class PixelGridView extends View{
 
     public int getRobotDirection(){
         return this.robotDirection;
+    }
+
+    private ArrayList<int[]> getWayPoints() {
+        return this.wayPoints;
     }
 
     @Override
@@ -155,6 +179,8 @@ public class PixelGridView extends View{
             }
         }
 
+
+
         // vertical lines
         for (int i = 1; i < numColumns; i++) {
             canvas.drawLine(i * cellWidth, 0, i * cellWidth, height, blackPaint);
@@ -165,35 +191,92 @@ public class PixelGridView extends View{
             canvas.drawLine(0, i * cellHeight, width, i * cellHeight, blackPaint);
         }
 
-        this.setStartEndPointColor(canvas, greenPaint, redPaint);
+//        this.setStartEndPointColor(canvas, greenPaint, redPaint);
+        this.setStartPointColor(canvas, greenPaint);
+        this.setEndPointColor(canvas, 18, 13, redPaint);
+        this.setWayPointColor(canvas, cyanPaint);
         this.robotPosMapping(canvas, pos, robotDirection);
 
     }
 
-//    @Override
-//    public boolean onTouchEvent(MotionEvent event) {
-//        if (event.getAction() == MotionEvent.ACTION_DOWN) {
-//            int column = (int)(event.getX() / cellWidth);
-//            int row = (int)(event.getY() / cellHeight);
-//
+
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        if (event.getAction() == MotionEvent.ACTION_DOWN) {
+            int column = (int) (event.getX() / cellWidth);
+            int row = (int)(event.getY() / cellHeight);
+
+            if(selectStartPosition){
+                if(!checkStartPoint(row, column)){
+                    selectStartPosition = false;
+                    return false;
+                }
+                this.setStartPos(inverseRowCoord(row), column);
+                selectStartPosition = false;
+                invalidate();
+
+            }
+
+            else if (selectWayPoint){
+                this.setWayPoint(inverseRowCoord(row), column);
+                selectWayPoint = false;
+                invalidate();
+            }
+
 //            cellChecked[column][row] = !cellChecked[column][row];
-//            invalidate();
+        }
+
+        return true;
+    }
+
+    private void setWayPoint(int row, int column) {
+        int[] wayPoint = new int[2];
+        wayPoint[0] = row;
+        wayPoint[1] = column;
+        wayPoints.add(wayPoint);
+    }
+
+    private boolean checkStartPoint(int row, int column) {
+        if (row < 1 || row >= 19 || column < 1 || column >= 14 ){
+            return false;
+        }
+        return true;
+    }
+//
+//    public void setStartEndPointColor(Canvas canvas, Paint colorStart, Paint colorEnd){
+//        for (int i = 0; i < 3; i++){
+//            for (int j = 17; j < 20; j++){
+//                canvas.drawRect(i * cellWidth, j * cellHeight,
+//                        (i + 1) * cellWidth, (j + 1) * cellHeight,
+//                        colorStart);
+//            }
 //        }
 //
-//        return true;
+//        for (int i = 12; i < 15; i++){
+//            for (int j = 0; j < 3; j++){
+//                canvas.drawRect(i * cellWidth, j * cellHeight,
+//                        (i + 1) * cellWidth, (j + 1) * cellHeight,
+//                        colorEnd);
+//            }
+//        }
 //    }
 
-    public void setStartEndPointColor(Canvas canvas, Paint colorStart, Paint colorEnd){
-        for (int i = 0; i < 3; i++){
-            for (int j = 17; j < 20; j++){
+    public void setStartPointColor(Canvas canvas, Paint colorStart){
+
+        int[] startPointEdges = this.getStartPos();
+        for (int i = startPointEdges[1]; i <= startPointEdges[3]; i++){
+            for (int j = startPointEdges[0]; j <= startPointEdges[2]; j++){
                 canvas.drawRect(i * cellWidth, j * cellHeight,
                         (i + 1) * cellWidth, (j + 1) * cellHeight,
                         colorStart);
             }
         }
-
-        for (int i = 12; i < 15; i++){
-            for (int j = 0; j < 3; j++){
+    }
+    public void setEndPointColor(Canvas canvas, int row, int column, Paint colorEnd){
+        int[] endPointEdges = convertRobotPosToEdge(row, column);
+        for (int i = endPointEdges[1]; i <= endPointEdges[3]; i++){
+            for (int j = endPointEdges[0]; j <= endPointEdges[2]; j++){
                 canvas.drawRect(i * cellWidth, j * cellHeight,
                         (i + 1) * cellWidth, (j + 1) * cellHeight,
                         colorEnd);
@@ -201,9 +284,31 @@ public class PixelGridView extends View{
         }
     }
 
+    private void setWayPointColor(Canvas canvas, Paint wayPointPaint) {
+        ArrayList<int[]> wayPoints = this.getWayPoints();
+        ArrayList<int[]> wayPointsEdges = new ArrayList<int[]>();
+        for (int i[] : wayPoints ){
+            wayPointsEdges.add(convertTileToEdge(i[0],i[1]));
+        }
+
+        for (int i[] : wayPointsEdges){
+            for (int j = i[1]; j < i[3]; j++){
+                for (int k = i[0]; k < i[2]; k++){
+                    canvas.drawRect(j * cellWidth, k * cellHeight,
+                            (j + 1) * cellWidth, (k + 1) * cellHeight,
+                            wayPointPaint);
+                }
+
+            }
+        }
+
+    }
+
+
+
     public void robotPosMapping(Canvas canvas, int[] pos, int robotDirection){
         boolean reachedWall = this.checkReachedWall(pos, robotDirection);
-
+//        boolean reachedWall = false;
         if(!reachedWall){
             for (int i = Math.min(pos[1],pos[3]); i <= Math.max(pos[1],pos[3]); i++){
                 for (int j = Math.min(pos[0],pos[2]); j <= Math.max(pos[0],pos[2]); j++){
@@ -244,13 +349,12 @@ public class PixelGridView extends View{
                         bluePaint);
             }
         }
-        else return;
 
     }
 
     private boolean checkReachedWall(int[] pos, int direction) {
         int[] boundaries = new int[4];
-        boundaries[0] = 0;
+        boundaries[0] = -1;
         boundaries[1] = 0;
         boundaries[2] = 19;
         boundaries[3] = 14;
@@ -265,31 +369,35 @@ public class PixelGridView extends View{
     public void moveForward(){
         int[] pos = this.getCurPos();
         int dir = this.getRobotDirection();
+        boolean reachedWall = this.checkReachedWall(pos, dir);
 
-        if (dir == 0){
-            pos[0]--;
-            pos[2]--;
+        if (!reachedWall){
+            if (dir == 0){
+                pos[0]--;
+                pos[2]--;
+            }
+
+            else if (dir == 1){
+                pos[1]--;
+                pos[3]--;
+            }
+
+
+            else if (dir == 2){
+                pos[0]++;
+                pos[2]++;
+            }
+
+            else if (dir == 3){
+                pos[1]++;
+                pos[3]++;
+            }
+
+            this.setCurPos(pos);
+
+            this.invalidate();
         }
 
-        else if (dir == 1){
-            pos[1]--;
-            pos[3]--;
-        }
-
-
-        else if (dir == 2){
-            pos[0]++;
-            pos[2]++;
-        }
-
-        else if (dir == 3){
-            pos[1]++;
-            pos[3]++;
-        }
-
-        this.setCurPos(pos);
-
-        this.invalidate();
     }
 
     public void rotateLeft(){
@@ -313,36 +421,40 @@ public class PixelGridView extends View{
     public void moveBackwards(){
         int[] pos = this.getCurPos();
         int dir = this.getRobotDirection();
+        boolean reachedWall = this.checkReachedWall(pos, (dir + 2)%4);
 
-        if (dir == 0){
-            pos[0]++;
-            pos[2]++;
+        if(!reachedWall){
+            if (dir == 0){
+                pos[0]++;
+                pos[2]++;
+            }
+
+            else if (dir == 1){
+                pos[1]++;
+                pos[3]++;
+            }
+
+
+            else if (dir == 2){
+                pos[0]--;
+                pos[2]--;
+            }
+
+            else if (dir == 3){
+                pos[1]--;
+                pos[3]--;
+            }
+
+            this.setCurPos(pos);
+
+            this.invalidate();
         }
 
-        else if (dir == 1){
-            pos[1]++;
-            pos[3]++;
-        }
-
-
-        else if (dir == 2){
-            pos[0]--;
-            pos[2]--;
-        }
-
-        else if (dir == 3){
-            pos[1]--;
-            pos[3]--;
-        }
-
-        this.setCurPos(pos);
-
-        this.invalidate();
     }
 
-    public void setWaypoint() {
+    public void selectWayPoint() {
         Log.d(TAG, "Setting Waypoint...");
-
+        selectWayPoint = true;
 
         // SET WAYPOINT CODE
 
@@ -352,9 +464,9 @@ public class PixelGridView extends View{
 
     }
 
-    public void setStartPoint() {
+    public void selectStartPoint() {
         Log.d(TAG, "Setting Start Point...");
-
+        selectStartPosition = true;
 
         // SET START POINT CODE
 
@@ -385,7 +497,7 @@ public class PixelGridView extends View{
         return (19 - rowNum);
     }
 
-    public int[] convertTileToEdge (int row, int column){
+    public int[] convertRobotPosToEdge (int row, int column){
         int rowFormatConvert = inverseRowCoord(row);
         int topEdge, leftEdge, bottomEdge, rightEdge;
         topEdge = rowFormatConvert - 1;
@@ -400,6 +512,20 @@ public class PixelGridView extends View{
         return edges;
     }
 
+    public int[] convertTileToEdge (int row, int column){
+        int rowFormatConvert = inverseRowCoord(row);
+        int topEdge, leftEdge, bottomEdge, rightEdge;
+        topEdge = rowFormatConvert;
+        leftEdge = column;
+        bottomEdge = rowFormatConvert + 1;
+        rightEdge = column + 1;
+        int[] edges = new int[4];
+        edges[0] = topEdge;
+        edges[1] = leftEdge;
+        edges[2] = bottomEdge;
+        edges[3] = rightEdge;
+        return edges;
+    }
 
     // Refresh map
     public void refreshMap(){
