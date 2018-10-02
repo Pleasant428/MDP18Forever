@@ -7,6 +7,7 @@ import Algorithm.*;
 import Map.*;
 import Map.Cell;
 import Map.Map;
+import Network.NetMgr;
 import Robot.*;
 import Robot.RobotConstants.Command;
 import Robot.RobotConstants.Direction;
@@ -50,6 +51,8 @@ public class Simulator extends Application {
 	private boolean setObstacle = false;
 	private boolean setWaypoint = false;
 	private boolean setRobot = false;
+	
+	private static final NetMgr netMgr = new NetMgr("192.168.18.18", 8080);
 
 	// GUI Components
 	private int stage = 1;
@@ -72,7 +75,7 @@ public class Simulator extends Application {
 	private final String SIM_EXP = "Simulation Exploration Path";
 	
 	//Threads for each of the tasks
-	private Thread realFastTask, realExpTask, simFastTask, simExpTask;
+	private Thread fastTask, expTask, netMgrTask;
 
 	public void start(Stage primaryStage) {
 		//Init for Map and Robot
@@ -86,7 +89,10 @@ public class Simulator extends Application {
 		robot.setStartPos(robot.getPosition().x, robot.getPosition().y, exploredMap);
 		
 		//Threads
-		simExpTask = new Thread(new ExplorationTask());
+		expTask = new Thread(new ExplorationTask());
+		fastTask = new Thread(new FastTask());
+		netMgrTask = new Thread();
+		
 
 		// Setting the Title and Values for the Window
 		primaryStage.setTitle("MDP Group 18: Algorithm Simulator");
@@ -164,7 +170,6 @@ public class Simulator extends Application {
 		timeLimitSB.setMax(240);
 		coverageLimitSB.setMin(10);
 		coverageLimitSB.setMax(100);
-		
 		
 		connectBtn.setMaxWidth(500);
 		startBtn.setMaxWidth(500);
@@ -294,7 +299,6 @@ public class Simulator extends Application {
 		// Layer 2
 		controlGrid.add(modeCB, 0, 5, 3, 1);
 		controlGrid.add(startBtn, 3, 5, 3, 1);
-		
 		
 		// Layer 3
 		controlGrid.add(loadMapBtn, 0, 6, 3, 1);
@@ -612,8 +616,7 @@ public class Simulator extends Application {
 				System.out.println("SF Here");
 				exploredMap.draw(true);
 				robot.draw();
-				simFastTask = new Thread(new FastTask());
-				simFastTask.start();
+				fastTask.start();
 				break;
 
 			case SIM_EXP:
@@ -621,8 +624,7 @@ public class Simulator extends Application {
 				robot.sense(exploredMap, map);
 				exploredMap.draw(true);
 				robot.draw();
-				simExpTask = new Thread(new ExplorationTask());
-				simExpTask.start();
+				expTask.start();
 				break;
 
 			}
@@ -677,6 +679,22 @@ public class Simulator extends Application {
 			
 			return 1;
 	    }
+	}
+	
+	
+	class NetTask extends Task<Integer>{
+		protected Integer call() throws Exception {
+			netMgr.startConn();
+			
+			System.out.println("Starting");
+			Scanner sc = new Scanner(System.in);
+			String msg = "";
+			while(true) {
+				netMgr.recieve(msg);
+				String[] msgArr = msg.split("|");
+				
+			}
+		}
 	}
 
 

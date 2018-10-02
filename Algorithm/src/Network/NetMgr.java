@@ -13,7 +13,9 @@ public class NetMgr {
 
 	private BufferedWriter out;
 	private BufferedReader in;
-
+	
+	
+	
 	public NetMgr(String ipAddr, int port) {
 		this.ipAddr = ipAddr;
 		this.port = port;
@@ -120,6 +122,7 @@ public class NetMgr {
 		return null;
 	}
 	
+	// String Tokenizer
 	
 	
 
