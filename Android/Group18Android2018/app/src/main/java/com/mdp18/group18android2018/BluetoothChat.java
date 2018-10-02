@@ -1,18 +1,20 @@
 package com.mdp18.group18android2018;
 
+import android.app.Activity;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.Context;
 import android.content.Intent;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
+import android.widget.TextView;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
 
-public class BluetoothChat {
+public class BluetoothChat extends Thread {
 
     private static final String TAG = "BluetoothChat";
     // private ConnectedThread myConnectedThread;
@@ -27,6 +29,7 @@ public class BluetoothChat {
            RESPONSIBLE FOR MAINTAINING THE BLUETOOTH CONNECTION, SENDING THE
            DATA, AND RECEIVING INCOMING DATA THROUGH INPUT/OUTPUT STREAMS RESPECTIVELY
    */
+
 
     public static BluetoothDevice getBluetoothDevice(){
         return myBluetoothConnectionDevice;
@@ -61,12 +64,12 @@ public class BluetoothChat {
             //Read from the InputStream
             try {
                 bytes = myInputStream.read(buffer);
-
                 String incomingMessage = new String(buffer, 0, bytes);
                 Log.d(TAG, "InputStream: " + incomingMessage);
 
+
                 //BROADCAST INCOMING MSG
-                Intent incomingMsgIntent = new Intent("Waiting for incoming msg...");
+                Intent incomingMsgIntent = new Intent("IncomingMsg");
                 incomingMsgIntent.putExtra("receivingMsg", incomingMessage);
                 LocalBroadcastManager.getInstance(myContext).sendBroadcast(incomingMsgIntent);
 
@@ -120,7 +123,7 @@ public class BluetoothChat {
 
 
     //METHOD TO START CHAT SERVICE
-    static void connected(BluetoothSocket mySocket, BluetoothDevice myDevice, Context context) {
+     static void connected(BluetoothSocket mySocket, BluetoothDevice myDevice, Context context) {
         Log.d(TAG, "Connected: Starting");
 
         //showToast("Connection Established With: "+myDevice.getName());

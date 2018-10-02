@@ -33,6 +33,10 @@ public class ReconfigStringCommand extends AppCompatActivity{
 
     SharedPreferences myPrefs;
 
+    public static final String mypreference="mypref";
+    public static final String F1="f1";
+    public static final String F2="f2";
+
     // For bluetooth connection status
     private static final UUID myUUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
     BluetoothDevice myBTConnectionDevice;
@@ -56,9 +60,11 @@ public class ReconfigStringCommand extends AppCompatActivity{
         btn_f1 = (Button) findViewById(R.id.btn_f1);
         btn_f2 = (Button) findViewById(R.id.btn_f2);
 
-        myPrefs=getSharedPreferences("myPrefs", MODE_PRIVATE);
+        myPrefs=getSharedPreferences(mypreference, Context.MODE_PRIVATE);
 
         init();
+        onClickF1();
+        onClickF2();
 
     }
 
@@ -69,8 +75,8 @@ public class ReconfigStringCommand extends AppCompatActivity{
 
     public void Save(View view) {
         SharedPreferences.Editor editor = myPrefs.edit();
-        editor.putString("f1", et_f1.getText().toString());
-        editor.putString("f2", et_f2.getText().toString());
+        editor.putString(F1, et_f1.getText().toString());
+        editor.putString(F2, et_f2.getText().toString());
         editor.apply();
 
         Toast.makeText(this, "Commands saved!", Toast.LENGTH_SHORT).show();
@@ -87,22 +93,25 @@ public class ReconfigStringCommand extends AppCompatActivity{
     }
 
     public void Retrieve (View view) {
-        String str_f1 = myPrefs.getString("f1", "");
+        String str_f1 = myPrefs.getString(F1, "");
         et_f1.setText(str_f1);
-        String str_f2 = myPrefs.getString("f2", "");
+        String str_f2 = myPrefs.getString(F2, "");
         et_f2.setText(str_f2);
-
-        Toast.makeText(this, "Commands retrieved!", Toast.LENGTH_SHORT).show();
-
+        if (myPrefs.contains(F1)){
+            btn_f1.setText(myPrefs.getString(F1,"String Not Found"));
+        }
+        if (myPrefs.contains(F2)){
+            btn_f2.setText(myPrefs.getString(F2,"String Not Found"));
+        }
     }
 
     public void onClickF1(){
 
         btn_f1.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
+            public void onClick(View view) {
 
-                String tempF1 = myPrefs.getString("f1", "");
+                String tempF1 = myPrefs.getString(F1, "");
                 byte[] bytes = tempF1.getBytes(Charset.defaultCharset());
                 BluetoothChat.writeMsg(bytes);
 
@@ -118,9 +127,9 @@ public class ReconfigStringCommand extends AppCompatActivity{
 
         btn_f2.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
+            public void onClick(View view) {
 
-                String tempF2 = myPrefs.getString("f2", "");
+                String tempF2 = myPrefs.getString(F2, "");
                 byte[] bytes = tempF2.getBytes(Charset.defaultCharset());
                 BluetoothChat.writeMsg(bytes);
 
@@ -175,56 +184,55 @@ public class ReconfigStringCommand extends AppCompatActivity{
             myBTConnectionDevice = intent.getParcelableExtra("Device");
 
             //DISCONNECTED FROM BLUETOOTH CHAT
-            if (connectionStatus.equals("disconnect")) {
+            if(connectionStatus.equals("disconnect")){
 
-                Log.d("MainActivity:", "Device Disconnected");
-                connectedDevice = null;
-                connectedState = false;
-                connectionStatusBox.setText(R.string.btStatusOffline);
+                Log.d("ConnectAcitvity:","Device Disconnected");
 
-                if (currentActivity) {
+                //Stop Bluetooth Connection Service
+                //stopService(connectIntent);
 
-                    //RECONNECT DIALOG MSG
-                    AlertDialog alertDialog = new AlertDialog.Builder(ReconfigStringCommand.this).create();
-                    alertDialog.setTitle("BLUETOOTH DISCONNECTED");
-                    alertDialog.setMessage("Connection with device: '" + myBTConnectionDevice.getName() + "' has ended. Do you want to reconnect?");
-                    alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "Yes",
-                            new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int which) {
+                //RECONNECT DIALOG MSG
+                AlertDialog alertDialog = new AlertDialog.Builder(ReconfigStringCommand.this).create();
+                alertDialog.setTitle("BLUETOOTH DISCONNECTED");
+                alertDialog.setMessage("Connection with device: '"+myBTConnectionDevice.getName()+"' has ended. Do you want to reconnect?");
+                alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "Yes",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                //startBTConnection(myBTConnectionDevice, myUUID);
+                                //START BT CONNECTION SERVICE
+                                Intent connectIntent = new Intent(ReconfigStringCommand.this, BluetoothConnectionService.class);
+                                connectIntent.putExtra("serviceType", "connect");
+                                connectIntent.putExtra("device", myBTConnectionDevice);
+                                connectIntent.putExtra("id", myUUID);
+                                startService(connectIntent);
 
-                                    //START BT CONNECTION SERVICE
-                                    Intent connectIntent = new Intent(ReconfigStringCommand.this, BluetoothConnectionService.class);
-                                    connectIntent.putExtra("serviceType", "connect");
-                                    connectIntent.putExtra("device", myBTConnectionDevice);
-                                    connectIntent.putExtra("id", myUUID);
-                                    startService(connectIntent);
-                                }
-                            });
-                    alertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, "No",
-                            new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int which) {
-                                    dialog.dismiss();
-                                }
-                            });
+                            }
+                        });
+                alertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, "No",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        });
+
+                if(!isFinishing()){ //here activity means your activity class
                     alertDialog.show();
-
                 }
             }
-            //SUCCESSFULLY CONNECTED TO BLUETOOTH DEVICE
-            else if (connectionStatus.equals("connect")) {
 
-                connectedDevice = myBTConnectionDevice.getName();
-                connectedState = true;
-                Log.d("MainActivity:", "Device Connected " + connectedState);
-                connectionStatusBox.setText(connectedDevice);
-                Toast.makeText(ReconfigStringCommand.this, "Connection Established: " + myBTConnectionDevice.getName(),
-                        Toast.LENGTH_SHORT).show();
+            //SUCCESSFULLY CONNECTED TO BLUETOOTH DEVICE
+            else if(connectionStatus.equals("connect")){
+
+
+                Log.d("ConnectAcitvity:","Device Connected");
+                Toast.makeText(ReconfigStringCommand.this, "Connection Established: "+ myBTConnectionDevice.getName(),
+                        Toast.LENGTH_LONG).show();
             }
 
             //BLUETOOTH CONNECTION FAILED
-            else if (connectionStatus.equals("connectionFail")) {
-                Toast.makeText(ReconfigStringCommand.this, "Connection Failed: " + myBTConnectionDevice.getName(),
-                        Toast.LENGTH_SHORT).show();
+            else if(connectionStatus.equals("connectionFail")) {
+                Toast.makeText(ReconfigStringCommand.this, "Connection Failed: "+ myBTConnectionDevice.getName(),
+                        Toast.LENGTH_LONG).show();
             }
 
         }

@@ -62,7 +62,7 @@ public class MainActivity extends AppCompatActivity {
         LocalBroadcastManager.getInstance(this).registerReceiver(btConnectionReceiver, new IntentFilter("btConnectionStatus"));
 
         //REGISTER BROADCAST RECEIVER FOR IMCOMING MSG
-        LocalBroadcastManager.getInstance(this).registerReceiver(incomingMessageReceiver, new IntentFilter("Incoming Message"));
+        LocalBroadcastManager.getInstance(this).registerReceiver(incomingMessageReceiver, new IntentFilter("IncomingMsg"));
 
 
         mPGV = findViewById(R.id.map);
@@ -83,10 +83,10 @@ public class MainActivity extends AppCompatActivity {
                 } else {
 
                     //If already connected to a bluetooth device
-                    String navigate = "And|Ard|W";
+                    String navigate = "And|Ard|0";
                     byte[] bytes = navigate.getBytes(Charset.defaultCharset());
                     BluetoothChat.writeMsg(bytes);
-                    Log.d(TAG, "Android Controller: Move Forward {once} sent");
+                    Log.d(TAG, "Android Controller: Move Forward sent");
                     tv_mystringcmd.setText(R.string.navFwd);
                     mPGV.moveForward();
                 }
@@ -104,7 +104,7 @@ public class MainActivity extends AppCompatActivity {
                 } else {
 
                     //If already connected to a bluetooth device
-                    String navigate = "And|Ard|A";
+                    String navigate = "And|Ard|1";
                     byte[] bytes = navigate.getBytes(Charset.defaultCharset());
                     BluetoothChat.writeMsg(bytes);
                     Log.d(TAG, "Android Controller: Turn Left sent");
@@ -125,7 +125,7 @@ public class MainActivity extends AppCompatActivity {
                 } else {
 
                     //If already connected to a bluetooth device
-                    String navigate = "And|Ard|S";
+                    String navigate = "And|Ard|2";
                     byte[] bytes = navigate.getBytes(Charset.defaultCharset());
                     BluetoothChat.writeMsg(bytes);
                     Log.d(TAG, "Android Controller: Turn Right sent");
@@ -145,7 +145,7 @@ public class MainActivity extends AppCompatActivity {
                 } else {
 
                     //If already connected to a bluetooth device
-                    String navigate = "And|Ard|D";
+                    String navigate = "And|Ard|3";
                     byte[] bytes = navigate.getBytes(Charset.defaultCharset());
                     BluetoothChat.writeMsg(bytes);
                     Log.d(TAG, "Android Controller: Move Backwards sent");
@@ -169,6 +169,11 @@ public class MainActivity extends AppCompatActivity {
                     // The toggle is enabled : To select waypoint on map
                     mPGV.selectWayPoint();
                     tb_setWaypointCoord.toggle();
+
+                    // For Checklist C5: Send WAY point coordinates to AMD Tool
+//                    String startCoord = "And|Ard|" + Integer.toString(inverseRowCoord(row)) + "," + Integer.toString(column);
+//                    byte[] bytes = startCoord.getBytes(Charset.defaultCharset());
+//                    BluetoothChat.writeMsg(bytes);
                 }
             }
         });
@@ -180,6 +185,12 @@ public class MainActivity extends AppCompatActivity {
                     mPGV.selectStartPoint();
                     setStartDirection();
                     tb_setStartCoord.toggle();
+
+                    // For Checklist C5: Send start point coordinates to AMD Tool
+//                    String startCoord = "And|Ard|".concat(Integer.toString(mPGV.getStartCoord()[0])).concat(",").concat(Integer.toString(mPGV.getStartCoord()[1]));
+//                    Log.d(TAG, "And|Ard|" + Integer.toString(mPGV.getStartCoord()[0]) + "," + Integer.toString(mPGV.getStartCoord()[1]));
+//                    byte[] bytes = startCoord.getBytes(Charset.defaultCharset());
+//                    BluetoothChat.writeMsg(bytes);
                 }
             }
         });
@@ -266,57 +277,62 @@ public class MainActivity extends AppCompatActivity {
         public void onReceive(Context context, Intent intent) {
 
             String incomingMsg = intent.getStringExtra("receivingMsg");
-            tv_mystringcmd.setText(incomingMsg);
 
             Log.d(TAG, "Receiving incoming message: " + incomingMsg);
+            tv_mystringcmd.setText(incomingMsg);
 
             // Filter empty and concatenated string from receiving channel
-            if(incomingMsg.length() > 9 && incomingMsg.length() < 345) {
+            if(incomingMsg.length() > 8 && incomingMsg.length() < 345) {
 
                 // Check if string is for android
-                if (incomingMsg.substring(4, 7).equals("And")){
+                if (incomingMsg.substring(4, 7).equals("And")) {
 
-                    String[] filteredMsg = msgDelimiter(incomingMsg.replaceAll(" ", "").replaceAll("\\n", "").trim(), "\\|");
+                    //String[] filteredMsg = msgDelimiter(incomingMsg.replaceAll("", "").replaceAll("\\n", "").trim(), "\\|");
+
+                    String[] filteredMsg = msgDelimiter(incomingMsg, "|");
 
                     // Message: Action
                     Log.d(TAG, "Incoming Message filtered: " + filteredMsg[2]);
 
                     // Data (coordinates)
-                    String[] mazeInfo = msgDelimiter(filteredMsg[3], ",");
+                    //String[] mazeInfo = msgDelimiter(filteredMsg[3], ",");
 
                     switch (filteredMsg[2]) {
 
                         // Action: FORWARD
                         case "0":
-                            for (int counter = Integer.parseInt(filteredMsg[3]); counter >= 1; counter-- ) {
+                            for (int counter = Integer.parseInt(filteredMsg[3]); counter >= 1; counter--) {
+                                Log.d(TAG, "passed counter");
                                 mPGV.moveForward();
+                                Log.d(TAG, "Moved forward");
                                 tv_mystringcmd.setText(R.string.fwd);
-                                tv_mystatus.setText(R.string.moving);}
+                                Log.d(TAG, "Display command");
+                                tv_mystatus.setText(R.string.moving);
+                                Log.d(TAG, "Status is set to moving");
+
+                            }
                             break;
 
 
                         // Action: TURN_LEFT
                         case "1":
-                            for (int counter = Integer.parseInt(filteredMsg[3]); counter >= 1; counter-- ) {
-                                mPGV.rotateLeft();
-                                tv_mystringcmd.setText(R.string.left);
-                                tv_mystatus.setText(R.string.moving);}
+                            mPGV.rotateLeft();
+                            tv_mystringcmd.setText(R.string.left);
+                            tv_mystatus.setText(R.string.moving);
                             break;
 
 
-                        // Action: TURN_RIGHT
+                         // Action: TURN_RIGHT
                         case "2":
-                            for (int counter = Integer.parseInt(filteredMsg[3]); counter >= 1; counter-- ) {
-                                mPGV.rotateRight();
-                                tv_mystringcmd.setText(R.string.right);
-                                tv_mystatus.setText(R.string.moving);
-                            }
+                            mPGV.rotateRight();
+                            tv_mystringcmd.setText(R.string.right);
+                            tv_mystatus.setText(R.string.moving);
                             break;
 
 
-                        // Action: BACKWARDS
+                    // Action: BACKWARDS
                         case "3":
-                            for (int counter = Integer.parseInt(filteredMsg[3]); counter >= 1; counter-- ) {
+                            for (int counter = Integer.parseInt(filteredMsg[3]); counter >= 1; counter--) {
                                 mPGV.moveBackwards();
                                 tv_mystringcmd.setText(R.string.back);
                                 tv_mystatus.setText(R.string.moving);
@@ -362,11 +378,11 @@ public class MainActivity extends AppCompatActivity {
 
                         // Action: ROBOT_POS
                         case "10":
-//                            int row = Integer.parseInt(filteredMsg[3],0,1);
-//                            int col = ;
-//                            int[] robotPos = mPGV.convertRobotPosToEdge(row, col);
-//                            mPGV.setCurPos(robotPos);
-//                            mPGV.invalidate();
+    //                            int row = Integer.parseInt(filteredMsg[3],0,1);
+    //                            int col = ;
+    //                            int[] robotPos = mPGV.convertRobotPosToEdge(row, col);
+    //                            mPGV.setCurPos(robotPos);
+    //                            mPGV.invalidate();
 
 
                             break;
@@ -381,7 +397,13 @@ public class MainActivity extends AppCompatActivity {
                         // Action: MD2
                         case "md2":
                             break;
+
+                        default:
+                            Log.d(TAG, "Switch Case default!");
+                            break;
                     }
+                    mPGV.refreshMap();
+                    Log.d(TAG, "Refresh Map");
                 }
             }
 
@@ -394,10 +416,9 @@ public class MainActivity extends AppCompatActivity {
         builder.setTitle("Select Robot Direction")
                 .setItems(R.array.directions_array, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int i) {
-                        // !!!! MATCH ROBOT DIRECTION ON ARRAY
                         mPGV.setRobotDirection(i);
                         dialog.dismiss();
-                        Log.d(TAG, "Start Point Direction set.");
+                        Log.d(TAG, "Start Point Direction set");
                     }
                 });
         builder.create();
@@ -493,7 +514,6 @@ public class MainActivity extends AppCompatActivity {
                 Log.d("MainActivity:", "Device Disconnected");
                 connectedDevice = null;
                 connectedState = false;
-
 
                 if (currentActivity) {
 
