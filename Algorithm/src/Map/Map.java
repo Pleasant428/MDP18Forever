@@ -149,21 +149,21 @@ public class Map {
 		ArrayList<Cell> neighbours = new ArrayList<Cell>();
 
 		// UP
-		if (checkValidCell(c.getPos().x, c.getPos().y + 1) && checkValidMove(c.getPos().x, c.getPos().y + 1)) {
+		if (checkValidMove(c.getPos().y + 1, c.getPos().x)) {
 			neighbours.add(getCell(c.getPos().y + 1, c.getPos().x));
 		}
 		// DOWN
-		if (checkValidCell(c.getPos().x, c.getPos().y - 1) && checkValidMove(c.getPos().x, c.getPos().y - 1)) {
+		if (checkValidMove( c.getPos().y - 1, c.getPos().x)) {
 			neighbours.add(getCell(c.getPos().y - 1, c.getPos().x));
 		}
 
 		// RIGHT
-		if (checkValidCell(c.getPos().x + 1, c.getPos().y) && checkValidMove(c.getPos().x + 1, c.getPos().y)) {
+		if (checkValidMove(c.getPos().y, c.getPos().x + 1)) {
 			neighbours.add(getCell(c.getPos().y, c.getPos().x + 1));
 		}
 
 		// LEFT
-		if (checkValidCell(c.getPos().x - 1, c.getPos().y) && checkValidMove(c.getPos().x - 1, c.getPos().y)) {
+		if (checkValidMove( c.getPos().y, c.getPos().x - 1)) {
 			neighbours.add(getCell(c.getPos().y, c.getPos().x - 1));
 		}
 
@@ -181,7 +181,9 @@ public class Map {
 
 			for (int col = 0; col < MapConstants.MAP_WIDTH; col++) {
 				// Select Color of the Cells
-				if (row <= MapConstants.STARTZONE_ROW + 1 && col <= MapConstants.STARTZONE_COL + 1)
+				if(grid[row][col].isPath())
+					gc.setFill(MapConstants.PH_COLOR);
+				else if (row <= MapConstants.STARTZONE_ROW + 1 && col <= MapConstants.STARTZONE_COL + 1)
 					gc.setFill(MapConstants.SZ_COLOR);
 				else if (row >= MapConstants.GOALZONE_ROW - 1 && col >= MapConstants.GOALZONE_COL - 1)
 					gc.setFill(MapConstants.GZ_COLOR);

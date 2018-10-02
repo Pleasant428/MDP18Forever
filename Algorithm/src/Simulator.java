@@ -225,6 +225,8 @@ public class Simulator extends Application {
 					if( file != null) {
 						MapDescriptor.loadMapFromDisk(map, file.getAbsolutePath());
 					}
+					map.draw(false);
+					robot.draw();
 				}
 				else {
 					fileChooser.setTitle("Choose file to load ExploredMap to");
@@ -232,7 +234,10 @@ public class Simulator extends Application {
 					if( file != null) {
 						MapDescriptor.loadMapFromDisk(exploredMap, file.getAbsolutePath());
 					}
+					exploredMap.draw(true);
+					robot.draw();
 				}
+				
 			}
 		});
 		saveMapBtn.setOnMouseClicked(new EventHandler<MouseEvent>() {
@@ -605,7 +610,10 @@ public class Simulator extends Application {
 
 			case SIM_FAST:
 				System.out.println("SF Here");
-				
+				exploredMap.draw(true);
+				robot.draw();
+				simFastTask = new Thread(new FastTask());
+				simFastTask.start();
 				break;
 
 			case SIM_EXP:
@@ -613,7 +621,8 @@ public class Simulator extends Application {
 				robot.sense(exploredMap, map);
 				exploredMap.draw(true);
 				robot.draw();
-				new Thread(new ExplorationTask()).start();
+				simExpTask = new Thread(new ExplorationTask());
+				simExpTask.start();
 				break;
 
 			}
@@ -647,7 +656,8 @@ public class Simulator extends Application {
 		@Override
 	    protected Integer call() throws Exception {
 			FastestPath fp = new FastestPath(exploredMap, robot);
-			ArrayList<Cell> path = fp.run(new Point(MapConstants.STARTZONE_COL,MapConstants.STARTZONE_COL), new Point(MapConstants.GOALZONE_ROW,MapConstants.GOALZONE_COL), robot.getDirection());
+			ArrayList<Cell> path = fp.run(new Point(robot.getPosition().x,robot.getPosition().y), new Point(MapConstants.GOALZONE_COL,MapConstants.GOALZONE_ROW), robot.getDirection());
+			fp.displayFastestPath(path, true);
 			ArrayList<Command> commands = fp.getPathCommands(path);
 			
 			int steps = (int)(stepsSB.getValue());
@@ -675,10 +685,12 @@ public class Simulator extends Application {
 		public void handle(MouseEvent event) {
 			if (setObstacle) {
 				map.resetMap();
+				map.setAllExplored(true);
 				map.draw(false);
 			}
 			else {
 				exploredMap.resetMap();
+				exploredMap.setAllExplored(false);
 				exploredMap.draw(true);
 			}
 			robot.draw();

@@ -132,7 +132,7 @@ public class FastestPath {
 		//Loop through all the items in toVisit
 		while(!toVisit.isEmpty()) {
 			cur = minCostCell(goal);
-			
+			System.out.println("IN loop");
 			if(prevCell.containsKey(cur))
 				curDir = getCellDirection(prevCell.get(cur).getPos(),cur.getPos());
 			
@@ -143,18 +143,17 @@ public class FastestPath {
 			//Check If Goal Reached
 			if(visited.contains(exploredMap.getCell(goal))) {
 				path = getPath(start,goal);
-				System.out.println(path.toString());
 				return path;
 			}
-			
+			System.out.println("Fast Cur: "+cur.toString());
 			neighbours = exploredMap.getNeighbours(cur);
 			for(int i=0; i<neighbours.size(); i++) {
+				System.out.println(neighbours.get(i).toString());
 				
 				//if cell has been visited skip
 				if(visited.contains(neighbours.get(i)))
 					continue;
 				
-				System.out.println(neighbours.get(i).toString());
 				gCost = costG.get(cur.getPos())+ getCostG(cur.getPos(),neighbours.get(i).getPos(),curDir);
 				
 				//if the cell is not in toVisit
@@ -202,7 +201,8 @@ public class FastestPath {
 		for(int i=0; i<path.size(); i++) {
 			temp = path.get(i);
 			//Set the path cells to display as path on the Sim
-			temp.setPath(display);
+			exploredMap.getCell(temp.getPos()).setPath(display);
+			System.out.println(exploredMap.getCell(temp.getPos()).toString());
 			
 			//Output Path on console
 			if(i != (path.size()-1))
@@ -210,6 +210,7 @@ public class FastestPath {
 			else
 				System.out.print("(" + temp.getPos().y + ", " + temp.getPos().x + ")");
 		}
+		exploredMap.draw(true);
 
 		System.out.println("\n");
 	}
@@ -240,6 +241,7 @@ public class FastestPath {
 			move = Command.FORWARD;
 			tempRobot.move(move, RobotConstants.MOVE_STEPS, exploredMap);
 			moves.add(move);
+			cell = newCell;
 		}
 		
 		System.out.println(moves.toString());
@@ -253,9 +255,9 @@ public class FastestPath {
 		switch(botDir) {
 		case UP:
 			if(cellDir == Direction.LEFT)
-				move = Command.TURN_RIGHT;
-			else
 				move = Command.TURN_LEFT;
+			else
+				move = Command.TURN_RIGHT;
 			break;
 			
 		case LEFT:

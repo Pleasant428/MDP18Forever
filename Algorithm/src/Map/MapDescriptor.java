@@ -20,13 +20,18 @@ public class MapDescriptor {
     }
     
     private static String hexToBin(String hexStr) {
-    	String bin = "", tempStr="";
+    	String bin = "", tempStr="", tempBin;
     	int temp;
     	for(int i=0;i<hexStr.length(); i++)
     	{
     		tempStr += hexStr.charAt(i);
     		temp = Integer.parseInt(tempStr,16);
-    		bin += Integer.toBinaryString(temp);
+    		tempBin = Integer.toBinaryString(temp);
+    		if(tempBin.length()!=4)
+    			while(tempBin.length()!=4)
+    				tempBin = "0"+tempBin;
+    			
+    		bin += tempBin;
     		tempStr ="";
     	}
     	return bin;
@@ -39,20 +44,18 @@ public class MapDescriptor {
 		String temp ="11";// First two bits set to 11
 		for (int row = 0; row < MapConstants.MAP_HEIGHT; row++) {
 			for (int col = 0; col < MapConstants.MAP_WIDTH; col++) {
-				
-				if(temp.length()<4)
-					temp += map.getCell(row, col).isExplored() ? "1" : "0";
-				else {
+				temp += map.getCell(row, col).isExplored() ? "1" : "0";
+				if(temp.length()==4){
 					mapString += binToHex(temp);
 					temp = "";
 				}
 			}
 		}
 		temp+= "11";
-
+		mapString += binToHex(temp);
 		// Last two bits set to 11
 		// return mapString;
-		return mapString + binToHex(temp);
+		return mapString;
 	}
     
     //Obstacle MDF String
@@ -65,16 +68,14 @@ public class MapDescriptor {
 			for (int col = 0; col < MapConstants.MAP_WIDTH; col++) {
 				if (map.getCell(row, col).isExplored()) {
 					binStr += map.getCell(row, col).isObstacle() ? "1" : "0";
-					if(temp.length()<4)
-						temp += map.getCell(row, col).isObstacle() ? "1" : "0";
-					else {
+					temp += map.getCell(row, col).isObstacle() ? "1" : "0";
+					if(temp.length()==4){
 						mapString += binToHex(temp);
 						temp = "";
 					}
 				}
 			}
 		}
-		System.out.println("Obstacle Bin Length: "+binStr.length());
 		
 		// Pad with '0' to make the length a multiple of 8
 		int tempLength = temp.length();
@@ -89,8 +90,6 @@ public class MapDescriptor {
 			}
 			mapString += binToHex(temp);
 		}
-		System.out.println(mapString);
-		System.out.println("Obstacle Hex Length: "+mapString.length());
 		return mapString;
 	}
 	
@@ -112,20 +111,23 @@ public class MapDescriptor {
 				for(int col=0; col< MapConstants.MAP_WIDTH; col++) {
 					if(binStr.charAt(strIndex)=='1')
 						map.getCell(row, col).setExplored(true);
+					strIndex++;
 				}
 			}
 			
 			//Part 2 Obstacles in the explored Area
 			binStr = hexToBin(hexStr2);
-			System.out.println(binStr.length());
 			strIndex = 0;
 			for(int row=0; row < MapConstants.MAP_HEIGHT; row++) {
 				for(int col=0; col< MapConstants.MAP_WIDTH; col++) {
 					if(map.getCell(row, col).isExplored()) {
-						System.out.println(strIndex);
-						System.out.println(binStr.charAt(strIndex));
 						if(binStr.charAt(strIndex)=='1') {
 							map.getCell(row, col).setObstacle(true);
+							// Set the virtual wall around the obstacle
+							for (int r = row - 1; r <= row + 1; r++)
+								for (int c = col - 1; c <= col + 1; c++)
+									if (map.checkValidCell(r, c))
+										map.getCell(r, c).setVirtualWall(true);
 						}
 						strIndex++;
 					}
