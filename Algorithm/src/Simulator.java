@@ -159,7 +159,7 @@ public class Simulator extends Application {
 		coverageLimitSB = new ScrollBar();
 		stepsSB = new ScrollBar();
 		stepsSB.setMin(1);
-		stepsSB.setMax(10);
+		stepsSB.setMax(100);
 		timeLimitSB.setMin(10);
 		timeLimitSB.setMax(240);
 		coverageLimitSB.setMin(10);
@@ -693,6 +693,7 @@ public class Simulator extends Application {
 				exploredMap.setAllExplored(false);
 				exploredMap.draw(true);
 			}
+			robot.setStartPos(robot.getPosition().x, robot.getPosition().y, exploredMap);
 			robot.draw();
 		}
 	};

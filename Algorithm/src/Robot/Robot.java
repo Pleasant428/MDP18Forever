@@ -53,9 +53,9 @@ public class Robot {
 		// Initializing the Sensors
 		/* ID information for sensors:
 		 * 
-		 * SF1/SL1 SF2 	SF3
-		 *  X 		X	LR1
-		 * SL2		X	 X
+		 * SF1/SL1 SF2 	SF3/SR1
+		 *  X 		X	 X
+		 * 	X		X	SR2
 		 * 
 		 * 1st Letter:
 		 * S: Short Range Sensor L:Long Range Sensor
