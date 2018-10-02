@@ -24,6 +24,7 @@ public class PixelGridView extends View{
     private int frontStartPos, backStartPos, leftStartPos, rightStartPos;
     private int frontCurPos, backCurPos, leftCurPos, rightCurPos;
     private int robotDirection;
+    private int[] startCoord;
     private ArrayList<int[]> wayPoints = new ArrayList<int[]>();
     private boolean selectStartPosition = false, selectWayPoint = false;
     private Paint blackPaint = new Paint();
@@ -34,7 +35,8 @@ public class PixelGridView extends View{
     private Paint grayPaint = new Paint();
     private Paint whitePaint = new Paint();
     private Paint bluePaint = new Paint();
-    private boolean[][] cellChecked;
+    private Paint lightGrayPaint = new Paint();
+    private boolean[][] cellExplored;
 
     public PixelGridView(Context context) {
         this(context, null);
@@ -50,6 +52,7 @@ public class PixelGridView extends View{
         greenPaint.setColor(Color.GREEN);
         bluePaint.setColor(Color.BLUE);
         cyanPaint.setColor(Color.CYAN);
+        lightGrayPaint.setColor(Color.LTGRAY);
 
     }
 
@@ -89,7 +92,17 @@ public class PixelGridView extends View{
         this.rightCurPos = rightStartPos;
     }
 
+    public void setStartCoord(int row, int column){
+        this.startCoord[0] = column;
+        this.startCoord[1] = row;
+    }
+
+    public int[] getStartCoord(){
+        return this.startCoord;
+    }
+
     public void setStartPos(int row, int column){
+        this.setStartCoord(row, column);
         int[] startEdges = convertRobotPosToEdge(row, column);
         this.setStartPos(startEdges[0], startEdges[1], startEdges[2], startEdges[3]);
     }
@@ -155,7 +168,7 @@ public class PixelGridView extends View{
         cellWidth = getWidth() / getNumColumns();
         cellHeight = cellWidth;
 
-        cellChecked = new boolean[getNumColumns()][getNumRows()];
+        cellExplored = new boolean[getNumColumns()][getNumRows()];
 
         invalidate();
     }
@@ -173,9 +186,12 @@ public class PixelGridView extends View{
 
         for (int i = 0; i < numColumns; i++) {
             for (int j = 0; j < numRows; j++) {
-                canvas.drawRect(i * cellWidth, j * cellHeight,
-                        (i + 1) * cellWidth, (j + 1) * cellHeight,
-                        grayPaint);
+                if(!cellExplored[i][j]){
+                    canvas.drawRect(i * cellWidth, j * cellHeight,
+                            (i + 1) * cellWidth, (j + 1) * cellHeight,
+                            grayPaint);
+                }
+
             }
         }
 
@@ -530,6 +546,11 @@ public class PixelGridView extends View{
     // Refresh map
     public void refreshMap(){
         invalidate();
+    }
+
+    // Check whether the tile has been explored or not
+    public void exploredTile(){
+
     }
 
 }
