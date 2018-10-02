@@ -14,11 +14,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
-import android.provider.SyncStateContract;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.NavUtils;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
@@ -26,11 +22,13 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.WindowManager;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ListAdapter;
 import android.widget.ListView;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -49,7 +47,7 @@ public class BluetoothConnect extends AppCompatActivity{
     public DeviceListAdapter myDeviceListAdapter;
     public DeviceListAdapter myPairedDeviceListAdapter;
 
-    BluetoothConnectionService myBluetoothConnection;
+//    BluetoothConnectionService myBluetoothConnection;
 
     //Bounded Device
     static BluetoothDevice myBTDevice;
@@ -57,7 +55,7 @@ public class BluetoothConnect extends AppCompatActivity{
 
     BluetoothAdapter myBluetoothAdapter;
 
-    //VIEWS ANN BUTTONS
+    //VIEWS AND BUTTONS
     ListView lvNewDevices;
     ListView lvPairedDevices;
     Button btnSend;
@@ -95,7 +93,6 @@ public class BluetoothConnect extends AppCompatActivity{
         pairedDeviceText = findViewById(R.id.pairedDeviceText);
         incomingMsg = new StringBuilder();
         myBTDevice = null;
-
 
         //REGISTER BROADCAST RECEIVER FOR IMCOMING MSG
         LocalBroadcastManager.getInstance(this).registerReceiver(btConnectionReceiver, new IntentFilter("btConnectionStatus"));
@@ -260,6 +257,7 @@ public class BluetoothConnect extends AppCompatActivity{
         }
         return super.onOptionsItemSelected(item);
     }
+
 
     @Override
     public void onBackPressed() {
