@@ -88,7 +88,7 @@ public class MainActivity extends AppCompatActivity {
                     BluetoothChat.writeMsg(bytes);
                     Log.d(TAG, "Android Controller: Move Forward sent");
                     tv_mystringcmd.setText(R.string.navFwd);
-                    mPGV.moveForward();
+                                        mPGV.moveForward();
                 }
             }
         });

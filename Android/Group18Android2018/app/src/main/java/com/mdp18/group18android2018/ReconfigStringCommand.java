@@ -98,10 +98,10 @@ public class ReconfigStringCommand extends AppCompatActivity{
         String str_f2 = myPrefs.getString(F2, "");
         et_f2.setText(str_f2);
         if (myPrefs.contains(F1)){
-            btn_f1.setText(myPrefs.getString(F1,"String Not Found"));
+            et_f1.setText(myPrefs.getString(F1,"String Not Found"));
         }
         if (myPrefs.contains(F2)){
-            btn_f2.setText(myPrefs.getString(F2,"String Not Found"));
+            et_f2.setText(myPrefs.getString(F2,"String Not Found"));
         }
     }
 

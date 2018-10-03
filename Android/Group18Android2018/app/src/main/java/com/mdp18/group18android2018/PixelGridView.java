@@ -167,11 +167,11 @@ public class PixelGridView extends View{
         return this.wayPoints;
     }
 
-//    @Override
-//    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
-//        super.onSizeChanged(w, h, oldw, oldh);
-//        calculateDimensions();
-//    }
+    @Override
+    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+        super.onSizeChanged(w, h, oldw, oldh);
+        calculateDimensions();
+    }
 
     private void calculateDimensions() {
         if (numColumns < 1 || numRows < 1) {
@@ -325,9 +325,7 @@ public class PixelGridView extends View{
     }
 
     public void robotPosMapping(Canvas canvas, int[] pos, int robotDirection){
-        boolean reachedWall = this.checkReachedWall(pos, robotDirection);
-//        boolean reachedWall = false;
-        if(!reachedWall){
+
             for (int i = Math.min(pos[1],pos[3]); i <= Math.max(pos[1],pos[3]); i++){
                 for (int j = Math.min(pos[0],pos[2]); j <= Math.max(pos[0],pos[2]); j++){
                     canvas.drawRect(i * cellWidth, j * cellHeight,
@@ -366,13 +364,11 @@ public class PixelGridView extends View{
                         (pos[3] + 1) * cellWidth, (pos[2]) * cellHeight,
                         bluePaint);
             }
-        }
-
     }
 
     private boolean checkReachedWall(int[] pos, int direction) {
         int[] boundaries = new int[4];
-        boundaries[0] = -1;
+        boundaries[0] = 0;
         boundaries[1] = 0;
         boundaries[2] = 19;
         boundaries[3] = 14;
@@ -420,7 +416,7 @@ public class PixelGridView extends View{
             int[] curCoord = this.getCurCoord();
 
 
-            this.exploredTile(prevCoord, curCoord);
+//            this.exploredTile(prevCoord, curCoord);
 
             this.setCurPos(pos);
 
