@@ -204,7 +204,7 @@ public class MainActivity extends AppCompatActivity {
                     // Send both coordinates to Algo as one string
                     int convertDirection = mPGV.getRobotDirection();
                     int convertedDirection = mPGV.convertRobotDirectionForAlgo(convertDirection);
-                    String sendAlgoCoord = "And|Alg|".concat(Integer.toString(mPGV.getStartCoord()[0])).concat(",").concat(Integer.toString(mPGV.getStartCoord()[1])).concat(",").concat(Integer.toString(convertedDirection)).concat(Integer.toString(mPGV.getWayPoints().get(0)[1])).concat(",").concat(Integer.toString(mPGV.getWayPoints().get(0)[0]));
+                    String sendAlgoCoord = "And|Alg|".concat(Integer.toString(mPGV.getStartCoord()[0])).concat(",").concat(Integer.toString(mPGV.getStartCoord()[1])).concat(",").concat(Integer.toString(convertedDirection)).concat(",").concat(Integer.toString(mPGV.getWayPoints().get(0)[1])).concat(",").concat(Integer.toString(mPGV.getWayPoints().get(0)[0]));
                     byte[] bytes = sendAlgoCoord.getBytes(Charset.defaultCharset());
                     BluetoothChat.writeMsg(bytes);
                     Log.d(TAG, "Sent Start and Waypoint Coordinates to Algo");
@@ -308,8 +308,6 @@ public class MainActivity extends AppCompatActivity {
 
                 // Check if string is for android
                 if (incomingMsg.substring(4, 7).equals("And")) {
-
-                    //String[] filteredMsg = msgDelimiter(incomingMsg.replaceAll(" ", "").replaceAll(",", "\\|").replaceAll("\\{", "").replaceAll("\\}", "").replaceAll("\\:", "\\|").replaceAll("\"", "").trim(), "\\|");
 
                     String[] filteredMsg = msgDelimiter(incomingMsg.replaceAll("\\,", "\\|").trim(), "\\|");
 

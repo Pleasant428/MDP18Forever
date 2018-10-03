@@ -146,7 +146,7 @@ public class PixelGridView extends View {
     }
 
     public void setCurPos(int row, int column) {
-        int[] edges = convertTileToEdge(row, column);
+        int[] edges = convertRobotPosToEdge(row, column);
         this.frontCurPos = edges[0];
         this.leftCurPos = edges[1];
         this.backCurPos = edges[2];
@@ -574,8 +574,8 @@ public class PixelGridView extends View {
         public int[] convertTileToEdge ( int row, int column){
             int rowFormatConvert = inverseRowCoord(row);
             int topEdge, leftEdge, bottomEdge, rightEdge;
-            topEdge = rowFormatConvert - 1;
-            leftEdge = column - 1;
+            topEdge = rowFormatConvert;
+            leftEdge = column;
             bottomEdge = rowFormatConvert + 1;
             rightEdge = column + 1;
             int[] edges = new int[4];
