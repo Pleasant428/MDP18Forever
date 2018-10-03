@@ -104,8 +104,8 @@ public class PixelGridView extends View{
         return this.startCoord;
     }
 
-    public int[] getCurCoord() {
 
+    public int[] getCurCoord(){
         return this.curCoord;
     }
 
@@ -167,11 +167,11 @@ public class PixelGridView extends View{
         return this.wayPoints;
     }
 
-    @Override
-    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
-        super.onSizeChanged(w, h, oldw, oldh);
-        calculateDimensions();
-    }
+//    @Override
+//    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+//        super.onSizeChanged(w, h, oldw, oldh);
+//        calculateDimensions();
+//    }
 
     private void calculateDimensions() {
         if (numColumns < 1 || numRows < 1) {
@@ -199,11 +199,11 @@ public class PixelGridView extends View{
 
         for (int i = 0; i < numColumns; i++) {
             for (int j = 0; j < numRows; j++) {
-                if(!cellExplored[i][j]){
+//                if(!cellExplored[i][j]){
                     canvas.drawRect(i * cellWidth, j * cellHeight,
                             (i + 1) * cellWidth, (j + 1) * cellHeight,
                             grayPaint);
-                }
+//                }
 
             }
         }
@@ -238,7 +238,8 @@ public class PixelGridView extends View{
             if(selectStartPosition){
                 if(!checkStartPoint(row, column)){
                     selectStartPosition = false;
-                    return false;
+                    invalidate();
+                    return true;
                 }
                 this.setStartPos(inverseRowCoord(row), column);
                 selectStartPosition = false;
@@ -322,8 +323,6 @@ public class PixelGridView extends View{
             }
         }
     }
-
-
 
     public void robotPosMapping(Canvas canvas, int[] pos, int robotDirection){
         boolean reachedWall = this.checkReachedWall(pos, robotDirection);
@@ -420,7 +419,8 @@ public class PixelGridView extends View{
 
             int[] curCoord = this.getCurCoord();
 
-//            this.exploredTile(prevCoord, curCoord);
+
+            this.exploredTile(prevCoord, curCoord);
 
             this.setCurPos(pos);
 
@@ -550,18 +550,17 @@ public class PixelGridView extends View{
 
 
     // Check whether the tile has been explored or not
-//    public void exploredTile(int[] prevCoord, int[] curCoord){
-//        if(prevCoord[0] == curCoord[0]){
-//            this.cellExplored[curCoord[0] - 1][curCoord[1]] = true;
-//            this.cellExplored[curCoord[0]][curCoord[1]] = true;
-//            this.cellExplored[curCoord[0] + 1][curCoord[1]] = true;
-//        }
-//
-//        else{
-//            this.cellExplored[curCoord[0]][curCoord[1] - 1] = true;
-//            this.cellExplored[curCoord[0]][curCoord[1]] = true;
-//            this.cellExplored[curCoord[0]][curCoord[1] + 1] = true;
-//        }
-//    }
+    public void exploredTile(int[] prevCoord, int[] curCoord){
+        if(prevCoord[0] == curCoord[0]){
+            this.cellExplored[curCoord[0] - 1][curCoord[1]] = true;
+            this.cellExplored[curCoord[0]][curCoord[1]] = true;
+            this.cellExplored[curCoord[0] + 1][curCoord[1]] = true;
+        }
 
+        else{
+            this.cellExplored[curCoord[0]][curCoord[1] - 1] = true;
+            this.cellExplored[curCoord[0]][curCoord[1]] = true;
+            this.cellExplored[curCoord[0]][curCoord[1] + 1] = true;
+        }
+    }
 }
