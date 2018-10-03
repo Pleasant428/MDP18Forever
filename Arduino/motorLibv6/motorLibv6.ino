@@ -1,4 +1,5 @@
 #include <MsTimer2.h>
+#include <Math.h>
 #include <RunningMedian.h>
 #include <SharpIR.h>
 #include <EnableInterrupt.h>
@@ -8,24 +9,17 @@
 const int NUM_SAMPLES_MEDIAN = 7;
 const int LEFT_PULSE = 3; // LEFT M1 Pulse
 const int RIGHT_PULSE = 11; // RIGHT M2 Pulse
-const int MAX_SPEED = 250;
-const int TURN_MAX_SPEED = 200;
-const int START_SPEED = 250;
-const int SPEED_STEP = 10;
-const int SPEED_STEP_TICKS = 30;
-const int TURN_TICKS = 745;
+const int FORWARD_MAX_SPEED = 250;
+const int TURN_MAX_SPEED = 150;
+const int ROTATE_MAX_SPEED = 100;
+const int TURN_TICKS = 761;
 const int TENCM_TICKS = 560;
 const int MAX_SMALL_SENSOR = 80;
 const int MAX_BIG_SENSOR = 150;
-const int DIST_WALL_CENTER_BOX = 13;
-//const double kp = 2.6, ki = 1.6, kd = 0;
-//const double kp = 2.95, ki = 1.3, kd = 0.0005;
+const int DIST_WALL_CENTER_BOX = 15;
+
 //const double kp = 2.95, ki = 1.3, kd = 0.00006; // OPTIMAL
 const double kp = 6.73, ki = 1.2, kd = 0.00004; // OPTIMAL
-//const double kp = 1.95, ki = 1.3, kd = 0.0001;
-//const double kp = 10, ki = 0.1, kd = 0.025;
-//const double kp = 2.85, ki = 1.9, kd = 0;
-//const double kp = 10, ki = 0.1, kd = 0.025;
 
 DualVNH5019MotorShield md;
 long tick_R = 0;
@@ -62,12 +56,27 @@ void setup() {
   //  alignFront();
   //  turnLeft();
   //  alignRight();
-  alignRight();
-  moveForwardTillWall();
-  alignFront();
-  turnLeft();
-  alignRight();
-  moveForwardTillWall();
+  //  alignRight();
+  //    moveForwardTillWall();
+  //  alignFront();
+  moveForward(2000);
+//  turnLeft(45);
+//  moveForward(10);
+//  turnRight(45);
+//  moveForward(20);
+  //  turnLeft();
+  //  turnLeft();
+  //  turnLeft();
+  //  turnLeft();
+  //  turnLeft();
+  //  turnLeft();
+  //  turnLeft();
+  //  turnRight();
+  //  turnRight();
+  //  turnRight();
+  //  turnRight();
+  //  alignRight();
+  //  moveForwardTillWall();
   //  turnLeft();
   //  turnLeft();
   //  alignRight();
@@ -115,10 +124,10 @@ void loop() {
   //  Serial.print(", ");
   //  Serial.print("S: ");
   //  Serial.print(frontIR3_Value);
-  Serial.print(" R: ");
-  Serial.print(tick_R);
-  Serial.print(" L: ");
-  Serial.println(tick_L);
+  //  Serial.print(" R: ");
+  //  Serial.print(tick_R);
+  //  Serial.print(" L: ");
+  //  Serial.println(tick_L);
 
 
 }
@@ -148,25 +157,13 @@ void setupMotorEncoder() {
 void moveForward(long distance) {
   initializeTick();
   initializeMotor_Start();
-  double currentSpeed = START_SPEED;
+  double currentSpeed = FORWARD_MAX_SPEED;
   double offset = 0;
   long last_R = 0;
-  while (tick_R < distance || tick_L < distance) {
-    //    if (tick_R < (long)(0.5 * distance) || currentSpeed == START_SPEED || last_R == 0) {
-    //      if (((tick_R - last_R) > SPEED_STEP_TICKS && currentSpeed < MAX_SPEED) || currentSpeed == START_SPEED || last_R == 0) {
-    //        last_R = tick_R;
-    //        currentSpeed = currentSpeed + SPEED_STEP;
-    //      }
-    //    }
-    //    if (tick_R > (long)(0.85 * distance)) {
-    //      if ((tick_R - last_R) > SPEED_STEP_TICKS) {
-    //        last_R = tick_R;
-    //        currentSpeed = currentSpeed - SPEED_STEP;
-    //      }
-    //    }
+  long distance_cm = ceil(distance * ceil(TENCM_TICKS/10.0));
+  while (tick_R < distance_cm || tick_L < distance_cm) {
     offset = computePID();
     md.setSpeeds(currentSpeed, currentSpeed - offset);
-    //    md.setSpeeds(currentSpeed + offset, currentSpeed - offset);
     Serial.print("S: ");
     Serial.print(currentSpeed);
     Serial.print(" R: ");
@@ -183,24 +180,11 @@ void moveForward(long distance) {
 void moveBackwards(long distance) {
   initializeTick();
   initializeMotor_Start();
-  double currentSpeed = START_SPEED;
+  double currentSpeed = FORWARD_MAX_SPEED;
   double offset = 0;
   long last_R = 0;
   while (tick_R < distance || tick_L < distance) {
-    //    if (tick_R < (long)(0.5 * distance) || currentSpeed == START_SPEED || last_R == 0) {
-    //      if (((tick_R - last_R) > SPEED_STEP_TICKS && currentSpeed < MAX_SPEED) || currentSpeed == START_SPEED || last_R == 0) {
-    //        last_R = tick_R;
-    //        currentSpeed = currentSpeed + SPEED_STEP;
-    //      }
-    //    }
-    //    if (tick_R > (long)(0.85 * distance)) {
-    //      if ((tick_R - last_R) > SPEED_STEP_TICKS) {
-    //        last_R = tick_R;
-    //        currentSpeed = currentSpeed - SPEED_STEP;
-    //      }
-    //    }
     offset = computePID();
-    //    md.setSpeeds(-(currentSpeed + offset), -(currentSpeed - offset));
     md.setSpeeds(-currentSpeed, -(currentSpeed - offset));
     Serial.print("S: ");
     Serial.print(currentSpeed);
@@ -218,21 +202,14 @@ void moveBackwards(long distance) {
 void moveForwardTillWall() {
   initializeTick();
   initializeMotor_Start();
-  double currentSpeed = START_SPEED;
+  double currentSpeed = FORWARD_MAX_SPEED;
   double offset = 0;
   long last_R = 0;
   while (1) {
     if (frontIR1_Value <= DIST_WALL_CENTER_BOX || frontIR2_Value <= DIST_WALL_CENTER_BOX  || frontIR3_Value <= DIST_WALL_CENTER_BOX ) {
       break;
     }
-    //    if (tick_R < (long)(0.5 * 800) || currentSpeed == START_SPEED || last_R == 0) {
-    //      if (((tick_R - last_R) > SPEED_STEP_TICKS && currentSpeed < MAX_SPEED) || currentSpeed == START_SPEED || last_R == 0) {
-    //        last_R = tick_R;
-    //        currentSpeed = currentSpeed + SPEED_STEP;
-    //      }
-    //    }
     offset = computePID();
-    //    md.setSpeeds(currentSpeed + offset, currentSpeed - offset);
     md.setSpeeds(currentSpeed, currentSpeed - offset);
     Serial.print("S: ");
     Serial.print(currentSpeed);
@@ -242,7 +219,6 @@ void moveForwardTillWall() {
     Serial.print(tick_L);
     Serial.print(" O: ");
     Serial.println(offset);
-    //    Serial.println(micros());
   }
   md.setSpeeds(0, 0);
   initializeMotor_End();
@@ -251,25 +227,34 @@ void moveForwardTillWall() {
 void turnLeft() {
   initializeTick();
   initializeMotor_Start();
-  double currentSpeed = START_SPEED;
+  double currentSpeed = TURN_MAX_SPEED;
   double offset = 0;
   long last_R = 0;
   while (tick_R < TURN_TICKS || tick_L < TURN_TICKS) {
-    //    if (tick_R < (long)(0.5 * TURN_TICKS) || currentSpeed == START_SPEED || last_R == 0) {
-    //      if (((tick_R - last_R) > SPEED_STEP_TICKS && currentSpeed < TURN_MAX_SPEED) || currentSpeed == START_SPEED || last_R == 0) {
-    //        last_R = tick_R;
-    //        currentSpeed = currentSpeed + SPEED_STEP;
-    //      }
-    //    }
-    //    if (tick_R > (long)(0.85 * TURN_TICKS)) {
-    //      if ((tick_R - last_R) > SPEED_STEP_TICKS) {
-    //        last_R = tick_R;
-    //        currentSpeed = currentSpeed - SPEED_STEP;
-    //      }
-    //    }
     offset = computePID();
     md.setSpeeds(-currentSpeed, currentSpeed - offset);
-    //    md.setSpeeds(-(currentSpeed + offset), currentSpeed - offset);
+    Serial.print("S: ");
+    Serial.print(currentSpeed);
+    Serial.print(" R: ");
+    Serial.print(tick_R);
+    Serial.print(" L: ");
+    Serial.print(tick_L);
+    Serial.print(" O: ");
+    Serial.println(offset);
+  }
+  initializeMotor_End();
+}
+
+void turnLeft(int degree) {
+  initializeTick();
+  initializeMotor_Start();
+  double currentSpeed = TURN_MAX_SPEED;
+  double offset = 0;
+  long last_R = 0;
+  int turn_degree = ceil(ceil(TURN_TICKS / 90.0) * (degree * 0.978));
+  while (tick_R < turn_degree || tick_L < turn_degree) {
+    offset = computePID();
+    md.setSpeeds(-currentSpeed, currentSpeed - offset);
     Serial.print("S: ");
     Serial.print(currentSpeed);
     Serial.print(" R: ");
@@ -285,25 +270,34 @@ void turnLeft() {
 void turnRight() {
   initializeTick();
   initializeMotor_Start();
-  double currentSpeed = START_SPEED;
+  double currentSpeed = TURN_MAX_SPEED;
   double offset = 0;
   long last_R = 0;
   while (tick_R < TURN_TICKS || tick_L < TURN_TICKS) {
-    //    if (tick_R < (long)(0.5 * TURN_TICKS) || currentSpeed == START_SPEED || last_R == 0) {
-    //      if (((tick_R - last_R) > SPEED_STEP_TICKS && currentSpeed < TURN_MAX_SPEED) || currentSpeed == START_SPEED || last_R == 0) {
-    //        last_R = tick_R;
-    //        currentSpeed = currentSpeed + SPEED_STEP;
-    //      }
-    //    }
-    //    if (tick_R > (long)(0.85 * TURN_TICKS)) {
-    //      if ((tick_R - last_R) > SPEED_STEP_TICKS) {
-    //        last_R = tick_R;
-    //        currentSpeed = currentSpeed - SPEED_STEP;
-    //      }
-    //    }
     offset = computePID();
     md.setSpeeds(currentSpeed, -(currentSpeed - offset));
-    //    md.setSpeeds(currentSpeed + offset, -(currentSpeed - offset));
+    Serial.print("S: ");
+    Serial.print(currentSpeed);
+    Serial.print(" R: ");
+    Serial.print(tick_R);
+    Serial.print(" L: ");
+    Serial.print(tick_L);
+    Serial.print(" O: ");
+    Serial.println(offset);
+  }
+  initializeMotor_End();
+}
+
+void turnRight(int degree) {
+  initializeTick();
+  initializeMotor_Start();
+  double currentSpeed = TURN_MAX_SPEED;
+  double offset = 0;
+  long last_R = 0;
+  int turn_degree = ceil(ceil(TURN_TICKS / 90.0) * (degree * 0.978));
+  while (tick_R < turn_degree || tick_L < turn_degree) {
+    offset = computePID();
+    md.setSpeeds(currentSpeed, -(currentSpeed - offset));
     Serial.print("S: ");
     Serial.print(currentSpeed);
     Serial.print(" R: ");
@@ -319,28 +313,12 @@ void turnRight() {
 void rotateLeft(long distance) {
   initializeTick();
   initializeMotor_Start();
-  double currentSpeed = START_SPEED;
+  double currentSpeed = ROTATE_MAX_SPEED;
   double offset = 0;
   long last_R = 0;
   while (tick_R < distance || tick_L < distance) {
-    if (last_R == 0) {
-      currentSpeed = currentSpeed + SPEED_STEP;
-    }
-    //    if (tick_R < (long)(0.5 * TURN_TICKS) || currentSpeed == START_SPEED) {
-    //      if (((tick_R - last_R) > SPEED_STEP_TICKS && currentSpeed < TURN_MAX_SPEED) || currentSpeed == START_SPEED) {
-    //        last_R = tick_R;
-    //        currentSpeed = currentSpeed + SPEED_STEP;
-    //      }
-    //    }
-    //    if (tick_R > (long)(0.85 * distance)) {
-    //      if ((tick_R - last_R) > SPEED_STEP_TICKS) {
-    //        last_R = tick_R;
-    //        currentSpeed = currentSpeed - SPEED_STEP;
-    //      }
-    //    }
     offset = computePID();
     md.setSpeeds(-currentSpeed, currentSpeed - offset);
-    //    md.setSpeeds(-(currentSpeed + offset), currentSpeed - offset);
     Serial.print("S: ");
     Serial.print(currentSpeed);
     Serial.print(" R: ");
@@ -356,28 +334,12 @@ void rotateLeft(long distance) {
 void rotateRight(long distance) {
   initializeTick();
   initializeMotor_Start();
-  double currentSpeed = START_SPEED;
+  double currentSpeed = ROTATE_MAX_SPEED;
   double offset = 0;
   long last_R = 0;
   while (tick_R < distance || tick_L < distance) {
-    if (last_R == 0) {
-      currentSpeed = currentSpeed + SPEED_STEP;
-    }
-    //    if (tick_R < (long)(0.5 * TURN_TICKS) || currentSpeed == START_SPEED) {
-    //      if (((tick_R - last_R) > SPEED_STEP_TICKS && currentSpeed < TURN_MAX_SPEED) || currentSpeed == START_SPEED) {
-    //        last_R = tick_R;
-    //        currentSpeed = currentSpeed + SPEED_STEP;
-    //      }
-    //    }
-    //    if (tick_R > (long)(0.85 * distance)) {
-    //      if ((tick_R - last_R) > SPEED_STEP_TICKS) {
-    //        last_R = tick_R;
-    //        currentSpeed = currentSpeed - SPEED_STEP;
-    //      }
-    //    }
     offset = computePID();
     md.setSpeeds(currentSpeed, -(currentSpeed - offset));
-    //    md.setSpeeds(currentSpeed + offset, -(currentSpeed - offset));
     Serial.print("S: ");
     Serial.print(currentSpeed);
     Serial.print(" R: ");
@@ -398,9 +360,9 @@ void alignRight() {
   Serial.println(diff);
   while (diff != 0) {
     if (diff > 0) {
-      rotateLeft(abs(diff * 6));
+      rotateLeft(abs(diff * 4));
     } else {
-      rotateRight(abs(diff * 6));
+      rotateRight(abs(diff * 4));
     }
     diff = rightIR1_Value - rightIR2_Value;
     Serial.print("D: ");
@@ -419,16 +381,16 @@ void alignFront() {
   Serial.println(diff);
   while (diff != 0) {
     if (diff > 0) {
-      rotateLeft(abs(diff * 6));
+      rotateLeft(abs(diff * 4));
     } else {
-      rotateRight(abs(diff * 6));
+      rotateRight(abs(diff * 4));
     }
     diff = rightIR1_Value - rightIR2_Value;
     Serial.print("D: ");
     Serial.println(diff);
     delay(400);
   }
-  long diff_dis = frontIR1_Value - 11;
+  long diff_dis = frontIR1_Value - DIST_WALL_CENTER_BOX;
   if (diff_dis > 0)
     moveForward((TENCM_TICKS / 10) * diff_dis);
   else
