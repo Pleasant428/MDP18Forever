@@ -441,7 +441,7 @@ public class MainActivity extends AppCompatActivity {
 
                     Log.d(TAG, "Incoming Message from AMD: " + incomingMsg);
 
-                    String[] filteredMsg = msgDelimiter(incomingMsg.replaceAll(" ", "").replaceAll(",", "\\|").replaceAll("\\{", "").replaceAll("\\}", "").replaceAll("\\:", "\\|").replaceAll("\"", "").trim(), "\\|");
+                    String[] filteredMsg = msgDelimiter(incomingMsg.replaceAll(" ", "").replaceAll(",", "\\|").replaceAll("\\{", "").replaceAll("\\}", "").replaceAll("\\:", "\\|").replaceAll("\"", "").replaceAll("\\[", "").replaceAll("\\]", "").trim(), "\\|");
 
 
                     Log.d(TAG, "filteredMsg: " + filteredMsg);
@@ -470,6 +470,8 @@ public class MainActivity extends AppCompatActivity {
                             robotPosDir = 1;
 
                         // For setting robot start position from AMD, use robotPosCol, robotPosRow, robotPosDir
+                        mPGV.setCurPos(robotPosRow, robotPosCol);
+                        mPGV.setRobotDirection(robotPosDir);
                     }
 
                     else if (filteredMsg[0].equals("grid")) {

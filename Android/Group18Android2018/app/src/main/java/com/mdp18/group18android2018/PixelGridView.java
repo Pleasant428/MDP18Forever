@@ -74,6 +74,7 @@ public class PixelGridView extends View {
         }
 
         this.setObstacle(3, 4, true);
+        this.setObstacle(9, 12,true);
     }
 
     public void setObstacle(int i, int j, boolean obstacle) {
