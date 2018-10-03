@@ -36,7 +36,7 @@ public class MainActivity extends AppCompatActivity {
 
     PixelGridView mPGV;
     ImageButton forwardButton, leftRotateButton, rightRotateButton, reverseButton;
-    Button btn_update;
+    Button btn_update, btn_sendToAlgo;
     TextView tv_status, tv_map_exploration, tv_mystatus, tv_mystringcmd;
     ToggleButton tb_setWaypointCoord, tb_setStartCoord, tb_autoManual, tb_fastestpath, tb_exploration;
 
@@ -83,12 +83,13 @@ public class MainActivity extends AppCompatActivity {
                 } else {
 
                     //If already connected to a bluetooth device
-                    String navigate = "And|Ard|0";
+                    String navigate = "And|Ard|0|1";
                     byte[] bytes = navigate.getBytes(Charset.defaultCharset());
                     BluetoothChat.writeMsg(bytes);
                     Log.d(TAG, "Android Controller: Move Forward sent");
+                    tv_mystatus.setText("Moving");
                     tv_mystringcmd.setText(R.string.navFwd);
-                                        mPGV.moveForward();
+                    mPGV.moveForward();
                 }
             }
         });
@@ -104,10 +105,11 @@ public class MainActivity extends AppCompatActivity {
                 } else {
 
                     //If already connected to a bluetooth device
-                    String navigate = "And|Ard|1";
+                    String navigate = "And|Ard|1|";
                     byte[] bytes = navigate.getBytes(Charset.defaultCharset());
                     BluetoothChat.writeMsg(bytes);
                     Log.d(TAG, "Android Controller: Turn Left sent");
+                    tv_mystatus.setText("Moving");
                     tv_mystringcmd.setText(R.string.navLeft);
                     mPGV.rotateLeft();
                 }
@@ -125,10 +127,11 @@ public class MainActivity extends AppCompatActivity {
                 } else {
 
                     //If already connected to a bluetooth device
-                    String navigate = "And|Ard|2";
+                    String navigate = "And|Ard|2|";
                     byte[] bytes = navigate.getBytes(Charset.defaultCharset());
                     BluetoothChat.writeMsg(bytes);
                     Log.d(TAG, "Android Controller: Turn Right sent");
+                    tv_mystatus.setText("Moving");
                     tv_mystringcmd.setText(R.string.navRight);
                     mPGV.rotateRight();
                 }
@@ -145,10 +148,11 @@ public class MainActivity extends AppCompatActivity {
                 } else {
 
                     //If already connected to a bluetooth device
-                    String navigate = "And|Ard|3";
+                    String navigate = "And|Ard|3|1";
                     byte[] bytes = navigate.getBytes(Charset.defaultCharset());
                     BluetoothChat.writeMsg(bytes);
                     Log.d(TAG, "Android Controller: Move Backwards sent");
+                    tv_mystatus.setText("Moving");
                     tv_mystringcmd.setText(R.string.navRev);
                     mPGV.moveBackwards();
                 }
@@ -159,6 +163,7 @@ public class MainActivity extends AppCompatActivity {
         tv_map_exploration = (TextView) findViewById(R.id.tv_map_exploration);
 
         tv_mystatus =  (TextView) findViewById(R.id.tv_mystatus);
+        tv_mystatus.setText("Stop");
 
         tv_mystringcmd = (TextView) findViewById(R.id.tv_mystringcmd);
 
@@ -180,6 +185,30 @@ public class MainActivity extends AppCompatActivity {
                     mPGV.selectStartPoint();
                     setStartDirection();
                     tb_setStartCoord.toggle();
+                }
+            }
+        });
+
+
+        // To send start coordinates and waypoint coordinates to Algo
+        btn_sendToAlgo = (Button) findViewById(R.id.btn_sendToAlgo);
+        btn_sendToAlgo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // Check BT connectionIf not connected to any bluetooth device
+                if(connectedDevice == null) {
+                    Toast.makeText(MainActivity.this, "Please connect to bluetooth device first!", Toast.LENGTH_SHORT).show();
+                } else {
+
+                    //If already connected to a bluetooth device
+                    // Send both coordinates to Algo as one string
+                    int convertDirection = mPGV.getRobotDirection();
+                    int convertedDirection = mPGV.convertRobotDirectionForAlgo(convertDirection);
+                    String sendAlgoCoord = "And|Alg|".concat(Integer.toString(mPGV.getStartCoord()[0])).concat(",").concat(Integer.toString(mPGV.getStartCoord()[1])).concat(",").concat(Integer.toString(convertedDirection)).concat(Integer.toString(mPGV.getWayPoints().get(0)[1])).concat(",").concat(Integer.toString(mPGV.getWayPoints().get(0)[0]));
+                    byte[] bytes = sendAlgoCoord.getBytes(Charset.defaultCharset());
+                    BluetoothChat.writeMsg(bytes);
+                    Log.d(TAG, "Sent Start and Waypoint Coordinates to Algo");
+                    Toast.makeText(MainActivity.this, "Start & Waypoint coordinates sent", Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -210,10 +239,12 @@ public class MainActivity extends AppCompatActivity {
                 if (isChecked) {
                     // The toggle is enabled; Start Exploration Mode
                     startExploration();
+                    //tv_mystatus.setText("Moving");
 
                 } else {
                     // The toggle is disabled; Stop Exploration Mode
                     stopExploration();
+                    //tv_mystatus.setText("Stop");
                 }
             }
         });
@@ -224,10 +255,12 @@ public class MainActivity extends AppCompatActivity {
                 if (isChecked) {
                     // The toggle is enabled; Start Fastest Path Mode
                     startFastestPath();
+                    //tv_mystatus.setText("Moving");
 
                 } else {
                     // The toggle is disabled; Stop Fastest Path Mode
                     stopFastestPath();
+                    //tv_mystatus.setText("Stop");
                 }
             }
         });
@@ -276,15 +309,13 @@ public class MainActivity extends AppCompatActivity {
                 // Check if string is for android
                 if (incomingMsg.substring(4, 7).equals("And")) {
 
-                    //String[] filteredMsg = msgDelimiter(incomingMsg.replaceAll("", "").replaceAll("\\n", "").trim(), "\\|");
+                    //String[] filteredMsg = msgDelimiter(incomingMsg.replaceAll(" ", "").replaceAll(",", "\\|").replaceAll("\\{", "").replaceAll("\\}", "").replaceAll("\\:", "\\|").replaceAll("\"", "").trim(), "\\|");
 
-                    String[] filteredMsg = msgDelimiter(incomingMsg, "|");
+                    String[] filteredMsg = msgDelimiter(incomingMsg.replaceAll("\\,", "\\|").trim(), "\\|");
 
                     // Message: Action
                     Log.d(TAG, "Incoming Message filtered: " + filteredMsg[2]);
 
-                    // Data (coordinates)
-                    //String[] mazeInfo = msgDelimiter(filteredMsg[3], ",");
 
                     switch (filteredMsg[2]) {
 
@@ -367,11 +398,10 @@ public class MainActivity extends AppCompatActivity {
 
                         // Action: ROBOT_POS
                         case "10":
-    //                            int row = Integer.parseInt(filteredMsg[3],0,1);
-    //                            int col = ;
-    //                            int[] robotPos = mPGV.convertRobotPosToEdge(row, col);
-    //                            mPGV.setCurPos(robotPos);
-    //                            mPGV.invalidate();
+                               int col = Integer.parseInt(filteredMsg[3]);
+                               int row = Integer.parseInt(filteredMsg[4]);
+
+                               mPGV.setCurPos(row,col);
 
 
                             break;
@@ -379,20 +409,77 @@ public class MainActivity extends AppCompatActivity {
 
                         // Action: MD1
                         case "md1":
+                            String mapDes1 = filteredMsg[3];
+
+                            // use MapDes1 to process MDF String
 
                             break;
 
 
                         // Action: MD2
                         case "md2":
+                            String mapDes2 = filteredMsg[3];
+
+                            // use MapDes2 to process MDF String
+
                             break;
+
+                        case "s":
+                            // Sent by Arduino: robot stop
+                            tv_mystatus.setText("Stop");
+                            tv_mystringcmd.setText("");
 
                         default:
                             Log.d(TAG, "Switch Case default!");
                             break;
                     }
-                    mPGV.refreshMap();
-                    Log.d(TAG, "Refresh Map");
+                }
+
+                // For receiving AMD robotPosition and grid
+                if (incomingMsg.substring(0,1).equals("{")) {
+
+
+                    Log.d(TAG, "Incoming Message from AMD: " + incomingMsg);
+
+                    String[] filteredMsg = msgDelimiter(incomingMsg.replaceAll(" ", "").replaceAll(",", "\\|").replaceAll("\\{", "").replaceAll("\\}", "").replaceAll("\\:", "\\|").replaceAll("\"", "").trim(), "\\|");
+
+
+                    Log.d(TAG, "filteredMsg: " + filteredMsg);
+
+                    if (filteredMsg[0].equals("robotposition")) {
+                        int robotPosCol = Integer.parseInt(filteredMsg[1]) + 1;
+                        int robotPosRow = 19 - (Integer.parseInt(filteredMsg[2]) + 1);
+                        int robotPosDeg = Integer.parseInt(filteredMsg[3]);
+
+                        int robotPosDir = 0;
+
+                        // Up
+                        if (robotPosDeg == 0)
+                            robotPosDir = 0;
+
+                            //Right
+                        else if (robotPosDeg == 90)
+                            robotPosDir = 3;
+
+                            //Down
+                        else if (robotPosDeg == 180)
+                            robotPosDir = 2;
+
+                            // Left
+                        else if (robotPosDeg == 270)
+                            robotPosDir = 1;
+
+                        // For setting robot start position from AMD, use robotPosCol, robotPosRow, robotPosDir
+                    }
+
+                    else if (filteredMsg[0].equals("grid")) {
+                        String mdAMD = filteredMsg[1];
+
+                        Log.d(TAG, "mdAMD: " + mdAMD);
+
+                        // For setting up map from recevied AMD MDF String, use mdAMD
+                        Log.d(TAG, "Processing mdAMD...");
+                    }
                 }
             }
 
@@ -486,6 +573,7 @@ public class MainActivity extends AppCompatActivity {
     private String[] msgDelimiter(String message, String delimiter) {
         return (message.toLowerCase()).split(delimiter);
     }
+
 
     //BROADCAST RECEIVER FOR BLUETOOTH CONNECTION STATUS
     BroadcastReceiver btConnectionReceiver = new BroadcastReceiver() {
