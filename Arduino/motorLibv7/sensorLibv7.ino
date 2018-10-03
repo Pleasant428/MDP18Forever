@@ -4,7 +4,7 @@
 
 const int MAX_SMALL_SENSOR = 80;
 const int MAX_BIG_SENSOR = 150;
-const int NUM_SAMPLES_MEDIAN = 15;
+const int NUM_SAMPLES_MEDIAN = 10;
 
 double frontIR1_Diffs[] = {7.75, 17.70, 29.05, 35.00};
 double frontIR2_Diffs[] = {8.15, 19.25, 32.00, 41.00};
@@ -39,16 +39,16 @@ void setupSensorInterrupt() {
   ADCSRA &= ~(bit (ADPS0) | bit (ADPS1) | bit (ADPS2)); // clear prescaler bits
   //  ADCSRA |= bit (ADPS0) | bit (ADPS2);// 32  prescaler
   ADCSRA |= bit (ADPS2); // 16  prescaler
-  MsTimer2::set(40, readSensors);
+  MsTimer2::set(35, readSensors);
   MsTimer2::start();
 }
 
-//void slowSensorInterrupt() {
-//  MsTimer2::stop();
-//  //  MsTimer2::set(80, readSensors);
-//  //  MsTimer2::start();
-//}
-//
+void stopSensorInterrupt() {
+  MsTimer2::stop();
+  //  MsTimer2::set(80, readSensors);
+  //  MsTimer2::start();
+}
+
 //void restoreSensorInterrupt() {
 //  MsTimer2::stop();
 //  MsTimer2::set(40, readSensors);
@@ -215,3 +215,4 @@ void readLeftSensor_1() {
   }
   leftIR1_Block = 9;
 }
+

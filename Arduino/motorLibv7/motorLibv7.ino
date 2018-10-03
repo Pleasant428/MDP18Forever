@@ -9,11 +9,11 @@ const int MOVE_MAX_SPEED = 265;
 const int MOVE_MIN_SPEED = 210;
 const int TURN_MAX_SPEED = 170;
 const int ROTATE_MAX_SPEED = 110;
-const int TURN_TICKS = 780;
+const int TURN_TICKS = 770;
 const int TENCM_TICKS = 555;
 const double DIST_WALL_CENTER_BOX = 2.65;
 //const double kp = 6.73, ki = 1.25, kd = 0; // OPTIMAL
-const double kp = 7.68, ki = 1.05, kd = 0;
+const double kp = 7.25, ki = 1.05, kd = 0;
 //double kp = 0, ki = 0, kd = 0;
 //const double kp = 15, ki = 0, kd = 0;
 
@@ -26,167 +26,6 @@ double previous_error = 0;
 DualVNH5019MotorShield md;
 PID myPID(&tick_R, &speed_O, &tick_L, kp, ki, kd, REVERSE);
 
-bool debug = false;
-
-void setup() {
-  md.init();
-  setupSerialConnection();
-  setupMotorEncoder();
-  //  setupSensorInterrupt();
-  myPID.SetMode(AUTOMATIC);
-  myPID.SetOutputLimits(-370, 370);
-  myPID.SetSampleTime(10);
-  delay(2000);
-  //    moveForward(150);
-  moveForward(100);
-  //  delay(1000);
-  //  moveBackwards(100);
-  //  turnRight(1080);
-  //  delay(2000);
-  //  turnLeft(1080);
-  //  delay(2000);
-  //  turnLeft();
-  //  delay(2000);
-  //  turnRight();
-  //  turnLeft(1080);
-  //  moveForwardTillWall();
-  //  followRightWallTillWall();
-  //  alignRight();
-  //  turnLeft();
-  //  alignFront();
-  //  //  turnRight();
-  //  alignFront();
-  //  turnRight(360);
-  //  followRightWallTillWall();
-  //  alignFront();
-  //  turnRight(720);
-  //  delay(2000);
-  //  turnLeft(720);
-  //  checkList_A6();
-  //  turnRight(1080);
-  //    moveForward(10);
-  //  moveForwardTillWall();
-  //  checkList_A7();
-  //delay(500);
-
-}
-
-
-
-
-void loop() {
-  
-  char command_buffer[12];
-  int i = 0
-  char newChar;
-  
-   while (1){
-    if (Serial.available()){
-      newChar = Serial.read();
-      command_buffer[i] = newChar;
-      i++;
-      if (newChar == '|'){
-        i = 1;
-        break;
-      }
-    }  
-  }
-  // Alg|Ard|0|{1-10} (Steps)
-  //2nd Character of the Array is the Command
-  char command = command_buffer[2];
-  int numOfSteps = atoi(command_buffer[3]);
-
-  // 0 : FORWARD
-  // 1: TURN_LEFT
-  // 2: TURN_RIGHT
-  // 3: BACKWARD
-  // 4: ALIGN_FRONT
-  // 5: ALIGN_RIGHT
-  // 6: SEND_SENSORS
-
-  switch (command) {
-  case '0':
-    {
-      moveForward(k*10);
-      break;
-    }
-    case '1':
-    {
-      for (int k = 0; k < numOfSteps; k++) {
-        turnLeft();
-      }
-      break;
-    }
-    case '2':
-    {
-      for (int k = 0; k < numOfSteps; k++) {
-        turnRight();
-      }
-      break;
-    }
-    case '3':
-   {
-      moveBackwards(k*10);
-      break;
-   }
-   case '4':
-   {
-      alignFront();
-      break;
-   }
-   case '5':
-   {
-      alignRight();
-      break;
-   }
-   case '6':
-   {
-      Serial.print("Ard|Alg|Sensor|1:");
-      Serial.print(getFrontIR1());
-      Serial.print(":");
-      Serial.print(getFrontIR1_Block());
-      Serial.print(",2:");
-      Serial.print(getFrontIR2());
-      Serial.print(":");
-      Serial.print(getFrontIR2_Block());
-      Serial.print(",3:");
-      Serial.print(getFrontIR3());
-      Serial.print(":");
-      Serial.print(getFrontIR3_Block());
-      Serial.print(",4:");
-      Serial.print(getRightIR1());
-      Serial.print(":");
-      Serial.print(getRightIR1_Block());
-      Serial.print(",5:");
-      Serial.print  (getRightIR2());
-      Serial.print(":");
-      Serial.print(getRightIR2_Block());
-      Serial.print(",6:");
-      Serial.println(getLeftIR1());
-      Serial.print(":");
-      Serial.print(getLeftIR1_Block()); 
-      Serial.println("");
-
-      break;
-   }
-    default:
-   {
-     break;
-   }
-    memset(command_buffer,0,sizeof(command_buffer));
-  }
-}
-  
-
-
-}
-
-
-//--------------------------Serial Codes-------------------------------
-void setupSerialConnection() {
-  Serial.begin(9600);
-}
-
 //--------------------------Motor Codes-------------------------------
 void setupMotorEncoder() {
   md.init();
@@ -194,6 +33,21 @@ void setupMotorEncoder() {
   pinMode(RIGHT_PULSE, INPUT);
   enableInterrupt(LEFT_PULSE, leftMotorTime, CHANGE);
   enableInterrupt(RIGHT_PULSE, rightMotorTime, CHANGE);
+}
+
+void stopMotorEncoder() {
+  disableInterrupt(LEFT_PULSE);
+  disableInterrupt(RIGHT_PULSE);
+}
+
+void setupPID() {
+  myPID.SetMode(AUTOMATIC);
+  myPID.SetOutputLimits(-370, 370);
+  myPID.SetSampleTime(10);
+}
+
+void stopPID() {
+  myPID.SetMode(MANUAL);
 }
 
 void moveForward(long distance) {
@@ -209,7 +63,6 @@ void moveForward(long distance) {
   double offset = 0;
 
   while (tick_R < distance || tick_L < distance) {
-    Serial.println(millis());
     //    offset = computePID();
     if (myPID.Compute())
       md.setSpeeds(currentSpeed, currentSpeed - speed_O);
@@ -281,10 +134,6 @@ void turnLeft(int degree) {
   double offset = 0;
 
   int turn_degree = ceil(ceil(TURN_TICKS / 90.0) * (degree * 0.98));
-  if (debug) {
-    Serial.print("(TL)Ticks: ");
-    Serial.println(turn_degree);
-  }
   while (tick_R < turn_degree || tick_L < turn_degree) {
     //    offset = computePID();
     if (myPID.Compute())
@@ -314,10 +163,6 @@ void turnRight(int degree) {
   double offset = 0;
 
   int turn_degree = ceil(ceil(TURN_TICKS / 90.0) * (degree * 0.98));
-  if (debug) {
-    Serial.print("(TR)Ticks: ");
-    Serial.println(turn_degree);
-  }
   while (tick_R < (turn_degree) || tick_L < (turn_degree)) {
     //    offset = computePID();
     if (myPID.Compute())
@@ -333,12 +178,6 @@ void rotateLeft(long distance) {
   double offset = 0;
 
   while (tick_R < distance || tick_L < distance) {
-    if (debug) {
-      Serial.print("(RL)R: ");
-      Serial.print(tick_R);
-      Serial.print(" L:");
-      Serial.println(tick_L);
-    }
     //    offset = computePID();
     if (myPID.Compute())
       md.setSpeeds(-currentSpeed, currentSpeed - speed_O);
@@ -353,12 +192,6 @@ void rotateRight(long distance) {
   double offset = 0;
 
   while (tick_R < distance || tick_L < distance) {
-    if (debug) {
-      Serial.print("(RR)R: ");
-      Serial.print(tick_R);
-      Serial.print(" L:");
-      Serial.println(tick_L);
-    }
     //    offset = computePID();
     if (myPID.Compute())
       md.setSpeeds(currentSpeed, -(currentSpeed - speed_O));
@@ -370,10 +203,6 @@ void alignRight() {
   delay(1000);
   double diff = getRightIR1() - getRightIR2();
   while (abs(diff) >= 0.5) {
-    if (debug) {
-      Serial.print("(AR)Diff: ");
-      Serial.println(abs(diff));
-    }
     if (diff > 0) {
       rotateLeft(abs(diff * 5));
     } else {
@@ -389,10 +218,6 @@ void alignFront() {
   delay(1000);
   double diff = getFrontIR1() - getFrontIR2();
   while (abs(diff) >= 0.5) {
-    if (debug) {
-      Serial.print("(AF)Diff: ");
-      Serial.println(abs(diff));
-    }
     if (diff > 0) {
       rotateLeft(abs(diff * 5));
     } else {
@@ -409,10 +234,6 @@ void alignFront() {
   delay(250);
   diff = getFrontIR1() - getFrontIR2();
   while (abs(diff) >= 0.5) {
-    if (debug) {
-      Serial.print("(AF)Diff: ");
-      Serial.println(abs(diff * 5));
-    }
     if (diff > 0) {
       rotateLeft(abs(diff * 5));
     } else {
@@ -502,7 +323,7 @@ int moveForwardTillWallA7() {
   double currentSpeed = MOVE_MAX_SPEED;
   double offset = 0;
   while (1) {
-    if (getFrontIR1() <= (DIST_WALL_CENTER_BOX + 6.6) || getFrontIR2() <= (DIST_WALL_CENTER_BOX + 7.3)  || getFrontIR3() <= (DIST_WALL_CENTER_BOX + 6.3) ) {
+    if (getFrontIR1() <= (DIST_WALL_CENTER_BOX + 10.6) || getFrontIR2() <= (DIST_WALL_CENTER_BOX + 11.3)  || getFrontIR3() <= (DIST_WALL_CENTER_BOX + 10.3) ) {
       break;
     }
     //    offset = computePID();
@@ -520,11 +341,14 @@ void checkList_A7() {
   int dist = 150;
   int dist_moved = moveForwardTillWallA7();
   dist = dist - dist_moved;
+  turnRight(45);
+  moveForward(38);
   turnLeft(45);
-  moveForward(38);
-  turnRight(95);
-  moveForward(38);
+  moveForward(10);
+  turnLeft(45);
+  moveForward(28);
   dist = dist - 54;
-  turnLeft(45);
-  moveForward(dist);
+  turnRight(45);
+  moveForward(dist-10);
 }
+
