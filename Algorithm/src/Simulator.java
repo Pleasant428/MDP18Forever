@@ -12,7 +12,7 @@ import Robot.*;
 import Robot.RobotConstants.Command;
 import Robot.RobotConstants.Direction;
 
-//JavaFX Librarys
+//JavaFX Libraries
 import javafx.application.Application;
 import javafx.geometry.*;
 import javafx.event.*;
@@ -89,8 +89,6 @@ public class Simulator extends Application {
 		robot.setStartPos(robot.getPosition().x, robot.getPosition().y, exploredMap);
 		
 		//Threads
-		expTask = new Thread(new ExplorationTask());
-		fastTask = new Thread(new FastTask());
 		netMgrTask = new Thread();
 		
 
@@ -351,8 +349,6 @@ public class Simulator extends Application {
 				}
 				robot.sense(exploredMap, map);
 				System.out.println("Robot Direction AFTER:" + robot.getDirection());
-				exploredMap.draw(true);
-				robot.draw();
 			}
 		});
 
@@ -605,25 +601,31 @@ public class Simulator extends Application {
 			String selectedMode = modeCB.getSelectionModel().getSelectedItem();
 			switch (selectedMode) {
 			case REAL_FAST:
+				sim = false;
 				System.out.println("RF Here");
 				break;
 
 			case REAL_EXP:
+				sim = false;
 				System.out.println("RE Here");
 				break;
 
 			case SIM_FAST:
+				sim = true;
 				System.out.println("SF Here");
 				exploredMap.draw(true);
 				robot.draw();
+				fastTask = new Thread(new FastTask());
 				fastTask.start();
 				break;
 
 			case SIM_EXP:
+				sim = true;
 				System.out.println("SE Here");
 				robot.sense(exploredMap, map);
 				exploredMap.draw(true);
 				robot.draw();
+				expTask = new Thread(new ExplorationTask());
 				expTask.start();
 				break;
 
@@ -647,7 +649,7 @@ public class Simulator extends Application {
 			if(steps == 0)
 				steps = 5;
 			
-			Exploration explore = new Exploration(exploredMap, map, robot,coverageLimit, timeLimit,steps);
+			Exploration explore = new Exploration(exploredMap, map, robot,coverageLimit, timeLimit,steps, sim);
 			explore.exploration(new Point(MapConstants.STARTZONE_COL,MapConstants.STARTZONE_COL));
 			
 	        return 1;
@@ -657,7 +659,7 @@ public class Simulator extends Application {
 	class FastTask extends Task<Integer>{
 		@Override
 	    protected Integer call() throws Exception {
-			FastestPath fp = new FastestPath(exploredMap, robot);
+			FastestPath fp = new FastestPath(exploredMap, robot,sim);
 			ArrayList<Cell> path = fp.run(new Point(robot.getPosition().x,robot.getPosition().y), new Point(MapConstants.GOALZONE_COL,MapConstants.GOALZONE_ROW), robot.getDirection());
 			fp.displayFastestPath(path, true);
 			ArrayList<Command> commands = fp.getPathCommands(path);
@@ -668,17 +670,37 @@ public class Simulator extends Application {
 				steps = 5;
 			
 			for (Command c : commands) {
-				try {
-					TimeUnit.MILLISECONDS.sleep(RobotConstants.MOVE_SPEED/steps);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
+				if(sim) {
+					try {
+						TimeUnit.MILLISECONDS.sleep(RobotConstants.MOVE_SPEED/steps);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+					
+				}
+				else {
+					String msg = "Alg|Ard|"+c.ordinal()+"|"+RobotConstants.MOVE_STEPS;
+					netMgr.send(msg);
+					netMgr.recieve(msg);
+					String [] msgArr = msg.split("|");
+					
+					//Android Orders a Stop Command
+					if(msgArr[0].equalsIgnoreCase("And")) {
+						Command andC = Command.values()[Integer.parseInt(msgArr[2])];
+						if(c == Command.STOP)
+							return -1;
+					}
 				}
 				robot.move(c, RobotConstants.MOVE_STEPS, exploredMap);
-				robot.sense(exploredMap, map);
+				exploredMap.draw(true);
+				robot.draw();
 			}
 			
 			return 1;
 	    }
+		private void sendCommand(Command c) {
+			
+		}
 	}
 	
 	

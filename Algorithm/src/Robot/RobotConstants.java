@@ -12,6 +12,7 @@ public class RobotConstants {
 	public static final int MOVE_COST = 1;
 	public static final int TURN_COST = 5;
 	public static final double INFINITE_COST = 10000000;
+//	public static final int CALIBRATE_AFTER = 3; //Calibrate After number of moves
 	
 	public static final int MOVE_STEPS = 1;
 	public static final int MOVE_SPEED = 1000;	//Delays before movement (Lower = faster) in milliseconds
@@ -50,6 +51,6 @@ public class RobotConstants {
 	
 	
 	public static enum Command{
-		FORWARD, TURN_LEFT, TURN_RIGHT, BACKWARD, CALIBRATE, ERROR, STARTEXP, ENDEXP, STARTFAST, ENDFAST, STOP, ROBOT_POS;
+		FORWARD, TURN_LEFT, TURN_RIGHT, BACKWARD, ALIGN_FRONT, ALIGN_RIGHT, SEND_SENSORS, ERROR, ENDEXP, ENDFAST, STOP, ROBOT_POS;
 	}
 }

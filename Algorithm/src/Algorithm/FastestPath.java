@@ -30,13 +30,14 @@ public class FastestPath {
 	private ArrayList<Cell> toVisit;		//Store cells to be visited
 	private ArrayList<Cell> visited;		//Store visited cells
 	private HashMap<Point, Double> costG;
-	
 	private ArrayList<Cell> path;
+	private boolean sim = true;
 	
 	
-	public FastestPath(Map exploredMap, Robot robot) {
+	public FastestPath(Map exploredMap, Robot robot, boolean sim) {
 		this.exploredMap = exploredMap;
 		this.robot = robot;
+		this.sim = sim;
 		prevCell = new HashMap<Cell, Cell>();
 		
 		costG = new HashMap<Point, Double>();
@@ -132,23 +133,20 @@ public class FastestPath {
 		//Loop through all the items in toVisit
 		while(!toVisit.isEmpty()) {
 			cur = minCostCell(goal);
-			System.out.println("IN loop");
 			if(prevCell.containsKey(cur))
 				curDir = getCellDirection(prevCell.get(cur).getPos(),cur.getPos());
 			
 			visited.add(cur);
 			toVisit.remove(cur);
-			System.out.println(visited.contains(exploredMap.getCell(goal)));
 			
 			//Check If Goal Reached
 			if(visited.contains(exploredMap.getCell(goal))) {
 				path = getPath(start,goal);
 				return path;
 			}
-			System.out.println("Fast Cur: "+cur.toString());
+			
 			neighbours = exploredMap.getNeighbours(cur);
 			for(int i=0; i<neighbours.size(); i++) {
-				System.out.println(neighbours.get(i).toString());
 				
 				//if cell has been visited skip
 				if(visited.contains(neighbours.get(i)))
@@ -175,6 +173,7 @@ public class FastestPath {
 		}
 		
 		// return Null if cannot find a path
+		System.out.println("Returning NULL");
 		return null;
 		
 	}
@@ -225,17 +224,29 @@ public class FastestPath {
 		Cell newCell;
 		Direction cellDir;
 		
+//		int calibrateCount = 0; //Calibrate after 3 moves
+		
 		
 		//Iterate through the path
 		for(int i=0; i< path.size(); i++) {
 			newCell = path.get(i);
 			cellDir = getCellDirection(cell.getPos(),newCell.getPos());
-			System.out.println(cellDir);
+			
+			if(!sim) {
+				if(calibratePoint(cell, tempRobot.getDirection())/*||calibrateCount == RobotConstants.CALIBRATE_AFTER*/)
+				{
+//					calibrateCount = 0;
+					moves.add(Command.ALIGN_RIGHT);
+					moves.add(Command.ALIGN_FRONT);
+				}
+//				else
+//					calibrateCount++;
+			}
+			
 			while(tempRobot.getDirection()!=cellDir) {
 				move = getTurnMovement(tempRobot.getDirection(), cellDir);
 				tempRobot.move(move, RobotConstants.MOVE_STEPS, exploredMap);
 				moves.add(move);
-				System.out.println("robot dir: "+tempRobot.getDirection()+" celldir: "+cellDir);
 			}
 			//Keep Moving Forward in the Path
 			move = Command.FORWARD;
@@ -243,12 +254,51 @@ public class FastestPath {
 			moves.add(move);
 			cell = newCell;
 		}
-		
-		System.out.println(moves.toString());
+		System.out.println("Generated Moves: "+moves.toString());
 		return moves;
 	}
 	
+	//Determine if a cell is a calibration point (all front and right cells are virtual walls) 
+	public boolean calibratePoint(Cell cur, Direction robotDir) {
+		Cell front1 = cur, front2= cur, front3 = cur, right1 = cur, right2 = cur;
+		switch(robotDir) {
+		case UP:
+			front1 = exploredMap.getCell(cur.getPos().y+1, cur.getPos().x-1);
+			front2 = exploredMap.getCell(cur.getPos().y+1, cur.getPos().x);
+			front3 = exploredMap.getCell(cur.getPos().y+1, cur.getPos().x+1);
+			right1 = exploredMap.getCell(cur.getPos().y+1, cur.getPos().x+1);
+			right2 = exploredMap.getCell(cur.getPos().y-1, cur.getPos().x+1);
+			break;
+		case DOWN:
+			front1 = exploredMap.getCell(cur.getPos().y-1, cur.getPos().x-1);
+			front2 = exploredMap.getCell(cur.getPos().y-1, cur.getPos().x);
+			front3 = exploredMap.getCell(cur.getPos().y-1, cur.getPos().x+1);
+			right1 = exploredMap.getCell(cur.getPos().y-1, cur.getPos().x-1);
+			right2 = exploredMap.getCell(cur.getPos().y+1, cur.getPos().x-1);
+			break;
+		case RIGHT:
+			front1 = exploredMap.getCell(cur.getPos().y+1, cur.getPos().x+1);
+			front2 = exploredMap.getCell(cur.getPos().y, cur.getPos().x+1);
+			front3 = exploredMap.getCell(cur.getPos().y-1, cur.getPos().x+1);
+			right1 = exploredMap.getCell(cur.getPos().y-1, cur.getPos().x+1);
+			right2 = exploredMap.getCell(cur.getPos().y-1, cur.getPos().x-1);
+			break;
+		case LEFT:
+			front1 = exploredMap.getCell(cur.getPos().y-1, cur.getPos().x-1);
+			front2 = exploredMap.getCell(cur.getPos().y, cur.getPos().x-1);
+			front3 = exploredMap.getCell(cur.getPos().y+1, cur.getPos().x-1);
+			right1 = exploredMap.getCell(cur.getPos().y-1, cur.getPos().x-1);
+			right2 = exploredMap.getCell(cur.getPos().y+1, cur.getPos().x+1);
+			break;
+		}
+		if(front1.isVirtualWall()&&front2.isVirtualWall()&&front3.isVirtualWall()&&right1.isVirtualWall()&&right2.isVirtualWall())
+			return true;
+		
+		return false;
+	}
 	
+	
+	//Returns which side to turn to face the cell based on the robot's direction
 	public Command getTurnMovement(Direction botDir, Direction cellDir) {
 		Command move;
 		

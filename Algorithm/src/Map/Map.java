@@ -87,7 +87,7 @@ public class Map {
 		for (int row = 0; row < MapConstants.MAP_HEIGHT; row++) {
 			for (int col = 0; col < MapConstants.MAP_WIDTH; col++) {
 				cell = grid[row][col];
-				if(!cell.isExplored() && distance > loc.distance(cell.getPos()))
+				if(!cell.isExplored() && !cell.isVirtualWall() && distance > loc.distance(cell.getPos()))
 				{
 					nearest = cell;
 					distance = loc.distance(cell.getPos());
@@ -106,7 +106,7 @@ public class Map {
 		for (int row = 0; row < MapConstants.MAP_HEIGHT; row++) {
 			for (int col = 0; col < MapConstants.MAP_WIDTH; col++) {
 				cell = grid[row][col];
-				if(cell.isExplored() && distance > loc.distance(cell.getPos()))
+				if(checkValidMove(row,col) && distance > loc.distance(cell.getPos()))
 				{
 					nearest = cell;
 					distance = loc.distance(cell.getPos());

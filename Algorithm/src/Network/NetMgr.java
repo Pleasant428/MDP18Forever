@@ -121,9 +121,4 @@ public class NetMgr {
 		
 		return null;
 	}
-	
-	// String Tokenizer
-	
-	
-
 }
