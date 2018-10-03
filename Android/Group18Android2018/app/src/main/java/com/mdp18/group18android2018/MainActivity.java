@@ -169,11 +169,6 @@ public class MainActivity extends AppCompatActivity {
                     // The toggle is enabled : To select waypoint on map
                     mPGV.selectWayPoint();
                     tb_setWaypointCoord.toggle();
-
-                    // For Checklist C5: Send WAY point coordinates to AMD Tool
-//                    String startCoord = "And|Ard|" + Integer.toString(inverseRowCoord(row)) + "," + Integer.toString(column);
-//                    byte[] bytes = startCoord.getBytes(Charset.defaultCharset());
-//                    BluetoothChat.writeMsg(bytes);
                 }
             }
         });
@@ -185,12 +180,6 @@ public class MainActivity extends AppCompatActivity {
                     mPGV.selectStartPoint();
                     setStartDirection();
                     tb_setStartCoord.toggle();
-
-                    // For Checklist C5: Send start point coordinates to AMD Tool
-//                    String startCoord = "And|Ard|".concat(Integer.toString(mPGV.getStartCoord()[0])).concat(",").concat(Integer.toString(mPGV.getStartCoord()[1]));
-//                    Log.d(TAG, "And|Ard|" + Integer.toString(mPGV.getStartCoord()[0]) + "," + Integer.toString(mPGV.getStartCoord()[1]));
-//                    byte[] bytes = startCoord.getBytes(Charset.defaultCharset());
-//                    BluetoothChat.writeMsg(bytes);
                 }
             }
         });
