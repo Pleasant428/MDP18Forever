@@ -65,6 +65,7 @@ public class PixelGridView extends View{
         this.setNumRows(20);
         this.setStartPos(17,0,19,2);
         this.setRobotDirection(0);
+        this.obstacles = new boolean[this.getNumColumns()][this.getNumRows()];
 
         for (int i = 0; i < this.getNumColumns(); i++) {
             for (int j = 0; j < this.getNumRows(); j++) {
@@ -385,8 +386,8 @@ public class PixelGridView extends View{
         for(int i = 0; i < this.getNumColumns(); i++){
             for(int j = 0; j < this.getNumRows(); j++){
                 if(obstacle[i][j]){
-                    canvas.drawRect(i * cellWidth, j * cellHeight,
-                            (i + 1) * cellWidth, (j + 1) * cellHeight,
+                    canvas.drawRect(i * cellWidth, (19 - j) * cellHeight,
+                            (i + 1) * cellWidth, (20 - j) * cellHeight,
                             blackPaint);
                 }
             }
@@ -413,8 +414,9 @@ public class PixelGridView extends View{
         int[] prevCoord = this.getCurCoord();
         int dir = this.getRobotDirection();
         boolean reachedWall = this.checkReachedWall(pos, dir);
+        boolean reachedObstacle = this.checkReachedObstacle(pos, dir);
 
-        if (!reachedWall){
+        if (!reachedWall && !reachedObstacle){
             if (dir == 0){
                 pos[0]--;
                 pos[2]--;
@@ -471,8 +473,9 @@ public class PixelGridView extends View{
         int[] pos = this.getCurPos();
         int dir = this.getRobotDirection();
         boolean reachedWall = this.checkReachedWall(pos, (dir + 2)%4);
+        boolean reachedObstacle = this.checkReachedObstacle(pos, (dir + 2)%4);
 
-        if(!reachedWall){
+        if(!reachedWall && !reachedObstacle){
             if (dir == 0){
                 pos[0]++;
                 pos[2]++;
@@ -498,7 +501,35 @@ public class PixelGridView extends View{
 
             this.invalidate();
         }
+    }
 
+    public boolean checkReachedObstacle(int[] pos, int dir) {
+        boolean[][] obstacle = this.getObstacles();
+        if(dir == 0){
+            if(obstacle[pos[1]][20 - pos[0]] || obstacle[pos[1] + 1][20 - pos[0]] || obstacle[pos[3]][20 - pos[0]]){
+                return true;
+            }
+        }
+
+        else if (dir == 1){
+            if(obstacle[pos[1] - 1][17 - pos[0]] || obstacle[pos[1] - 1][18 - pos[0]] || obstacle[pos[1] - 1][19 - pos[0]]){
+                return true;
+            }
+        }
+
+        else if (dir == 2){
+            if(obstacle[pos[1]][18 - pos[2]] || obstacle[pos[1] + 1][18 - pos[2]] || obstacle[pos[3]][18 - pos[2]]){
+                return true;
+            }
+        }
+
+        else {
+            if(obstacle[pos[3] + 1][17 - pos[0]] || obstacle[pos[3] + 1][18 - pos[0]] || obstacle[pos[3] + 1][19 - pos[0]]){
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public void selectWayPoint() {
