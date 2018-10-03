@@ -254,7 +254,7 @@ public class FastestPath {
 			moves.add(move);
 			cell = newCell;
 		}
-		System.out.println("Generated Moves: "+moves.toString());
+		//System.out.println("Generated Moves: "+moves.toString());
 		return moves;
 	}
 	

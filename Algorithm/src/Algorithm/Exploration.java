@@ -73,12 +73,13 @@ public class Exploration {
 		areaExplored = exploredMap.exploredPercentage();
 		startTime = System.currentTimeMillis();
 		endTime = startTime + timeLimit;
-//		double prevArea = exploredMap.exploredPercentage();
-//		int moves = 1;
-//		int checkingStep = 10;
+		double prevArea = exploredMap.exploredPercentage();
+		int moves = 1;
+		int checkingStep = 10;
 		this.start = start;
 		
 		// Loop to explore the map
+		outerloop:
 		do {
 			
 			try {
@@ -89,34 +90,45 @@ public class Exploration {
 			}
 			
 			areaExplored = exploredMap.exploredPercentage();
+			
+			//returned to start
+			if (prevArea == areaExplored||robot.getPosition().distance(start)==0) {
+				while(prevArea == areaExplored){
+					prevArea = areaExplored;
+					if(!goToUnexplored())
+						break outerloop;
+					areaExplored = exploredMap.exploredPercentage();
+				}
+				checkingStep = 2;
+			}
 			if(areaExplored >= 100)
 				break;
-			//returned to start
-//			if (robot.getPosition().distance(start) == 0 || prevArea == areaExplored) {
-//				
-//				goToUnexplored();
-//			}
-//			
-//			moves++;
+			if(moves%checkingStep==0)
+				prevArea = areaExplored;
+			
+			moves++;
 		} while (areaExplored < coverageLimit && System.currentTimeMillis() < endTime);
 		
 		goToPoint(start);
 	}
 
 	// Locate nearest unexplored point
-	public void goToUnexplored() {
+	public boolean goToUnexplored() {
 		System.out.println("Go to UnExplored");
 		// Located the nearest unexplored cell and return the nearest explored cell to
 		// it
 		Cell unCell = exploredMap.nearestUnexp(robot.getPosition());
-		System.out.println(unCell.toString());
-		Cell cell = exploredMap.nearestExp(unCell.getPos());
-		System.out.println(cell.toString());
-		goToPoint(cell.getPos());
+		System.out.println("Unexplored: "+unCell.toString());
+		Cell cell = exploredMap.nearestExp(unCell.getPos(), robot.getPosition());
+		//Unexplored Node cannot be reached from nearest explored cell
+		if(unCell.getPos().distance(cell.getPos())>RobotConstants.SHORT_MAX)
+			return false;
+		System.out.println("Explored: "+cell.toString());
+		return goToPoint(cell.getPos());
 	}
 
 	// Fast Algo to a point (used to go back to start
-	public void goToPoint(Point loc) {
+	public boolean goToPoint(Point loc) {
 		// robot already at start
 		if (robot.getPosition().equals(start)&&loc.equals(start)) {
 			while (robot.getDirection() != Direction.UP) {
@@ -128,14 +140,14 @@ public class Exploration {
 				robot.sense(exploredMap, map);
 				robot.move(Command.TURN_RIGHT, RobotConstants.MOVE_STEPS, exploredMap);
 			}
-			return;
+			return false;
 		}
 		ArrayList<Command> commands = new ArrayList<Command>();
 		ArrayList<Cell> path = new ArrayList<Cell>();
 		FastestPath backToStart = new FastestPath(exploredMap, robot, sim);
 		path = backToStart.run(robot.getPosition(), loc, robot.getDirection());
-		if(path == null)
-			return;
+		if(path.isEmpty())
+			return false;
 		backToStart.displayFastestPath(path, true);
 		commands = backToStart.getPathCommands(path);
 		for (Command c : commands) {
@@ -161,6 +173,7 @@ public class Exploration {
 				robot.sense(exploredMap, map);
 			}
 		}
+		return true;
 	}
 
 	public void getMove() throws InterruptedException {

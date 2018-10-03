@@ -87,7 +87,7 @@ public class Map {
 		for (int row = 0; row < MapConstants.MAP_HEIGHT; row++) {
 			for (int col = 0; col < MapConstants.MAP_WIDTH; col++) {
 				cell = grid[row][col];
-				if(!cell.isExplored() && !cell.isVirtualWall() && distance > loc.distance(cell.getPos()))
+				if(!cell.isExplored() && distance > loc.distance(cell.getPos()))
 				{
 					nearest = cell;
 					distance = loc.distance(cell.getPos());
@@ -98,7 +98,7 @@ public class Map {
 	}
 	
 	//Returns the nearest explored cell to the loc
-	public Cell nearestExp(Point loc) {
+	public Cell nearestExp(Point loc, Point botLoc) {
 		Cell cell, nearest = null;
 		double distance = 1000;
 		
@@ -106,10 +106,13 @@ public class Map {
 		for (int row = 0; row < MapConstants.MAP_HEIGHT; row++) {
 			for (int col = 0; col < MapConstants.MAP_WIDTH; col++) {
 				cell = grid[row][col];
-				if(checkValidMove(row,col) && distance > loc.distance(cell.getPos()))
+				if(checkValidMove(row,col))
 				{
-					nearest = cell;
-					distance = loc.distance(cell.getPos());
+					if((distance > loc.distance(cell.getPos())) || 
+							(distance == loc.distance(cell.getPos()) && cell.getPos().distance(botLoc) < nearest.getPos().distance(botLoc))){
+						nearest = cell;
+						distance = loc.distance(cell.getPos());
+					}
 				}
 			}
 		}
