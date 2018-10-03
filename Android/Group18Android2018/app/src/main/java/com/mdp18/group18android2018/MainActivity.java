@@ -426,7 +426,11 @@ public class MainActivity extends AppCompatActivity {
                         case "11":
                                int col = Integer.parseInt(filteredMsg[3]);
                                int row = Integer.parseInt(filteredMsg[4]);
+                               int dir = Integer.parseInt(filteredMsg[5]);
+                               int convertedDirection = mPGV.convertRobotDirectionForAlgo(dir);
+                               mPGV.setRobotDirection(convertedDirection);
                                mPGV.setCurPos(row,col);
+                               mPGV.refreshMap(updateMap);
                             break;
 
 
@@ -448,7 +452,7 @@ public class MainActivity extends AppCompatActivity {
 
                             // Part 2
                             // use MapDes2 to process MDF String
-                            mPGV.updateMapInfo(mapDes2, updateMap);
+                            //mPGV.updateMapInfo(mapDes2, updateMap);
 
                             break;
 
@@ -470,7 +474,7 @@ public class MainActivity extends AppCompatActivity {
                             break;
 
                         default:
-                            Log.d(TAG, "Switch Case default!");
+                            Log.d(TAG, "Switch Case default! String command not recognised.");
                             break;
                     }
                 }
