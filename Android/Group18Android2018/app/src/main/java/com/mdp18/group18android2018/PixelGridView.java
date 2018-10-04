@@ -610,9 +610,7 @@ public class PixelGridView extends View {
 
 
         //WHETHER TO UPDATE THE MAP
-        if (updateMap == true) {
-            refreshMap(true);
-        }
+        this.refreshMap(this.getAutoUpdate());
     }
 
     // Refresh map
@@ -621,24 +619,6 @@ public class PixelGridView extends View {
             invalidate();
         }
     }
-
-    // Not sure if you want to use this
-    //UPDATE MAP WHEN MAP DESCRIPTOR ARRIVES
-    public void updateMapInfo(String mapInfo,boolean updateMap) {
-
-
-
-        // CODE TO ACCEPT AND PROCESS MDF STRING
-
-
-
-        // WHETHER TO REFRESH MAP TO DISPLAY UDPATED INFO
-        if (updateMap == true) {
-            refreshMap(true);
-        }
-
-    }
-
 
     // Check whether the tile has been explored or not
     public void exploredTile ( int[] prevCoord, int[] curCoord){
