@@ -236,6 +236,10 @@ public class MainActivity extends AppCompatActivity {
                     if (isChecked) {
                         // The toggle is enabled; Manual Mode
                         btn_update.setEnabled(true);
+                        forwardButton.setEnabled(true);
+                        leftRotateButton.setEnabled(true);
+                        rightRotateButton.setEnabled(true);
+                        reverseButton.setEnabled(true);
                         Toast.makeText(MainActivity.this, "Manual Mode enabled", Toast.LENGTH_SHORT).show();
 //                        updateMap = false;
                         mPGV.setAutoUpdate(false);
