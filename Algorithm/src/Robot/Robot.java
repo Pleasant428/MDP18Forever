@@ -317,57 +317,63 @@ public class Robot {
 					 
 			}
 		}
-			for (int i =0; i< sensorList.size(); i++) {
-				// check if sensor detects any obstacle
-				if(!sim)
-					obsBlock = sensorData[i][1];
-				else
-					obsBlock = sensorList.get(i).detect(map);
-				//Assign the rowInc and colInc based on sensor Direction
-				switch (sensorList.get(i).getSensorDir()) {
-				case UP: 
-					rowInc = 1;
-					colInc = 0;
-					break;
-					
-				case LEFT:
-					rowInc = 0;
-					colInc = -1;
-					break;
-					
-				case RIGHT:
-					rowInc = 0;
-					colInc = 1;
-					break;
-					
-				case DOWN:
-					rowInc = -1;
-					colInc = 0;
-					break;
-				}
-				
-				//Discover each of the blocks infront of the sensor if possible
-				for (int j = sensorList.get(i).getMinRange(); j <= sensorList.get(i).getMaxRange(); j++) {
-					
-					//Check if the block is valid otherwise exit (Edge of Map)
-					if (exploredMap.checkValidCell(sensorList.get(i).getRow()+ rowInc * j, sensorList.get(i).getCol() + colInc * j)) {
-						//Change the cell to explored first
-						exploredMap.getCell(sensorList.get(i).getRow() + rowInc * j, sensorList.get(i).getCol() + colInc * j).setExplored(true);
-						if (i == obsBlock) {
-							exploredMap.getCell(sensorList.get(i).getRow() + rowInc * j, sensorList.get(i).getCol() + colInc * j).setObstacle(true);
-							
-							//Virtual Wall Initialized
-							for (int r = sensorList.get(i).getRow() + rowInc * j - 1; r <= sensorList.get(i).getRow() + rowInc * j + 1; r++)
-								for (int c = sensorList.get(i).getCol() + colInc * j - 1; c <= sensorList.get(i).getCol() + colInc * j + 1; c++)
-									if (exploredMap.checkValidCell(r, c))
-										exploredMap.getCell(r, c).setVirtualWall(true);
-							break;
-						}
-					}
-					else
-						break;
-				}
+		for (int i = 0; i < sensorList.size(); i++) {
+			// check if sensor detects any obstacle
+			if (!sim)
+				obsBlock = sensorData[i][1];
+			else
+				obsBlock = sensorList.get(i).detect(map);
+			// Assign the rowInc and colInc based on sensor Direction
+			switch (sensorList.get(i).getSensorDir()) {
+			case UP:
+				rowInc = 1;
+				colInc = 0;
+				break;
+
+			case LEFT:
+				rowInc = 0;
+				colInc = -1;
+				break;
+
+			case RIGHT:
+				rowInc = 0;
+				colInc = 1;
+				break;
+
+			case DOWN:
+				rowInc = -1;
+				colInc = 0;
+				break;
 			}
+
+			// Discover each of the blocks infront of the sensor if possible
+			for (int j = sensorList.get(i).getMinRange(); j <= sensorList.get(i).getMaxRange(); j++) {
+
+				// Check if the block is valid otherwise exit (Edge of Map)
+				if (exploredMap.checkValidCell(sensorList.get(i).getRow() + rowInc * j,
+						sensorList.get(i).getCol() + colInc * j)) {
+					// Change the cell to explored first
+					exploredMap
+							.getCell(sensorList.get(i).getRow() + rowInc * j, sensorList.get(i).getCol() + colInc * j)
+							.setExplored(true);
+					if (i == obsBlock) {
+						exploredMap.getCell(sensorList.get(i).getRow() + rowInc * j,
+								sensorList.get(i).getCol() + colInc * j).setObstacle(true);
+
+						// Virtual Wall Initialized
+						for (int r = sensorList.get(i).getRow() + rowInc * j - 1; r <= sensorList.get(i).getRow()
+								+ rowInc * j + 1; r++)
+							for (int c = sensorList.get(i).getCol() + colInc * j - 1; c <= sensorList.get(i).getCol()
+									+ colInc * j + 1; c++)
+								if (exploredMap.checkValidCell(r, c))
+									exploredMap.getCell(r, c).setVirtualWall(true);
+						break;
+					}
+				} else
+					break;
+			}
+		}
+		sendMapDescriptor(exploredMap);
 		exploredMap.draw(true);
 		draw();
 	}
@@ -423,5 +429,12 @@ public class Robot {
 							+ MapConstants.MAP_OFFSET / 2);
 		}
 
+	}
+	
+	public void sendMapDescriptor(Map exploredMap) {
+		String data = MapDescriptor.generateMDFStringPart1(exploredMap);
+		NetMgr.getInstance().send("Alg|And|MD1|"+data);
+		data = MapDescriptor.generateMDFStringPart2(exploredMap);
+		NetMgr.getInstance().send("Alg|And|MD2|"+data);
 	}
 }
