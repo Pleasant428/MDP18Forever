@@ -64,17 +64,19 @@ public class PixelGridView extends View {
     public void initializeMap() {
         this.setNumColumns(15);
         this.setNumRows(20);
-        this.setStartPos(17, 0, 19, 2);
-        this.setRobotDirection(0);
-        this.setAutoUpdate(true);
         this.obstacles = new boolean[this.getNumColumns()][this.getNumRows()];
         this.cellExplored = new boolean[this.getNumColumns()][this.getNumRows()];
 
         for (int i = 0; i < this.getNumColumns(); i++) {
             for (int j = 0; j < this.getNumRows(); j++) {
                 this.setObstacle(i, j, false);
+                this.setCellExplored(i, j, false);
             }
         }
+        this.setStartCoord(1,1);
+        this.setStartPos(17, 0, 19, 2);
+        this.setRobotDirection(0);
+        this.setAutoUpdate(true);
 
         this.setObstacle(3, 4, true);
         this.setObstacle(9, 12,true);
@@ -82,6 +84,14 @@ public class PixelGridView extends View {
 
     public void setObstacle(int i, int j, boolean obstacle) {
         this.obstacles[i][j] = obstacle;
+    }
+
+    public void setCellExplored(int column, int row, boolean explored){
+        this.cellExplored[column][row] = explored;
+    }
+
+    public boolean[][] getCellExplored(){
+        return this.cellExplored;
     }
 
     public void setNumColumns(int numColumns) {
@@ -111,12 +121,25 @@ public class PixelGridView extends View {
         this.leftCurPos = leftStartPos;
         this.backCurPos = backStartPos;
         this.rightCurPos = rightStartPos;
+        for (int i = 0; i < this.getNumColumns(); i++) {
+            for (int j = 0; j < this.getNumRows(); j++) {
+                this.setObstacle(i, j, false);
+                this.setCellExplored(i, j, false);
+            }
+        }
     }
 
     public void setStartCoord(int row, int column) {
         this.startCoord[0] = column;
         this.startCoord[1] = row;
         this.curCoord = this.startCoord;
+        for (int i = 0; i < this.getNumColumns(); i++) {
+            for (int j = 0; j < this.getNumRows(); j++) {
+                this.setObstacle(i, j, false);
+                this.setCellExplored(i, j, false);
+            }
+        }
+
     }
 
     public int[] getStartCoord() {
@@ -129,14 +152,21 @@ public class PixelGridView extends View {
     }
 
     public void moveCurCoord(int xInc, int yInc) {
-        this.curCoord[0] = this.curCoord[0] + xInc;
-        this.curCoord[1] = this.curCoord[1] + yInc;
+        this.setCurPos(this.getCurCoord()[0] + xInc, this.getCurCoord()[1] + yInc);
+//        this.curCoord[0] = this.curCoord[0] + xInc;
+//        this.curCoord[1] = this.curCoord[1] + yInc;
     }
 
     public void setStartPos(int row, int column) {
         this.setStartCoord(row, column);
         int[] startEdges = convertRobotPosToEdge(row, column);
         this.setStartPos(startEdges[0], startEdges[1], startEdges[2], startEdges[3]);
+        for (int i = 0; i < this.getNumColumns(); i++) {
+            for (int j = 0; j < this.getNumRows(); j++) {
+                this.setObstacle(i, j, false);
+                this.setCellExplored(i, j, false);
+            }
+        }
     }
 
     public int[] getStartPos() {
@@ -154,6 +184,8 @@ public class PixelGridView extends View {
         this.leftCurPos = edges[1];
         this.backCurPos = edges[2];
         this.rightCurPos = edges[3];
+        this.curCoord[0] = column;
+        this.curCoord[1] = row;
 
         // Take out this to avoid update during Manual Mode
 //        invalidate();
@@ -664,16 +696,26 @@ public class PixelGridView extends View {
     }
 
     public void mapDescriptorChecklist(String hexMap){
+        Log.d(TAG,"hexMap" + hexMap);
+        char[] hexMapChar = hexMap.toCharArray();
         BigInteger hexBigInteger = new BigInteger(hexMap, 16);
         String binMap = hexBigInteger.toString(2);
+        String binMapWithLeadingZeros = String.format("%300s", binMap).replace(" ", "0");
+        Log.d(TAG, "hexBigInteger: " + hexBigInteger);
+        Log.d(TAG,"bitmap: "+ binMap);
+        Log.d(TAG, "binmap length:" + binMap.length());
 //        String binMap = Integer.toBinaryString(parseHex);
-
-        Integer[] binMapArray = new Integer[binMap.length()];
+        char cur;
+        Integer[] binMapArray = new Integer[binMapWithLeadingZeros.length()];
+        for (int i = 0; i < binMapWithLeadingZeros.length(); i++){
+            cur = binMapWithLeadingZeros.charAt(i);
+            binMapArray[i] = Integer.parseInt(String.valueOf(cur));
+        }
 //        int columnLimit = this.getNumColumns();
 //        int columnCount = 0;
         int binMapArrayIndex = 0;
-        for(int i = 0; i < this.getNumColumns(); i++){
-            for(int j = 0; j < this.getNumRows(); j++){
+        for(int j = this.getNumRows() - 1; j >= 0; j--){
+            for(int i = 0; i < this.getNumColumns(); i++){
                 if(binMapArray[binMapArrayIndex] == 1){
                     this.setObstacle(i, j, true);
                 }
@@ -681,6 +723,7 @@ public class PixelGridView extends View {
                     this.setObstacle(i, j, false);
                 binMapArrayIndex++;
             }
+//            binMapArrayIndex = 0;
         }
         this.refreshMap(this.getAutoUpdate());
     }
