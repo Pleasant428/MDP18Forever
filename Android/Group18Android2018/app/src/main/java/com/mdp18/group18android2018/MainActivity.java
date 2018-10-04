@@ -474,7 +474,8 @@ public class MainActivity extends AppCompatActivity {
 
                     else if (filteredMsg[0].equals("grid")) {
                         String mdAMD = filteredMsg[1];
-
+                        mPGV.mapDescriptorChecklist(mdAMD);
+                        mPGV.refreshMap();
                         Log.d(TAG, "mdAMD: " + mdAMD);
 
                         // For setting up map from recevied AMD MDF String, use mdAMD

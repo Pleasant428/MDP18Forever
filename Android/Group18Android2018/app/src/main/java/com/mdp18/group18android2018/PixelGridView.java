@@ -15,7 +15,7 @@ import android.widget.Toast;
 
 import java.nio.charset.Charset;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.math.BigInteger;
 
 import static android.content.ContentValues.TAG;
 
@@ -616,12 +616,13 @@ public class PixelGridView extends View {
     }
 
     public void mapDescriptorChecklist(String hexMap){
-        int parseHex = Integer.parseInt(hexMap, 16);
-        String binMap = Integer.toBinaryString(parseHex);
+        BigInteger hexBigInteger = new BigInteger(hexMap, 16);
+        String binMap = hexBigInteger.toString(2);
+//        String binMap = Integer.toBinaryString(parseHex);
 
         Integer[] binMapArray = new Integer[binMap.length()];
-        int columnLimit = this.getNumColumns();
-        int columnCount = 0;
+//        int columnLimit = this.getNumColumns();
+//        int columnCount = 0;
         int binMapArrayIndex = 0;
         for(int i = 0; i < this.getNumColumns(); i++){
             for(int j = 0; j < this.getNumRows(); j++){
@@ -633,6 +634,8 @@ public class PixelGridView extends View {
                 binMapArrayIndex++;
             }
         }
+
+        this.refreshMap();
     }
 }
 
