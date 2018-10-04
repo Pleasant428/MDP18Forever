@@ -678,19 +678,6 @@ public class Simulator extends Application {
 					}
 					
 				}
-				else {
-					String msg = "Alg|Ard|"+c.ordinal()+"|"+RobotConstants.MOVE_STEPS;
-					netMgr.send(msg);
-					netMgr.recieve(msg);
-					String [] msgArr = msg.split("|");
-					
-					//Android Orders a Stop Command
-					if(msgArr[0].equalsIgnoreCase("And")) {
-						Command andC = Command.values()[Integer.parseInt(msgArr[2])];
-						if(c == Command.STOP)
-							return -1;
-					}
-				}
 				robot.move(c, RobotConstants.MOVE_STEPS, exploredMap);
 				exploredMap.draw(true);
 				robot.draw();
@@ -698,9 +685,6 @@ public class Simulator extends Application {
 			
 			return 1;
 	    }
-		private void sendCommand(Command c) {
-			
-		}
 	}
 	
 	
