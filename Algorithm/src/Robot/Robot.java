@@ -8,11 +8,11 @@ import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
 import Map.*;
+import Network.NetMgr;
 import Robot.RobotConstants.Direction;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 import Robot.RobotConstants.Command;
-
 /**
  * @author Saklani Pankaj
  *
@@ -43,8 +43,16 @@ public class Robot {
 		this.reachedGoal = reachedGoal;
 	}
 
-	public Robot(boolean sim, Direction dir, int row, int col) {
+	public boolean isSim() {
+		return sim;
+	}
+
+	public void setSim(boolean sim) {
 		this.sim = sim;
+	}
+
+	public Robot(boolean sim, Direction dir, int row, int col) {
+		this.setSim(sim);
 		this.direction = dir;
 		this.reachedGoal = false;
 		this.pos = new Point(col, row);
@@ -189,6 +197,10 @@ public class Robot {
 	
 	//Moving using the Command enum
 	public void move(Command m, int steps, Map exploredMap) {
+		if(!sim) {
+			NetMgr.getInstance().send("Alg|Ard|"+m.ordinal()+"|"+steps);
+			NetMgr.getInstance().send("Alg|And|"+m.ordinal()+"|"+steps);
+		}
 		switch(m) {
 		case FORWARD:
 			move(direction, true, steps, exploredMap);
@@ -286,6 +298,34 @@ public class Robot {
 		}
 		exploredMap.draw(true);
 		draw();
+	}
+	
+	public boolean sense(Map exploredMap, String sensorDataStr) {
+		String [] strSensor = sensorDataStr.split(",");
+		Sensor s;
+		int[][] sensorData = new int[6][2];
+		System.out.println("Recieved "+strSensor.length+" sensor data");
+		
+		//Translate string to integer
+		for(int i=0; i< strSensor.length; i++) {
+			String [] arrSensorStr = strSensor[i].split(":");
+			sensorData[i][0] = Integer.parseInt(arrSensorStr[0]);
+			sensorData[i][1] = Integer.parseInt(arrSensorStr[1]);
+		}
+		
+		//Check Right Alignment
+		double prevRightAvg = (sensorList.get(3).getPrevData() + sensorList.get(4).getPrevData())/2;
+		double curRightAvg = (sensorData[3][0] + sensorData[3][0])/2;
+		if(Math.abs(curRightAvg - prevRightAvg) > 3){
+			NetMgr.getInstance().send("Alg|And|"+Command.ALIGN_RIGHT+"|");
+			NetMgr.getInstance().send("Alg|Ard|"+Command.ALIGN_RIGHT+"|");
+			return false;
+		}
+		
+		//Checking Front Alignment
+		boolean frontCal = (sensorData[])
+		
+		return true;
 	}
 
 	//Draw Method for Robot

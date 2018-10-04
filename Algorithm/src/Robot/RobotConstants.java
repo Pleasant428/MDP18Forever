@@ -24,6 +24,8 @@ public class RobotConstants {
 	public static final int LONG_MIN = 1;
 	public static final int LONG_MAX = 5;
 	
+	public static final int RIGHT_THRES = 3; //Threshold value or right sensor will calibrate once exceeded
+	
 	//Constants to render Robot
 	public static final Color ROBOT_BODY = Color.rgb(139, 0, 0, 0.8);
 	public static final Color ROBOT_OUTLINE = Color.BLACK;

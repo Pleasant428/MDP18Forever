@@ -9,16 +9,26 @@ public class NetMgr {
 
 	private String ipAddr;
 	private int port;
-	private Socket socket = null;
+	private static Socket socket = null;
 
 	private BufferedWriter out;
 	private BufferedReader in;
 	
+	private static NetMgr netMgr = null;
 	
+	public NetMgr() {
+		
+	}
 	
 	public NetMgr(String ipAddr, int port) {
 		this.ipAddr = ipAddr;
 		this.port = port;
+	}
+	
+	public static NetMgr getInstance() {
+		if(netMgr == null)
+			netMgr = new NetMgr();
+		return netMgr;
 	}
 
 	// Getter and Setters for ipAddr and port

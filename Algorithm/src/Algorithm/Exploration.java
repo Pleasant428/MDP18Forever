@@ -178,7 +178,6 @@ public class Exploration {
 
 	public void getMove() throws InterruptedException {
 		Direction dir = robot.getDirection();
-		
 		// Check Right if free then turn Right
 		if (movable(Direction.getPrevious(dir))) {
 			TimeUnit.MILLISECONDS.sleep(RobotConstants.MOVE_SPEED/stepPerSecond);
