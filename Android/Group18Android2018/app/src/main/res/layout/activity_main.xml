@@ -14,8 +14,8 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:layout_editor_absoluteX="69dp"
-        tools:layout_editor_absoluteY="16dp">
+        tools:layout_editor_absoluteX="210dp"
+        tools:layout_editor_absoluteY="106dp">
 
 
         <com.mdp18.group18android2018.PixelGridView
@@ -85,7 +85,7 @@
                     android:layout_height="wrap_content"
                     android:textOff="@string/setStart"
                     android:textOn="@string/onStart"
-                    android:textSize="@dimen/font_size_small"/>
+                    android:textSize="@dimen/font_size_small" />
 
                 <ToggleButton
                     android:id="@+id/tb_setWaypointCoord"
@@ -93,7 +93,7 @@
                     android:layout_height="wrap_content"
                     android:textOff="@string/setWaypoint"
                     android:textOn="@string/onWaypoint"
-                    android:textSize="@dimen/font_size_small"/>
+                    android:textSize="@dimen/font_size_small" />
             </LinearLayout>
 
             <ImageButton
@@ -218,11 +218,29 @@
         android:textSize="@dimen/font_size_small"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.414"
+        app:layout_constraintHorizontal_bias="0.418"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.967" />
+        app:layout_constraintVertical_bias="0.951" />
 
+    <Switch
+        android:id="@+id/tiltSwitch"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:checked="false"
+        android:text="Tilt  "
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.436"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="1.0" />
 
 
 </android.support.constraint.ConstraintLayout>
