@@ -66,6 +66,7 @@ public class PixelGridView extends View {
         this.setStartPos(17, 0, 19, 2);
         this.setRobotDirection(0);
         this.obstacles = new boolean[this.getNumColumns()][this.getNumRows()];
+        this.cellExplored = new boolean[this.getNumColumns()][this.getNumRows()];
 
         for (int i = 0; i < this.getNumColumns(); i++) {
             for (int j = 0; j < this.getNumRows(); j++) {
@@ -668,7 +669,7 @@ public class PixelGridView extends View {
             }
         }
 
-        this.refreshMap();
+        this.invalidate();
     }
 }
 
