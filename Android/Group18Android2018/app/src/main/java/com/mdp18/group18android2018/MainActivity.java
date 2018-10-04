@@ -34,7 +34,7 @@ import org.w3c.dom.Text;
 import java.nio.charset.Charset;
 import java.util.UUID;
 
-public class MainActivity extends AppCompatActivity implements SensorEventListener {
+public class MainActivity extends AppCompatActivity implements SensorEventListener{
     private static final String TAG = "MainActivity";
 
 //    boolean updateMap = true;
@@ -87,7 +87,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         //TILT
         tiltNavi = false;
         tiltBtn = findViewById(R.id.tiltSwitch);
-        //declaring Sensor Manager and sensor type
+
+            //declaring Sensor Manager and sensor type
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         sensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
 
@@ -367,31 +368,31 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                         // Action: FORWARD
                         case "0":
                             for (int counter = Integer.parseInt(filteredMsg[3]); counter >= 1; counter--) {
-                                Log.d(TAG, "passed counter");
                                 mPGV.moveForward();
-                                Log.d(TAG, "Moved forward");
                                 tv_mystringcmd.setText(R.string.fwd);
-                                Log.d(TAG, "Display command");
                                 tv_mystatus.setText(R.string.moving);
-                                Log.d(TAG, "Status is set to moving");
-
                             }
                             break;
 
 
                         // Action: TURN_LEFT
                         case "1":
-                            mPGV.rotateLeft();
-                            tv_mystringcmd.setText(R.string.left);
-                            tv_mystatus.setText(R.string.moving);
-                            break;
+
+                            for (int counter = Integer.parseInt(filteredMsg[3]); counter >= 1; counter--) {
+                                mPGV.rotateLeft();
+                                tv_mystringcmd.setText(R.string.left);
+                                tv_mystatus.setText(R.string.moving);
+                            }
+                                break;
 
 
                         // Action: TURN_RIGHT
                         case "2":
-                            mPGV.rotateRight();
-                            tv_mystringcmd.setText(R.string.right);
-                            tv_mystatus.setText(R.string.moving);
+                            for (int counter = Integer.parseInt(filteredMsg[3]); counter >= 1; counter--) {
+                                mPGV.rotateRight();
+                                tv_mystringcmd.setText(R.string.right);
+                                tv_mystatus.setText(R.string.moving);
+                            }
                             break;
 
 
@@ -457,7 +458,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                             int convertedDirection = mPGV.convertRobotDirectionForAlgo(dir);
                             mPGV.setRobotDirection(convertedDirection);
                             mPGV.setCurPos(row, col);
-//                               mPGV.refreshMap(mPGV.getAutoUpdate());
                             break;
 
 
@@ -490,14 +490,12 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                             break;
 
                         case "a":
-                            // Sent by RPi: Upwards arrow on coordinate
-                            // Format: Rpi|And|A|col,row
+                            // Sent by Algo: Upwards arrow on coordinate
+                            // Format: Alg|And|A|col,row
                             int arrow_col = Integer.parseInt(filteredMsg[3]);
                             int arrow_row = Integer.parseInt(filteredMsg[4]);
-
-                            // METHOD IN mPGV TO DISPLAY ARROW_UP.PNG ON THE COORDINATE
                             mPGV.displayArrowBlock(arrow_col, arrow_row);
-                            //mPGV.refreshMap(updateMap);
+                            mPGV.refreshMap(mPGV.getAutoUpdate());
                             break;
 
                         default:
@@ -506,40 +504,30 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                     }
                 }
 
+                // The following is for clearing checklist commands only.
+
                 // For receiving AMD robotPosition and grid
                 if (incomingMsg.substring(0, 1).equals("{")) {
-
-
                     Log.d(TAG, "Incoming Message from AMD: " + incomingMsg);
-
                     String[] filteredMsg = msgDelimiter(incomingMsg.replaceAll(" ", "").replaceAll(",", "\\|").replaceAll("\\{", "").replaceAll("\\}", "").replaceAll("\\:", "\\|").replaceAll("\"", "").replaceAll("\\[", "").replaceAll("\\]", "").trim(), "\\|");
-
-
                     Log.d(TAG, "filteredMsg: " + filteredMsg);
-
                     if (filteredMsg[0].equals("robotposition")) {
                         int robotPosCol = Integer.parseInt(filteredMsg[1]) + 1;
                         int robotPosRow = 19 - (Integer.parseInt(filteredMsg[2]) + 1);
                         int robotPosDeg = Integer.parseInt(filteredMsg[3]);
-
                         int robotPosDir = 0;
-
                         // Up
                         if (robotPosDeg == 0)
                             robotPosDir = 0;
-
-                            //Right
+                        //Right
                         else if (robotPosDeg == 90)
                             robotPosDir = 3;
-
-                            //Down
+                        //Down
                         else if (robotPosDeg == 180)
                             robotPosDir = 2;
-
-                            // Left
+                        // Left
                         else if (robotPosDeg == 270)
                             robotPosDir = 1;
-
                         // For setting robot start position from AMD
                         mPGV.setCurPos(robotPosRow, robotPosCol);
                         mPGV.setRobotDirection(robotPosDir);
@@ -609,7 +597,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     // Manual Mode; Update button
     public void onClickUpdate(View view) {
-
         Log.d(TAG, "Updating....");
         mPGV.refreshMap(true);
         Log.d(TAG, "Update completed!");
@@ -632,8 +619,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
             String connectionStatus = intent.getStringExtra("ConnectionStatus");
             myBTConnectionDevice = intent.getParcelableExtra("Device");
-            //myBTConnectionDevice = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-            //DISCONNECTED FROM BLUETOOTH CHAT
             if (connectionStatus.equals("disconnect")) {
 
                 Log.d("MainActivity:", "Device Disconnected");
@@ -687,6 +672,72 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         }
     };
 
+
+
+    // For checklist only
+    // EXTENSION BEYOND THE BASICS
+    // Tilt Control
+
+    /*
+     ONCLICKLISTENER FOR TILT BUTTON
+    */
+    public void onClickTiltSwitch(View view) {
+        tiltBtn.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    tiltNavi = true;
+                    Log.d(TAG, "Tilt Switch On!");
+
+                } else {
+                    tiltNavi = false;
+                    Log.d(TAG, "Tilt Switch Off!");
+
+
+                }
+            }
+        });
+    }
+
+    @Override
+    public void onSensorChanged(SensorEvent event) {
+        float x = event.values[0];
+        float y = event.values[1];
+        if (tiltNavi == true) {
+
+        if (Math.abs(x) > Math.abs(y)) {
+            if (x < 0) {
+                Log.d("MainActivity:", "RIGHT TILT!!");
+
+                tv_mystatus.setText("Moving");
+                tv_mystringcmd.setText(R.string.navRight);
+                mPGV.rotateRight();
+            }
+            if (x > 0) {
+                Log.d("MainActivity:", "LEFT TILT!!");
+
+                tv_mystatus.setText("Moving");
+                tv_mystringcmd.setText(R.string.navLeft);
+                mPGV.rotateLeft();
+            }
+        } else {
+            if (y < 0) {
+                Log.d("MainActivity:", "UP TILT!!");
+
+                tv_mystatus.setText("Moving");
+                tv_mystringcmd.setText(R.string.navFwd);
+                mPGV.moveForward();
+            }
+            if (y > 0) {
+                Log.d("MainActivity:", "DOWN TILT!!");
+
+                tv_mystatus.setText("Moving");
+                tv_mystringcmd.setText(R.string.navRev);
+                mPGV.moveBackwards();
+            }
+        }
+        }
+    }
+
     @Override
     public void onAccuracyChanged(Sensor arg0, int arg1) {
     }
@@ -704,93 +755,5 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         sensorManager.unregisterListener(this);
     }
 
-
-
-    //EXTENSION BEYOND THE BASICS
-
-    /*
-     ONCLICKLISTENER FOR TILT BUTTON
- */
-    public void onClickTiltSwitch() {
-
-        tiltBtn.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-
-                if (isChecked) {
-
-                    tiltNavi = true;
-                    Toast.makeText(MainActivity.this, "Tilt Switch On!!", Toast.LENGTH_SHORT).show();
-
-                } else {
-
-                    tiltNavi = false;
-                    Toast.makeText(MainActivity.this, "Tilt Switch Off!!", Toast.LENGTH_SHORT).show();
-
-
-                }
-            }
-        });
-
-
-    }
-
-    @Override
-    public void onSensorChanged(SensorEvent event) {
-        float x = event.values[0];
-        float y = event.values[1];
-        if (tiltNavi == true) {
-
-        if (Math.abs(x) > Math.abs(y)) {
-            if (x < 0) {
-                Log.d("MainActivity:", "RIGHT TILT!!");
-
-                String navi = "Arduino|Android|R|Nil";
-                byte[] bytes = navi.getBytes(Charset.defaultCharset());
-                BluetoothChat.writeMsg(bytes);
-
-                tv_mystatus.setText("Moving");
-                tv_mystringcmd.setText(R.string.navRight);
-                mPGV.rotateRight();
-            }
-            if (x > 0) {
-                Log.d("MainActivity:", "LEFT TILT!!");
-
-                String navi = "Arduino|Android|L|Nil";
-                byte[] bytes = navi.getBytes(Charset.defaultCharset());
-                BluetoothChat.writeMsg(bytes);
-
-                tv_mystatus.setText("Moving");
-                tv_mystringcmd.setText(R.string.navLeft);
-                mPGV.rotateLeft();
-            }
-        } else {
-            if (y < 0) {
-                Log.d("MainActivity:", "UP TILT!!");
-
-                String navi = "Arduino|Android|F|01";
-                byte[] bytes = navi.getBytes(Charset.defaultCharset());
-                BluetoothChat.writeMsg(bytes);
-
-                tv_mystatus.setText("Moving");
-                tv_mystringcmd.setText(R.string.navFwd);
-                mPGV.moveForward();
-            }
-            if (y > 0) {
-                Log.d("MainActivity:", "DOWN TILT!!");
-
-                String navi = "Arduino|Android|T|Nil";
-                byte[] bytes = navi.getBytes(Charset.defaultCharset());
-                BluetoothChat.writeMsg(bytes);
-
-                tv_mystatus.setText("Moving");
-                tv_mystringcmd.setText(R.string.navRev);
-                mPGV.moveBackwards();
-            }
-        }
-        if (x > (-2) && x < (2) && y > (-2) && y < (2)) {
-            Log.d("MainActivity:", "NOT TILTED!!");
-        }
-    }
-
 }
-}
+

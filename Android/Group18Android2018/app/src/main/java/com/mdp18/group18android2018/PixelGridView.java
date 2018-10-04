@@ -69,7 +69,6 @@ public class PixelGridView extends View {
     public void initializeMap() {
         this.setNumColumns(15);
         this.setNumRows(20);
-//        this.arrowImageCoord = new int[2];
         this.obstacles = new boolean[this.getNumColumns()][this.getNumRows()];
         this.cellExplored = new boolean[this.getNumColumns()][this.getNumRows()];
 
@@ -190,8 +189,6 @@ public class PixelGridView extends View {
         this.curCoord[0] = column;
         this.curCoord[1] = row;
 
-        // Take out this to avoid update during Manual Mode
-//        invalidate();
         this.refreshMap(this.getAutoUpdate());
     }
 
@@ -202,8 +199,6 @@ public class PixelGridView extends View {
         this.backCurPos = pos[2];
         this.rightCurPos = pos[3];
 
-        // Take out this to avoid update during Manual Mode
-//        invalidate();
         this.refreshMap(this.getAutoUpdate());
     }
 
@@ -228,8 +223,6 @@ public class PixelGridView extends View {
     public void setRobotDirection(int direction) {
         this.robotDirection = direction;
 
-        // Take out this to avoid update during Manual Mode
-//        invalidate();
         this.refreshMap(this.getAutoUpdate());
     }
 
@@ -254,7 +247,7 @@ public class PixelGridView extends View {
         if (originalDir == 2)
             return 3;
 
-            // If getRobotDirection == RIGHT
+        // If getRobotDirection == RIGHT
         else if (originalDir == 3)
             return 2;
 
@@ -283,7 +276,6 @@ public class PixelGridView extends View {
 
         cellWidth = getWidth() / getNumColumns();
         cellHeight = cellWidth;
-
         cellExplored = new boolean[getNumColumns()][getNumRows()];
 
         invalidate();
@@ -348,9 +340,8 @@ public class PixelGridView extends View {
                 Log.d(TAG, "Start Point: " + Integer.toString(this.getStartCoord()[0]) + "," + Integer.toString(this.getStartCoord()[1]));
                 byte[] bytes = startCoord.getBytes(Charset.defaultCharset());
                 BluetoothChat.writeMsg(bytes);
-
-                // No need to remove this invalidate
                 invalidate();
+
             } else if (selectWayPoint) {
                 this.setWayPoint(inverseRowCoord(row), column);
                 selectWayPoint = false;
@@ -359,8 +350,6 @@ public class PixelGridView extends View {
                 Log.d(TAG, "Waypoint: " + Integer.toString(this.getWayPoints().get(0)[0]).concat(",").concat(Integer.toString(this.getWayPoints().get(0)[1])));
                 byte[] bytes = waypointCoordinate.getBytes(Charset.defaultCharset());
                 BluetoothChat.writeMsg(bytes);
-
-                // No need to remove this invalidate
                 invalidate();
             }
 
