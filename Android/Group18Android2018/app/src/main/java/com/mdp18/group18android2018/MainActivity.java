@@ -87,12 +87,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         //TILT
         tiltNavi = false;
         tiltBtn = findViewById(R.id.tiltSwitch);
-        //DECLARING SENSOR MANAGER AND SENSOR TYPE
+        //declaring Sensor Manager and sensor type
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         sensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-
-        //REGISTER TILT MOTION SENSOR
-        sensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_NORMAL);
 
 
         // Forward button
@@ -691,9 +688,22 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     };
 
     @Override
-    public void onAccuracyChanged(Sensor sensor, int accuracy) {
-
+    public void onAccuracyChanged(Sensor arg0, int arg1) {
     }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        sensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_NORMAL);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        //unregister Sensor listener
+        sensorManager.unregisterListener(this);
+    }
+
 
 
     //EXTENSION BEYOND THE BASICS
@@ -724,87 +734,63 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     }
 
-    //METHOD FOR TILT SENSING (NAVIGATION)
     @Override
     public void onSensorChanged(SensorEvent event) {
         float x = event.values[0];
         float y = event.values[1];
+        if (tiltNavi == true) {
 
-        //CHECK IF TILT SWITCH IS ENABLED
-        if (tiltNavi) {
+        if (Math.abs(x) > Math.abs(y)) {
+            if (x < 0) {
+                Log.d("MainActivity:", "RIGHT TILT!!");
 
-            Log.d(TAG, "check");
+                String navi = "Arduino|Android|R|Nil";
+                byte[] bytes = navi.getBytes(Charset.defaultCharset());
+                BluetoothChat.writeMsg(bytes);
 
-            //CHECK IF CONNECTED TO DEVICE FIRST
-            if (connectedDevice == null) {
-                Toast.makeText(MainActivity.this, "Please Connect to a Device First!!",
-                        Toast.LENGTH_SHORT).show();
-            } else {
-
-                if (Math.abs(x) > Math.abs(y)) {
-                    if (x < 0) {
-                        Log.d("MainActivity:", "RIGHT TILT!!");
-
-                        String navi = "Arduino|Android|R|Nil";
-                        byte[] bytes = navi.getBytes(Charset.defaultCharset());
-                        BluetoothChat.writeMsg(bytes);
-                       /* Toast.makeText(MainActivity.this, "Right Movement Detected!!",
-                                Toast.LENGTH_SHORT).show();*/
-
-                        tv_mystatus.setText("Moving");
-                        tv_mystringcmd.setText(R.string.navRight);
-                        mPGV.rotateRight();
-
-
-                    }
-                    if (x > 0) {
-                        Log.d("MainActivity:", "LEFT TILT!!");
-
-                        String navi = "Arduino|Android|L|Nil";
-                        byte[] bytes = navi.getBytes(Charset.defaultCharset());
-                        BluetoothChat.writeMsg(bytes);
-                        /*Toast.makeText(MainActivity.this, "Left Movement Detected!!",
-                                Toast.LENGTH_SHORT).show();*/
-
-                        tv_mystatus.setText("Moving");
-                        tv_mystringcmd.setText(R.string.navLeft);
-                        mPGV.rotateLeft();
-                    }
-                } else {
-                    if (y < 0) {
-                        Log.d("MainActivity:", "UP TILT!!");
-
-                        String navi = "Arduino|Android|F|01";
-                        byte[] bytes = navi.getBytes(Charset.defaultCharset());
-                        BluetoothChat.writeMsg(bytes);
-                        /*Toast.makeText(MainActivity.this, "Forward Movement Detected!!",
-                                Toast.LENGTH_SHORT).show();*/
-
-                        tv_mystatus.setText("Moving");
-                        tv_mystringcmd.setText(R.string.navFwd);
-                        mPGV.moveForward();
-                    }
-                    if (y > 0) {
-                        Log.d("MainActivity:", "DOWN TILT!!");
-
-                        String navi = "Arduino|Android|T|Nil";
-                        byte[] bytes = navi.getBytes(Charset.defaultCharset());
-                        BluetoothChat.writeMsg(bytes);
-                        /*Toast.makeText(MainActivity.this, "Down Movement Detected!!",
-                                Toast.LENGTH_SHORT).show();*/
-
-                        tv_mystatus.setText("Moving");
-                        tv_mystringcmd.setText(R.string.navRev);
-                        mPGV.moveBackwards();
-                    }
-                }
-       /* if (x > (-2) && x < (2) && y > (-2) && y < (2)) {
-            Log.d("MainActivity:", "NOT TILTED!!");
-
-        }*/
+                tv_mystatus.setText("Moving");
+                tv_mystringcmd.setText(R.string.navRight);
+                mPGV.rotateRight();
             }
+            if (x > 0) {
+                Log.d("MainActivity:", "LEFT TILT!!");
+
+                String navi = "Arduino|Android|L|Nil";
+                byte[] bytes = navi.getBytes(Charset.defaultCharset());
+                BluetoothChat.writeMsg(bytes);
+
+                tv_mystatus.setText("Moving");
+                tv_mystringcmd.setText(R.string.navLeft);
+                mPGV.rotateLeft();
+            }
+        } else {
+            if (y < 0) {
+                Log.d("MainActivity:", "UP TILT!!");
+
+                String navi = "Arduino|Android|F|01";
+                byte[] bytes = navi.getBytes(Charset.defaultCharset());
+                BluetoothChat.writeMsg(bytes);
+
+                tv_mystatus.setText("Moving");
+                tv_mystringcmd.setText(R.string.navFwd);
+                mPGV.moveForward();
+            }
+            if (y > 0) {
+                Log.d("MainActivity:", "DOWN TILT!!");
+
+                String navi = "Arduino|Android|T|Nil";
+                byte[] bytes = navi.getBytes(Charset.defaultCharset());
+                BluetoothChat.writeMsg(bytes);
+
+                tv_mystatus.setText("Moving");
+                tv_mystringcmd.setText(R.string.navRev);
+                mPGV.moveBackwards();
+            }
+        }
+        if (x > (-2) && x < (2) && y > (-2) && y < (2)) {
+            Log.d("MainActivity:", "NOT TILTED!!");
         }
     }
 
-
+}
 }
