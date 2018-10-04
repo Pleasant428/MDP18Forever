@@ -32,7 +32,7 @@ import java.util.UUID;
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
 
-    boolean updateMap = true;
+//    boolean updateMap = true;
 
     PixelGridView mPGV;
     ImageButton forwardButton, leftRotateButton, rightRotateButton, reverseButton;
@@ -237,7 +237,8 @@ public class MainActivity extends AppCompatActivity {
                         // The toggle is enabled; Manual Mode
                         btn_update.setEnabled(true);
                         Toast.makeText(MainActivity.this, "Manual Mode enabled", Toast.LENGTH_SHORT).show();
-                        updateMap = false;
+//                        updateMap = false;
+                        mPGV.setAutoUpdate(false);
                         Log.d(TAG, "Auto updates disabled.");
 
                     } else {
@@ -248,7 +249,8 @@ public class MainActivity extends AppCompatActivity {
                         rightRotateButton.setEnabled(false);
                         reverseButton.setEnabled(false);
                         Toast.makeText(MainActivity.this, "Auto Mode enabled", Toast.LENGTH_SHORT).show();
-                        updateMap = true;
+//                        updateMap = true;
+                        mPGV.setAutoUpdate(true);
                         Log.d(TAG, "Auto updates enabled.");
                     }
                 }
@@ -430,7 +432,7 @@ public class MainActivity extends AppCompatActivity {
                                int convertedDirection = mPGV.convertRobotDirectionForAlgo(dir);
                                mPGV.setRobotDirection(convertedDirection);
                                mPGV.setCurPos(row,col);
-                               mPGV.refreshMap(updateMap);
+//                               mPGV.refreshMap(mPGV.getAutoUpdate());
                             break;
 
 
@@ -469,7 +471,7 @@ public class MainActivity extends AppCompatActivity {
                             int arrow_row = Integer.parseInt(filteredMsg[4]);
 
                             // METHOD IN mPGV TO DISPLAY ARROW_UP.PNG ON THE COORDINATE
-                            mPGV.displayArrowBlock(arrow_col, arrow_row, updateMap);
+                            mPGV.displayArrowBlock(arrow_col, arrow_row, mPGV.getAutoUpdate());
                             //mPGV.refreshMap(updateMap);
                             break;
 
@@ -521,7 +523,7 @@ public class MainActivity extends AppCompatActivity {
                     else if (filteredMsg[0].equals("grid")) {
                         String mdAMD = filteredMsg[1];
                         mPGV.mapDescriptorChecklist(mdAMD);
-                        mPGV.refreshMap();
+                        mPGV.refreshMap(mPGV.getAutoUpdate());
                         Log.d(TAG, "mdAMD: " + mdAMD);
 
                         // For setting up map from received AMD MDF String, use mdAMD
