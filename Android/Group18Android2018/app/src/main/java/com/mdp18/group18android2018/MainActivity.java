@@ -243,13 +243,13 @@ public class MainActivity extends AppCompatActivity {
 
                     } else {
                         // The toggle is disabled; Auto Mode
+                        mPGV.refreshMap(true);
                         btn_update.setEnabled(false);
                         forwardButton.setEnabled(false);
                         leftRotateButton.setEnabled(false);
                         rightRotateButton.setEnabled(false);
                         reverseButton.setEnabled(false);
                         Toast.makeText(MainActivity.this, "Auto Mode enabled", Toast.LENGTH_SHORT).show();
-//                        updateMap = true;
                         mPGV.setAutoUpdate(true);
                         Log.d(TAG, "Auto updates enabled.");
                     }
