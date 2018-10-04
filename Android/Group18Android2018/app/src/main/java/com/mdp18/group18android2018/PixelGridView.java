@@ -151,6 +151,8 @@ public class PixelGridView extends View {
         this.leftCurPos = edges[1];
         this.backCurPos = edges[2];
         this.rightCurPos = edges[3];
+
+        // Take out this to avoid update during Manual Mode
         invalidate();
     }
 
@@ -159,6 +161,8 @@ public class PixelGridView extends View {
         this.leftCurPos = pos[1];
         this.backCurPos = pos[2];
         this.rightCurPos = pos[3];
+
+        // Take out this to avoid update during Manual Mode
         invalidate();
     }
 
@@ -174,6 +178,8 @@ public class PixelGridView extends View {
 
     public void setRobotDirection(int direction) {
         this.robotDirection = direction;
+
+        // Take out this to avoid update during Manual Mode
         invalidate();
     }
 
@@ -281,6 +287,7 @@ public class PixelGridView extends View {
                 byte[] bytes = startCoord.getBytes(Charset.defaultCharset());
                 BluetoothChat.writeMsg(bytes);
 
+                // No need to remove this invalidate
                 invalidate();
             } else if (selectWayPoint) {
                 this.setWayPoint(inverseRowCoord(row), column);
@@ -291,6 +298,7 @@ public class PixelGridView extends View {
                 byte[] bytes = waypointCoordinate.getBytes(Charset.defaultCharset());
                 BluetoothChat.writeMsg(bytes);
 
+                // No need to remove this invalidate
                 invalidate();
             }
 
@@ -538,17 +546,6 @@ public class PixelGridView extends View {
         selectStartPosition = true;
     }
 
-    // Keeps the updated map on app regardless of auto or manual mode
-    public void updateMap (String[]mapInfo,boolean updateMap){
-
-        // UPDATE MAP CODE
-
-
-        // If updateMap == true, refresh map
-        if (updateMap) {
-            invalidate();
-        }
-    }
 
     // To inverse row's coordinates
     public int inverseRowCoord ( int rowNum){
@@ -586,9 +583,45 @@ public class PixelGridView extends View {
         return edges;
     }
 
+    // Display Arrow Block on Grid Map
+    public void displayArrowBlock (int arrowCol, int arrowRow, boolean updateMap) {
+
+
+
+
+        // CODE TO DISPLAY ARROW_UP.PNG ON THE POINT
+
+
+
+
+        //WHETHER TO UPDATE THE MAP
+        if (updateMap == true) {
+            refreshMap(true);
+        }
+    }
+
     // Refresh map
-    public void refreshMap () {
-        invalidate();
+    public void refreshMap (boolean updateMap) {
+        if (updateMap == true) {
+            invalidate();
+        }
+    }
+
+    // Not sure if you want to use this
+    //UPDATE MAP WHEN MAP DESCRIPTOR ARRIVES
+    public void updateMapInfo(String mapInfo,boolean updateMap) {
+
+
+
+        // CODE TO ACCEPT AND PROCESS MDF STRING
+
+
+
+        // WHETHER TO REFRESH MAP TO DISPLAY UDPATED INFO
+        if (updateMap == true) {
+            refreshMap(true);
+        }
+
     }
 
 

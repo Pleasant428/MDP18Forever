@@ -170,21 +170,34 @@ public class MainActivity extends AppCompatActivity {
         tb_setWaypointCoord = (ToggleButton) findViewById(R.id.tb_setWaypointCoord);
         tb_setWaypointCoord.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (isChecked) {
-                    // The toggle is enabled : To select waypoint on map
-                    mPGV.selectWayPoint();
-                    tb_setWaypointCoord.toggle();
+
+                // Check BT connectionIf not connected to any bluetooth device
+                if(connectedDevice == null) {
+                    Toast.makeText(MainActivity.this, "Please connect to bluetooth device first!", Toast.LENGTH_SHORT).show();
+                } else {
+
+                    if (isChecked) {
+                        // The toggle is enabled : To select waypoint on map
+                        mPGV.selectWayPoint();
+                        tb_setWaypointCoord.toggle();
+                    }
                 }
             }
         });
         tb_setStartCoord = (ToggleButton) findViewById(R.id.tb_setStartCoord);
         tb_setStartCoord.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (isChecked) {
-                    // The toggle is enabled: To select start point on map
-                    mPGV.selectStartPoint();
-                    setStartDirection();
-                    tb_setStartCoord.toggle();
+
+                // Check BT connectionIf not connected to any bluetooth device
+                if(connectedDevice == null) {
+                    Toast.makeText(MainActivity.this, "Please connect to bluetooth device first!", Toast.LENGTH_SHORT).show();
+                } else {
+                    if (isChecked) {
+                        // The toggle is enabled: To select start point on map
+                        mPGV.selectStartPoint();
+                        setStartDirection();
+                        tb_setStartCoord.toggle();
+                    }
                 }
             }
         });
@@ -216,19 +229,28 @@ public class MainActivity extends AppCompatActivity {
         tb_autoManual = (ToggleButton) findViewById(R.id.tb_autoManual);
         tb_autoManual.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (isChecked) {
-                    // The toggle is enabled; Manual Mode
-                    btn_update.setEnabled(true);
-                    Toast.makeText(MainActivity.this, "Manual Mode enabled", Toast.LENGTH_SHORT).show();
-                    updateMap = false;
-                    Log.d(TAG, "Auto updates disabled.");
 
+                if(connectedDevice == null) {
+                    Toast.makeText(MainActivity.this, "Please connect to bluetooth device first!", Toast.LENGTH_SHORT).show();
                 } else {
-                    // The toggle is disabled; Auto Mode
-                    btn_update.setEnabled(false);
-                    Toast.makeText(MainActivity.this, "Auto Mode enabled", Toast.LENGTH_SHORT).show();
-                    updateMap = true;
-                    Log.d(TAG, "Auto updates enabled.");
+                    if (isChecked) {
+                        // The toggle is enabled; Manual Mode
+                        btn_update.setEnabled(true);
+                        Toast.makeText(MainActivity.this, "Manual Mode enabled", Toast.LENGTH_SHORT).show();
+                        updateMap = false;
+                        Log.d(TAG, "Auto updates disabled.");
+
+                    } else {
+                        // The toggle is disabled; Auto Mode
+                        btn_update.setEnabled(false);
+                        forwardButton.setEnabled(false);
+                        leftRotateButton.setEnabled(false);
+                        rightRotateButton.setEnabled(false);
+                        reverseButton.setEnabled(false);
+                        Toast.makeText(MainActivity.this, "Auto Mode enabled", Toast.LENGTH_SHORT).show();
+                        updateMap = true;
+                        Log.d(TAG, "Auto updates enabled.");
+                    }
                 }
             }
         });
@@ -236,15 +258,13 @@ public class MainActivity extends AppCompatActivity {
         tb_exploration = (ToggleButton) findViewById(R.id.tb_exploration);
         tb_exploration.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (isChecked) {
-                    // The toggle is enabled; Start Exploration Mode
-                    startExploration();
-                    //tv_mystatus.setText("Moving");
-
+                if(connectedDevice == null) {
+                    Toast.makeText(MainActivity.this, "Please connect to bluetooth device first!", Toast.LENGTH_SHORT).show();
                 } else {
-                    // The toggle is disabled; Stop Exploration Mode
-                    stopExploration();
-                    //tv_mystatus.setText("Stop");
+                    if (isChecked) {
+                        // The toggle is enabled; Start Exploration Mode
+                        startExploration();
+                    }
                 }
             }
         });
@@ -252,15 +272,15 @@ public class MainActivity extends AppCompatActivity {
         tb_fastestpath = (ToggleButton) findViewById(R.id.tb_fastestpath);
         tb_fastestpath.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (isChecked) {
-                    // The toggle is enabled; Start Fastest Path Mode
-                    startFastestPath();
-                    //tv_mystatus.setText("Moving");
 
+                // Check BT connectionIf not connected to any bluetooth device
+                if(connectedDevice == null) {
+                    Toast.makeText(MainActivity.this, "Please connect to bluetooth device first!", Toast.LENGTH_SHORT).show();
                 } else {
-                    // The toggle is disabled; Stop Fastest Path Mode
-                    stopFastestPath();
-                    //tv_mystatus.setText("Stop");
+                    if (isChecked) {
+                        // The toggle is enabled; Start Fastest Path Mode
+                        startFastestPath();
+                    }
                 }
             }
         });
@@ -394,20 +414,32 @@ public class MainActivity extends AppCompatActivity {
                             endFastestPath();
                             break;
 
-                        // Action: ROBOT_POS
+
+                        //Action: STOP
+                        //No longer using
                         case "10":
+                            Toast.makeText(MainActivity.this, "COMMAND 10: STOP no longer applicable to Android", Toast.LENGTH_SHORT).show();
+                            break;
+
+
+                        // Action: ROBOT_POS
+                        case "11":
                                int col = Integer.parseInt(filteredMsg[3]);
                                int row = Integer.parseInt(filteredMsg[4]);
-
+                               int dir = Integer.parseInt(filteredMsg[5]);
+                               int convertedDirection = mPGV.convertRobotDirectionForAlgo(dir);
+                               mPGV.setRobotDirection(convertedDirection);
                                mPGV.setCurPos(row,col);
-
-
+                               mPGV.refreshMap(updateMap);
                             break;
 
 
                         // Action: MD1
                         case "md1":
                             String mapDes1 = filteredMsg[3];
+
+                            // Part 1
+                            String hexMapDes1 = mapDes1.substring(2,302);
 
                             // use MapDes1 to process MDF String
 
@@ -418,17 +450,31 @@ public class MainActivity extends AppCompatActivity {
                         case "md2":
                             String mapDes2 = filteredMsg[3];
 
+                            // Part 2
                             // use MapDes2 to process MDF String
+                            //mPGV.updateMapInfo(mapDes2, updateMap);
 
                             break;
 
                         case "s":
                             // Sent by Arduino: robot stop
-                            tv_mystatus.setText("Stop");
+                            tv_mystatus.setText(R.string.stop);
                             tv_mystringcmd.setText("");
+                            break;
+
+                        case "a":
+                            // Sent by RPi: Upwards arrow on coordinate
+                            // Format: Rpi|And|A|col,row
+                            int arrow_col = Integer.parseInt(filteredMsg[3]);
+                            int arrow_row = Integer.parseInt(filteredMsg[4]);
+
+                            // METHOD IN mPGV TO DISPLAY ARROW_UP.PNG ON THE COORDINATE
+                            mPGV.displayArrowBlock(arrow_col, arrow_row, updateMap);
+                            //mPGV.refreshMap(updateMap);
+                            break;
 
                         default:
-                            Log.d(TAG, "Switch Case default!");
+                            Log.d(TAG, "Switch Case default! String command not recognised.");
                             break;
                     }
                 }
@@ -467,7 +513,7 @@ public class MainActivity extends AppCompatActivity {
                         else if (robotPosDeg == 270)
                             robotPosDir = 1;
 
-                        // For setting robot start position from AMD, use robotPosCol, robotPosRow, robotPosDir
+                        // For setting robot start position from AMD
                         mPGV.setCurPos(robotPosRow, robotPosCol);
                         mPGV.setRobotDirection(robotPosDir);
                     }
@@ -478,7 +524,7 @@ public class MainActivity extends AppCompatActivity {
                         mPGV.refreshMap();
                         Log.d(TAG, "mdAMD: " + mdAMD);
 
-                        // For setting up map from recevied AMD MDF String, use mdAMD
+                        // For setting up map from received AMD MDF String, use mdAMD
                         Log.d(TAG, "Processing mdAMD...");
                     }
                 }
@@ -504,7 +550,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void startExploration() {
         Toast.makeText(MainActivity.this, "Exploration started", Toast.LENGTH_SHORT).show();
-        String startExp = "And|Alg|6";
+        String startExp = "And|Alg|6|";
         byte[] bytes = startExp.getBytes(Charset.defaultCharset());
         BluetoothChat.writeMsg(bytes);
         Log.d(TAG, "Android Controller: Start Exploration");
@@ -512,20 +558,8 @@ public class MainActivity extends AppCompatActivity {
         tv_mystatus.setText(R.string.moving);
     }
 
-    public void stopExploration() {
-
-        Toast.makeText(MainActivity.this, "Exploration stopped", Toast.LENGTH_SHORT).show();
-        String stopExp = "And|Alg|7";
-        byte[] bytes = stopExp.getBytes(Charset.defaultCharset());
-        BluetoothChat.writeMsg(bytes);
-        Log.d(TAG, "Android Controller: Stop Exploration");
-        tv_mystringcmd.setText(R.string.stopexp);
-        tv_mystatus.setText(R.string.stop);
-
-    }
-
     public void endExploration() {
-        Log.d(TAG, "Algorithm: End Exploration.");
+        Log.d(TAG, "Algorithm: End Exploration");
         tv_mystringcmd.setText(R.string.endexp);
         tv_mystatus.setText(R.string.stop);
         Toast.makeText(MainActivity.this, "Exploration ended", Toast.LENGTH_SHORT).show();
@@ -533,24 +567,12 @@ public class MainActivity extends AppCompatActivity {
 
     public void startFastestPath() {
         Toast.makeText(MainActivity.this, "Fastest Path started", Toast.LENGTH_SHORT).show();
-        String startFP = "And|Alg|8";
+        String startFP = "And|Alg|8|";
         byte[] bytes = startFP.getBytes(Charset.defaultCharset());
         BluetoothChat.writeMsg(bytes);
         Log.d(TAG, "Android Controller: Start Fastest Path");
         tv_mystringcmd.setText(R.string.startfp);
         tv_mystatus.setText(R.string.moving);
-    }
-
-    public void stopFastestPath() {
-
-        Toast.makeText(MainActivity.this, "Exploration stopped", Toast.LENGTH_SHORT).show();
-        String stopFP = "And|Alg|9";
-        byte[] bytes = stopFP.getBytes(Charset.defaultCharset());
-        BluetoothChat.writeMsg(bytes);
-        Log.d(TAG, "Android Controller: Stop Fastest Path");
-        tv_mystringcmd.setText(R.string.stopfp);
-        tv_mystatus.setText(R.string.stop);
-
     }
 
     public void endFastestPath() {
@@ -564,9 +586,9 @@ public class MainActivity extends AppCompatActivity {
     public void onClickUpdate(View view) {
 
         Log.d(TAG, "Updating....");
-        mPGV.refreshMap();
+        mPGV.refreshMap(true);
         Log.d(TAG, "Update completed!");
-        Toast.makeText(MainActivity.this,"Update Completed.", Toast.LENGTH_SHORT).show();
+        Toast.makeText(MainActivity.this,"Update completed", Toast.LENGTH_SHORT).show();
     }
 
 

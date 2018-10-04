@@ -30,8 +30,6 @@
     <string name="stop">Stopped</string>
     <string name="calibrating">Calibrating robot...</string>
     <string name="startexp">Start Exploration</string>
-    <string name="stopexp">Stop Exploration</string>
-    <string name="stopfp">Stop Fastest Path</string>
     <string name="endexp">End Exploration</string>
     <string name="startfp">Start Fastest Path</string>
     <string name="endfp">End Fastest Path</string>
