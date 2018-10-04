@@ -31,7 +31,7 @@ public class PixelGridView extends View {
     private int frontCurPos, backCurPos, leftCurPos, rightCurPos;
     private int robotDirection;
     private int[] startCoord = new int[2];
-    private int[] arrowImageCoord;
+    private ArrayList<int[]> arrowImageCoords = new ArrayList<>();
     private boolean autoUpdate;
     private int[] curCoord = new int[2];
     private ArrayList<int[]> wayPoints = new ArrayList<int[]>();
@@ -69,7 +69,7 @@ public class PixelGridView extends View {
     public void initializeMap() {
         this.setNumColumns(15);
         this.setNumRows(20);
-        this.arrowImageCoord = new int[2];
+//        this.arrowImageCoord = new int[2];
         this.obstacles = new boolean[this.getNumColumns()][this.getNumRows()];
         this.cellExplored = new boolean[this.getNumColumns()][this.getNumRows()];
 
@@ -84,9 +84,9 @@ public class PixelGridView extends View {
         this.setRobotDirection(0);
         this.setAutoUpdate(true);
 
-        this.setObstacle(3, 4, true);
-        this.setObstacle(9, 12,true);
-        this.setArrowImageCoord( 5,5);
+//        this.setObstacle(3, 4, true);
+//        this.setObstacle(9, 12,true);
+//        this.setArrowImageCoord( 5,5);
     }
 
     public void setObstacle(int i, int j, boolean obstacle) {
@@ -242,12 +242,15 @@ public class PixelGridView extends View {
     }
 
     public void setArrowImageCoord(int column, int row) {
-        this.arrowImageCoord[0] = column;
-        this.arrowImageCoord[1] = row;
+        int[] arrowImageCoord = new int[2];
+        arrowImageCoord[0] = column;
+        arrowImageCoord[1] = row;
+        this.arrowImageCoords.add(arrowImageCoord);
+
     }
 
-    public int[] getArrowImageCoord(){
-        return this.arrowImageCoord;
+    public ArrayList<int[]> getArrowImageCoords(){
+        return this.arrowImageCoords;
     }
 
     public int convertRobotDirectionForAlgo(int originalDir) {
@@ -479,12 +482,18 @@ public class PixelGridView extends View {
     }
 
     public void arrowMapping (Canvas canvas){
-        int[] arrowImageCoord = this.getArrowImageCoord();
-        RectF rect = new RectF(arrowImageCoord[0] * cellWidth, (19 - arrowImageCoord[1]) * cellHeight,
-                (arrowImageCoord[0] + 1) * cellWidth, (20 - arrowImageCoord[1]) * cellHeight);
+        ArrayList<int[]> arrowImageCoords = this.getArrowImageCoords();
+        if(arrowImageCoords.size() == 0) return;
 
-        Bitmap arrowBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.arrow_up);
-        canvas.drawBitmap(arrowBitmap,null, rect, null);
+        RectF rect;
+        for (int i = 0; i < arrowImageCoords.size(); i++){
+            rect = new RectF(arrowImageCoords.get(i)[0] * cellWidth, (19 - arrowImageCoords.get(i)[1]) * cellHeight,
+                    (arrowImageCoords.get(i)[0] + 1) * cellWidth, (20 - arrowImageCoords.get(i)[1]) * cellHeight);
+
+            Bitmap arrowBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.arrow_up);
+            canvas.drawBitmap(arrowBitmap,null, rect, null);
+        }
+
 
     }
 
@@ -539,8 +548,9 @@ public class PixelGridView extends View {
 //            this.exploredTile(prevCoord, curCoord);
 
             this.setCurPos(pos);
-
         }
+
+        return;
     }
 
     public void rotateLeft () {
@@ -587,18 +597,22 @@ public class PixelGridView extends View {
     public boolean checkReachedObstacle ( int[] pos, int dir){
         boolean[][] obstacle = this.getObstacles();
         if (dir == 0) {
+            if(pos[0] == 0) return true;
             if (obstacle[pos[1]][20 - pos[0]] || obstacle[pos[1] + 1][20 - pos[0]] || obstacle[pos[3]][20 - pos[0]]) {
                 return true;
             }
         } else if (dir == 1) {
+            if(pos[1] == 0) return true;
             if (obstacle[pos[1] - 1][17 - pos[0]] || obstacle[pos[1] - 1][18 - pos[0]] || obstacle[pos[1] - 1][19 - pos[0]]) {
                 return true;
             }
         } else if (dir == 2) {
+            if(pos[2] == 19) return true;
             if (obstacle[pos[1]][18 - pos[2]] || obstacle[pos[1] + 1][18 - pos[2]] || obstacle[pos[3]][18 - pos[2]]) {
                 return true;
             }
         } else {
+            if(pos[3] == 14) return true;
             if (obstacle[pos[3] + 1][17 - pos[0]] || obstacle[pos[3] + 1][18 - pos[0]] || obstacle[pos[3] + 1][19 - pos[0]]) {
                 return true;
             }

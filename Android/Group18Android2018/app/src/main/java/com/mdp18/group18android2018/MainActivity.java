@@ -83,7 +83,7 @@ public class MainActivity extends AppCompatActivity {
                 } else {
 
                     //If already connected to a bluetooth device
-                    String navigate = "And|Ard|0|1";
+                    String navigate = "And|Ard|0|";
                     byte[] bytes = navigate.getBytes(Charset.defaultCharset());
                     BluetoothChat.writeMsg(bytes);
                     Log.d(TAG, "Android Controller: Move Forward sent");
@@ -148,7 +148,7 @@ public class MainActivity extends AppCompatActivity {
                 } else {
 
                     //If already connected to a bluetooth device
-                    String navigate = "And|Ard|3|1";
+                    String navigate = "And|Ard|3|";
                     byte[] bytes = navigate.getBytes(Charset.defaultCharset());
                     BluetoothChat.writeMsg(bytes);
                     Log.d(TAG, "Android Controller: Move Backwards sent");
