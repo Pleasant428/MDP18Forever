@@ -83,10 +83,6 @@ public class PixelGridView extends View {
         this.setStartPos(17, 0, 19, 2);
         this.setRobotDirection(0);
         this.setAutoUpdate(true);
-
-        this.setObstacle(3, 4, true);
-        this.setObstacle(9, 12,true);
-        this.setArrowImageCoord( 5,5);
     }
 
     public void setObstacle(int i, int j, boolean obstacle) {

@@ -7,6 +7,10 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -20,6 +24,7 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
@@ -29,7 +34,7 @@ import org.w3c.dom.Text;
 import java.nio.charset.Charset;
 import java.util.UUID;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements SensorEventListener {
     private static final String TAG = "MainActivity";
 
 //    boolean updateMap = true;
@@ -39,6 +44,13 @@ public class MainActivity extends AppCompatActivity {
     Button btn_update, btn_sendToAlgo;
     TextView tv_status, tv_map_exploration, tv_mystatus, tv_mystringcmd;
     ToggleButton tb_setWaypointCoord, tb_setStartCoord, tb_autoManual, tb_fastestpath, tb_exploration;
+
+
+    // FOR TILT SENSOR
+    private SensorManager sensorManager;
+    private Sensor sensor;
+    boolean tiltNavi;
+    Switch tiltBtn;
 
 
     // For bluetooth connection status
@@ -65,11 +77,23 @@ public class MainActivity extends AppCompatActivity {
         LocalBroadcastManager.getInstance(this).registerReceiver(incomingMessageReceiver, new IntentFilter("IncomingMsg"));
 
 
+
         mPGV = findViewById(R.id.map);
         mPGV.initializeMap();
 
         btn_update = (Button) findViewById(R.id.btn_update);
         btn_update.setEnabled(false);
+
+        //TILT
+        tiltNavi = false;
+        tiltBtn = findViewById(R.id.tiltSwitch);
+        //DECLARING SENSOR MANAGER AND SENSOR TYPE
+        sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        sensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+
+        //REGISTER TILT MOTION SENSOR
+        sensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_NORMAL);
+
 
         // Forward button
         forwardButton = (ImageButton) findViewById(R.id.fwd_btn);
@@ -78,7 +102,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
 
                 // Check BT connection If not connected to any bluetooth device
-                if(connectedDevice == null) {
+                if (connectedDevice == null) {
                     Toast.makeText(MainActivity.this, "Please connect to bluetooth device first!", Toast.LENGTH_SHORT).show();
                 } else {
 
@@ -100,7 +124,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
 
                 // Check BT connectionIf not connected to any bluetooth device
-                if(connectedDevice == null) {
+                if (connectedDevice == null) {
                     Toast.makeText(MainActivity.this, "Please connect to bluetooth device first!", Toast.LENGTH_SHORT).show();
                 } else {
 
@@ -143,7 +167,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 // Check BT connectionIf not connected to any bluetooth device
-                if(connectedDevice == null) {
+                if (connectedDevice == null) {
                     Toast.makeText(MainActivity.this, "Please connect to bluetooth device first!", Toast.LENGTH_SHORT).show();
                 } else {
 
@@ -162,7 +186,7 @@ public class MainActivity extends AppCompatActivity {
         tv_status = (TextView) findViewById(R.id.tv_status);
         tv_map_exploration = (TextView) findViewById(R.id.tv_map_exploration);
 
-        tv_mystatus =  (TextView) findViewById(R.id.tv_mystatus);
+        tv_mystatus = (TextView) findViewById(R.id.tv_mystatus);
         tv_mystatus.setText("Stop");
 
         tv_mystringcmd = (TextView) findViewById(R.id.tv_mystringcmd);
@@ -172,7 +196,7 @@ public class MainActivity extends AppCompatActivity {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
 
                 // Check BT connectionIf not connected to any bluetooth device
-                if(connectedDevice == null) {
+                if (connectedDevice == null) {
                     Toast.makeText(MainActivity.this, "Please connect to bluetooth device first!", Toast.LENGTH_SHORT).show();
                 } else {
 
@@ -189,7 +213,7 @@ public class MainActivity extends AppCompatActivity {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
 
                 // Check BT connectionIf not connected to any bluetooth device
-                if(connectedDevice == null) {
+                if (connectedDevice == null) {
                     Toast.makeText(MainActivity.this, "Please connect to bluetooth device first!", Toast.LENGTH_SHORT).show();
                 } else {
                     if (isChecked) {
@@ -209,7 +233,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 // Check BT connectionIf not connected to any bluetooth device
-                if(connectedDevice == null) {
+                if (connectedDevice == null) {
                     Toast.makeText(MainActivity.this, "Please connect to bluetooth device first!", Toast.LENGTH_SHORT).show();
                 } else {
 
@@ -230,7 +254,7 @@ public class MainActivity extends AppCompatActivity {
         tb_autoManual.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
 
-                if(connectedDevice == null) {
+                if (connectedDevice == null) {
                     Toast.makeText(MainActivity.this, "Please connect to bluetooth device first!", Toast.LENGTH_SHORT).show();
                 } else {
                     if (isChecked) {
@@ -264,7 +288,7 @@ public class MainActivity extends AppCompatActivity {
         tb_exploration = (ToggleButton) findViewById(R.id.tb_exploration);
         tb_exploration.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if(connectedDevice == null) {
+                if (connectedDevice == null) {
                     Toast.makeText(MainActivity.this, "Please connect to bluetooth device first!", Toast.LENGTH_SHORT).show();
                 } else {
                     if (isChecked) {
@@ -280,7 +304,7 @@ public class MainActivity extends AppCompatActivity {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
 
                 // Check BT connectionIf not connected to any bluetooth device
-                if(connectedDevice == null) {
+                if (connectedDevice == null) {
                     Toast.makeText(MainActivity.this, "Please connect to bluetooth device first!", Toast.LENGTH_SHORT).show();
                 } else {
                     if (isChecked) {
@@ -293,21 +317,21 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    public boolean onCreateOptionsMenu (Menu menu) {
+    public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu if present
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
 
     @Override
-    public boolean onOptionsItemSelected (MenuItem item) {
-        switch (item.getItemId()){
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
             case R.id.btn_bluetoothconnect:
-                startActivity(new Intent(MainActivity.this,BluetoothConnect.class));
+                startActivity(new Intent(MainActivity.this, BluetoothConnect.class));
                 return true;
 
             case R.id.btn_reconfig:
-                startActivity(new Intent(MainActivity.this,ReconfigStringCommand.class));
+                startActivity(new Intent(MainActivity.this, ReconfigStringCommand.class));
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -330,7 +354,7 @@ public class MainActivity extends AppCompatActivity {
             tv_mystringcmd.setText(incomingMsg);
 
             // Filter empty and concatenated string from receiving channel
-            if(incomingMsg.length() > 8 && incomingMsg.length() < 345) {
+            if (incomingMsg.length() > 8 && incomingMsg.length() < 345) {
 
                 // Check if string is for android
                 if (incomingMsg.substring(4, 7).equals("And")) {
@@ -366,7 +390,7 @@ public class MainActivity extends AppCompatActivity {
                             break;
 
 
-                         // Action: TURN_RIGHT
+                        // Action: TURN_RIGHT
                         case "2":
                             mPGV.rotateRight();
                             tv_mystringcmd.setText(R.string.right);
@@ -374,7 +398,7 @@ public class MainActivity extends AppCompatActivity {
                             break;
 
 
-                    // Action: BACKWARDS
+                        // Action: BACKWARDS
                         case "3":
                             for (int counter = Integer.parseInt(filteredMsg[3]); counter >= 1; counter--) {
                                 mPGV.moveBackwards();
@@ -430,12 +454,12 @@ public class MainActivity extends AppCompatActivity {
 
                         // Action: ROBOT_POS
                         case "11":
-                               int col = Integer.parseInt(filteredMsg[3]);
-                               int row = Integer.parseInt(filteredMsg[4]);
-                               int dir = Integer.parseInt(filteredMsg[5]);
-                               int convertedDirection = mPGV.convertRobotDirectionForAlgo(dir);
-                               mPGV.setRobotDirection(convertedDirection);
-                               mPGV.setCurPos(row,col);
+                            int col = Integer.parseInt(filteredMsg[3]);
+                            int row = Integer.parseInt(filteredMsg[4]);
+                            int dir = Integer.parseInt(filteredMsg[5]);
+                            int convertedDirection = mPGV.convertRobotDirectionForAlgo(dir);
+                            mPGV.setRobotDirection(convertedDirection);
+                            mPGV.setCurPos(row, col);
 //                               mPGV.refreshMap(mPGV.getAutoUpdate());
                             break;
 
@@ -445,7 +469,7 @@ public class MainActivity extends AppCompatActivity {
                             String mapDes1 = filteredMsg[3];
 
                             // Part 1
-                            String hexMapDes1 = mapDes1.substring(2,302);
+                            String hexMapDes1 = mapDes1.substring(2, 302);
 
                             // use MapDes1 to process MDF String
 
@@ -486,7 +510,7 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 // For receiving AMD robotPosition and grid
-                if (incomingMsg.substring(0,1).equals("{")) {
+                if (incomingMsg.substring(0, 1).equals("{")) {
 
 
                     Log.d(TAG, "Incoming Message from AMD: " + incomingMsg);
@@ -522,9 +546,7 @@ public class MainActivity extends AppCompatActivity {
                         // For setting robot start position from AMD
                         mPGV.setCurPos(robotPosRow, robotPosCol);
                         mPGV.setRobotDirection(robotPosDir);
-                    }
-
-                    else if (filteredMsg[0].equals("grid")) {
+                    } else if (filteredMsg[0].equals("grid")) {
                         String mdAMD = filteredMsg[1];
                         mPGV.mapDescriptorChecklist(mdAMD);
                         mPGV.refreshMap(mPGV.getAutoUpdate());
@@ -594,7 +616,7 @@ public class MainActivity extends AppCompatActivity {
         Log.d(TAG, "Updating....");
         mPGV.refreshMap(true);
         Log.d(TAG, "Update completed!");
-        Toast.makeText(MainActivity.this,"Update completed", Toast.LENGTH_SHORT).show();
+        Toast.makeText(MainActivity.this, "Update completed", Toast.LENGTH_SHORT).show();
     }
 
 
@@ -667,6 +689,122 @@ public class MainActivity extends AppCompatActivity {
 
         }
     };
+
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {
+
+    }
+
+
+    //EXTENSION BEYOND THE BASICS
+
+    /*
+     ONCLICKLISTENER FOR TILT BUTTON
+ */
+    public void onClickTiltSwitch() {
+
+        tiltBtn.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+
+                if (isChecked) {
+
+                    tiltNavi = true;
+                    Toast.makeText(MainActivity.this, "Tilt Switch On!!", Toast.LENGTH_SHORT).show();
+
+                } else {
+
+                    tiltNavi = false;
+                    Toast.makeText(MainActivity.this, "Tilt Switch Off!!", Toast.LENGTH_SHORT).show();
+
+
+                }
+            }
+        });
+
+
+    }
+
+    //METHOD FOR TILT SENSING (NAVIGATION)
+    @Override
+    public void onSensorChanged(SensorEvent event) {
+        float x = event.values[0];
+        float y = event.values[1];
+
+        //CHECK IF TILT SWITCH IS ENABLED
+        if (tiltNavi) {
+
+            Log.d(TAG, "check");
+
+            //CHECK IF CONNECTED TO DEVICE FIRST
+            if (connectedDevice == null) {
+                Toast.makeText(MainActivity.this, "Please Connect to a Device First!!",
+                        Toast.LENGTH_SHORT).show();
+            } else {
+
+                if (Math.abs(x) > Math.abs(y)) {
+                    if (x < 0) {
+                        Log.d("MainActivity:", "RIGHT TILT!!");
+
+                        String navi = "Arduino|Android|R|Nil";
+                        byte[] bytes = navi.getBytes(Charset.defaultCharset());
+                        BluetoothChat.writeMsg(bytes);
+                       /* Toast.makeText(MainActivity.this, "Right Movement Detected!!",
+                                Toast.LENGTH_SHORT).show();*/
+
+                        tv_mystatus.setText("Moving");
+                        tv_mystringcmd.setText(R.string.navRight);
+                        mPGV.rotateRight();
+
+
+                    }
+                    if (x > 0) {
+                        Log.d("MainActivity:", "LEFT TILT!!");
+
+                        String navi = "Arduino|Android|L|Nil";
+                        byte[] bytes = navi.getBytes(Charset.defaultCharset());
+                        BluetoothChat.writeMsg(bytes);
+                        /*Toast.makeText(MainActivity.this, "Left Movement Detected!!",
+                                Toast.LENGTH_SHORT).show();*/
+
+                        tv_mystatus.setText("Moving");
+                        tv_mystringcmd.setText(R.string.navLeft);
+                        mPGV.rotateLeft();
+                    }
+                } else {
+                    if (y < 0) {
+                        Log.d("MainActivity:", "UP TILT!!");
+
+                        String navi = "Arduino|Android|F|01";
+                        byte[] bytes = navi.getBytes(Charset.defaultCharset());
+                        BluetoothChat.writeMsg(bytes);
+                        /*Toast.makeText(MainActivity.this, "Forward Movement Detected!!",
+                                Toast.LENGTH_SHORT).show();*/
+
+                        tv_mystatus.setText("Moving");
+                        tv_mystringcmd.setText(R.string.navFwd);
+                        mPGV.moveForward();
+                    }
+                    if (y > 0) {
+                        Log.d("MainActivity:", "DOWN TILT!!");
+
+                        String navi = "Arduino|Android|T|Nil";
+                        byte[] bytes = navi.getBytes(Charset.defaultCharset());
+                        BluetoothChat.writeMsg(bytes);
+                        /*Toast.makeText(MainActivity.this, "Down Movement Detected!!",
+                                Toast.LENGTH_SHORT).show();*/
+
+                        tv_mystatus.setText("Moving");
+                        tv_mystringcmd.setText(R.string.navRev);
+                        mPGV.moveBackwards();
+                    }
+                }
+       /* if (x > (-2) && x < (2) && y > (-2) && y < (2)) {
+            Log.d("MainActivity:", "NOT TILTED!!");
+
+        }*/
+            }
+        }
+    }
 
 
 }
