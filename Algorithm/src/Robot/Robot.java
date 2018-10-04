@@ -270,6 +270,7 @@ public class Robot {
 				NetMgr.getInstance().send("Alg|And|"+Command.ALIGN_RIGHT.ordinal()+"|");
 				NetMgr.getInstance().send("Alg|Ard|"+Command.ALIGN_RIGHT.ordinal()+"|");
 				sense(exploredMap, map);
+				return;
 			}
 			
 			//Check Right distance
@@ -286,6 +287,7 @@ public class Robot {
 				NetMgr.getInstance().recieve(msg);
 				NetMgr.getInstance().send("Alg|Ard|"+Command.ALIGN_RIGHT.ordinal()+"|");
 				sense(exploredMap, map);
+				return;
 			}
 			
 			//Checking Front Alignment too close/far from location
@@ -310,6 +312,7 @@ public class Robot {
 						NetMgr.getInstance().send("Alg|And|"+Command.ALIGN_FRONT.ordinal()+"|");
 					}
 					sense(exploredMap, map);
+					return;
 				}
 					 
 			}

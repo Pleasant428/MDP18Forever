@@ -133,10 +133,12 @@ public class Exploration {
 		// robot already at start
 		if (robot.getPosition().equals(start)&&loc.equals(start)) {
 			while (robot.getDirection() != Direction.UP) {
-				try {
-					TimeUnit.MILLISECONDS.sleep(RobotConstants.MOVE_SPEED/stepPerSecond);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
+				if(sim) {
+					try {
+						TimeUnit.MILLISECONDS.sleep(RobotConstants.MOVE_SPEED/stepPerSecond);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
 				}
 				robot.sense(exploredMap, map);
 				robot.move(Command.TURN_RIGHT, RobotConstants.MOVE_STEPS, exploredMap);
@@ -154,10 +156,12 @@ public class Exploration {
 		for (Command c : commands) {
 			robot.move(c, RobotConstants.MOVE_STEPS, exploredMap);
 			robot.sense(exploredMap, map);
-			try {
-				TimeUnit.MILLISECONDS.sleep(RobotConstants.MOVE_SPEED/stepPerSecond);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
+			if(sim) {
+				try {
+					TimeUnit.MILLISECONDS.sleep(RobotConstants.MOVE_SPEED/stepPerSecond);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
 			}
 		}
 
