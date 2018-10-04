@@ -631,7 +631,7 @@ public class PixelGridView extends View {
     }
 
     // Display Arrow Block on Grid Map
-    public void displayArrowBlock (int arrowCol, int arrowRow, boolean updateMap) {
+    public void displayArrowBlock (int arrowCol, int arrowRow) {
 
 
 

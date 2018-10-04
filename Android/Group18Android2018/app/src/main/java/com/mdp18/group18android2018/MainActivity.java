@@ -236,10 +236,10 @@ public class MainActivity extends AppCompatActivity {
                     if (isChecked) {
                         // The toggle is enabled; Manual Mode
                         btn_update.setEnabled(true);
-                        forwardButton.setEnabled(true);
-                        leftRotateButton.setEnabled(true);
-                        rightRotateButton.setEnabled(true);
-                        reverseButton.setEnabled(true);
+                        forwardButton.setEnabled(false);
+                        leftRotateButton.setEnabled(false);
+                        rightRotateButton.setEnabled(false);
+                        reverseButton.setEnabled(false);
                         Toast.makeText(MainActivity.this, "Manual Mode enabled", Toast.LENGTH_SHORT).show();
 //                        updateMap = false;
                         mPGV.setAutoUpdate(false);
@@ -249,10 +249,10 @@ public class MainActivity extends AppCompatActivity {
                         // The toggle is disabled; Auto Mode
                         mPGV.refreshMap(true);
                         btn_update.setEnabled(false);
-                        forwardButton.setEnabled(false);
-                        leftRotateButton.setEnabled(false);
-                        rightRotateButton.setEnabled(false);
-                        reverseButton.setEnabled(false);
+                        forwardButton.setEnabled(true);
+                        leftRotateButton.setEnabled(true);
+                        rightRotateButton.setEnabled(true);
+                        reverseButton.setEnabled(true);
                         Toast.makeText(MainActivity.this, "Auto Mode enabled", Toast.LENGTH_SHORT).show();
                         mPGV.setAutoUpdate(true);
                         Log.d(TAG, "Auto updates enabled.");
@@ -475,7 +475,7 @@ public class MainActivity extends AppCompatActivity {
                             int arrow_row = Integer.parseInt(filteredMsg[4]);
 
                             // METHOD IN mPGV TO DISPLAY ARROW_UP.PNG ON THE COORDINATE
-                            mPGV.displayArrowBlock(arrow_col, arrow_row, mPGV.getAutoUpdate());
+                            mPGV.displayArrowBlock(arrow_col, arrow_row);
                             //mPGV.refreshMap(updateMap);
                             break;
 
