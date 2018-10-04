@@ -199,6 +199,7 @@ public class Robot {
 	//Moving using the Command enum
 	public void move(Command m, int steps, Map exploredMap) {
 		if(!sim) {
+			System.out.println("Alg|Ard|"+m.ordinal()+"|"+steps);
 			NetMgr.getInstance().send("Alg|Ard|"+m.ordinal()+"|"+steps);
 			NetMgr.getInstance().send("Alg|And|"+m.ordinal()+"|"+steps);
 		}
@@ -253,7 +254,7 @@ public class Robot {
 		
 		if(!sim) {
 			String msg = null;
-			NetMgr.getInstance().recieve(msg);
+			msg = NetMgr.getInstance().recieve();
 			String [] msgArr = msg.split("|");
 			String [] strSensor = msgArr[3].split(",");
 			System.out.println("Recieved "+strSensor.length+" sensor data");
@@ -267,8 +268,8 @@ public class Robot {
 			
 			//Check Right Alignment
 			if((sensorData[3][0] - sensorData[4][0]) > RobotConstants.RIGHT_THRES){
-				NetMgr.getInstance().send("Alg|And|"+Command.ALIGN_RIGHT.ordinal()+"|");
-				NetMgr.getInstance().send("Alg|Ard|"+Command.ALIGN_RIGHT.ordinal()+"|");
+				NetMgr.getInstance().send("Alg|And|"+Command.ALIGN_RIGHT.ordinal()+"|0");
+				NetMgr.getInstance().send("Alg|Ard|"+Command.ALIGN_RIGHT.ordinal()+"|0");
 				sense(exploredMap, map);
 				return;
 			}
@@ -278,14 +279,14 @@ public class Robot {
 			double curRightAvg = (sensorData[3][0] + sensorData[3][0])/2;
 			// if too close/ far from right wall
 			if(Math.abs(curRightAvg - prevRightAvg) > RobotConstants.RIGHT_DIS_THRES){
-				NetMgr.getInstance().send("Alg|And|"+Command.ALIGN_FRONT+"|");
-				NetMgr.getInstance().send("Alg|Ard|"+Command.TURN_RIGHT.ordinal()+"|");
-				NetMgr.getInstance().recieve(msg);
-				NetMgr.getInstance().send("Alg|Ard|"+Command.ALIGN_FRONT.ordinal()+"|");
-				NetMgr.getInstance().recieve(msg);
-				NetMgr.getInstance().send("Alg|Ard|"+Command.TURN_LEFT.ordinal()+"|");
-				NetMgr.getInstance().recieve(msg);
-				NetMgr.getInstance().send("Alg|Ard|"+Command.ALIGN_RIGHT.ordinal()+"|");
+				NetMgr.getInstance().send("Alg|And|"+Command.ALIGN_FRONT+"|0");
+				NetMgr.getInstance().send("Alg|Ard|"+Command.TURN_RIGHT.ordinal()+"|0");
+				msg = NetMgr.getInstance().recieve();
+				NetMgr.getInstance().send("Alg|Ard|"+Command.ALIGN_FRONT.ordinal()+"|0");
+				msg = NetMgr.getInstance().recieve();
+				NetMgr.getInstance().send("Alg|Ard|"+Command.TURN_LEFT.ordinal()+"|0");
+				msg = NetMgr.getInstance().recieve();
+				NetMgr.getInstance().send("Alg|Ard|"+Command.ALIGN_RIGHT.ordinal()+"|0");
 				sense(exploredMap, map);
 				return;
 			}
@@ -305,11 +306,11 @@ public class Robot {
 				if(frontCal) {
 					//Unable to calibrate, as obstacles in front of each sensor is not at uniform distance request sensor data again
 					if((sensorData[2][1]<sensorData[0][1] || sensorData[2][1]<sensorData[1][1]) && sensorData[0][1] != sensorData[1][1])
-						NetMgr.getInstance().send("Alg|Ard|SS|");
+						NetMgr.getInstance().send("Alg|Ard|S|0");
 					else
 					{
-						NetMgr.getInstance().send("Alg|Ard|"+Command.ALIGN_FRONT.ordinal()+"|");
-						NetMgr.getInstance().send("Alg|And|"+Command.ALIGN_FRONT.ordinal()+"|");
+						NetMgr.getInstance().send("Alg|Ard|"+Command.ALIGN_FRONT.ordinal()+"|0");
+						NetMgr.getInstance().send("Alg|And|"+Command.ALIGN_FRONT.ordinal()+"|0");
 					}
 					sense(exploredMap, map);
 					return;

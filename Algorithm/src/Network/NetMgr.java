@@ -7,8 +7,8 @@ import java.net.UnknownHostException;
 //Class to Manage Connection
 public class NetMgr {
 
-	private String ipAddr;
-	private int port;
+	private String ipAddr = "192.168.18.18";
+	private int port = 8080;
 	private static Socket socket = null;
 
 	private BufferedWriter out;
@@ -18,11 +18,6 @@ public class NetMgr {
 	
 	public NetMgr() {
 		
-	}
-	
-	public NetMgr(String ipAddr, int port) {
-		this.ipAddr = ipAddr;
-		this.port = port;
 	}
 	
 	public static NetMgr getInstance() {
@@ -102,7 +97,7 @@ public class NetMgr {
 			out.flush();
 			System.out.println("Message: "+msg+" sent!");
 			
-		} catch (IOException e) {
+		} catch (Exception e) {
 			
 			System.out.println("Sending Message Failed (IOException)!");
 			e.printStackTrace();
@@ -113,7 +108,7 @@ public class NetMgr {
 	}
 
 	// Send Message
-	public String recieve(String msg) {
+	public String recieve() {
 		try {
 			System.out.println("Recieving Message...");
 			// KIV determine format for message traversal
@@ -125,7 +120,7 @@ public class NetMgr {
 			}
 			
 		} catch (Exception e) {
-			System.out.println("Recieving Message Failed (IOException)!");
+			System.out.println("Recieving Message Failed!");
 			e.printStackTrace();
 		}
 		

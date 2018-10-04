@@ -289,12 +289,4 @@ public class Exploration {
 		return exploredMap.checkValidMove(robot.getPosition().y + rowInc, robot.getPosition().x + colInc);
 
 	}
-	
-	public void sendMapDescriptor() {
-		MapDescriptor mp = new MapDescriptor();
-		String data = mp.generateMDFStringPart1(exploredMap);
-		NetMgr.getInstance().send("Alg|And|MD1|"+data);
-		data = mp.generateMDFStringPart2(exploredMap);
-		NetMgr.getInstance().send("Alg|And|MD2|"+data);
-	}
 }

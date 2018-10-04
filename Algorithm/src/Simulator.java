@@ -52,7 +52,7 @@ public class Simulator extends Application {
 	private boolean setWaypoint = false;
 	private boolean setRobot = false;
 	
-	private static final NetMgr netMgr = new NetMgr("192.168.18.18", 8080);
+	private static final NetMgr netMgr = new NetMgr();
 
 	// GUI Components
 	private int stage = 1;
@@ -606,13 +606,24 @@ public class Simulator extends Application {
 				break;
 
 			case REAL_EXP:
+				netMgr.startConn();
 				sim = false;
+				String msg = null;
+				robot.setSim(false);
 				System.out.println("RE Here");
+				netMgr.send("Alg|Ard|S|0");
+//				msg = netMgr.recieve();
+				robot.sense(exploredMap, map);
+				exploredMap.draw(true);
+				robot.draw();
+				expTask = new Thread(new ExplorationTask());
+				expTask.start();
 				break;
 
 			case SIM_FAST:
 				sim = true;
 				System.out.println("SF Here");
+				
 				exploredMap.draw(true);
 				robot.draw();
 				fastTask = new Thread(new FastTask());
@@ -687,22 +698,6 @@ public class Simulator extends Application {
 	    }
 	}
 	
-	
-	class NetTask extends Task<Integer>{
-		protected Integer call() throws Exception {
-			netMgr.startConn();
-			
-			System.out.println("Starting");
-			Scanner sc = new Scanner(System.in);
-			String msg = "";
-			while(true) {
-				netMgr.recieve(msg);
-				String[] msgArr = msg.split("|");
-				
-			}
-		}
-	}
-
 
 	// Event Handler for resetMapBtn
 	private EventHandler<MouseEvent> resetMapBtnClick = new EventHandler<MouseEvent>() {
