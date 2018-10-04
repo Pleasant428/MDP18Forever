@@ -4,9 +4,13 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.RectF;
+import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -27,6 +31,7 @@ public class PixelGridView extends View {
     private int frontCurPos, backCurPos, leftCurPos, rightCurPos;
     private int robotDirection;
     private int[] startCoord = new int[2];
+    private int[] arrowImageCoord;
     private boolean autoUpdate;
     private int[] curCoord = new int[2];
     private ArrayList<int[]> wayPoints = new ArrayList<int[]>();
@@ -64,6 +69,7 @@ public class PixelGridView extends View {
     public void initializeMap() {
         this.setNumColumns(15);
         this.setNumRows(20);
+        this.arrowImageCoord = new int[2];
         this.obstacles = new boolean[this.getNumColumns()][this.getNumRows()];
         this.cellExplored = new boolean[this.getNumColumns()][this.getNumRows()];
 
@@ -80,6 +86,7 @@ public class PixelGridView extends View {
 
         this.setObstacle(3, 4, true);
         this.setObstacle(9, 12,true);
+        this.setArrowImageCoord( 5,5);
     }
 
     public void setObstacle(int i, int j, boolean obstacle) {
@@ -234,6 +241,15 @@ public class PixelGridView extends View {
         return this.robotDirection;
     }
 
+    public void setArrowImageCoord(int column, int row) {
+        this.arrowImageCoord[0] = column;
+        this.arrowImageCoord[1] = row;
+    }
+
+    public int[] getArrowImageCoord(){
+        return this.arrowImageCoord;
+    }
+
     public int convertRobotDirectionForAlgo(int originalDir) {
         // If getRobotDirection == DOWN
         if (originalDir == 2)
@@ -310,7 +326,7 @@ public class PixelGridView extends View {
         this.setWayPointColor(canvas, cyanPaint);
         this.robotPosMapping(canvas, pos, robotDirection);
         this.obstacleMapping(canvas);
-
+        this.arrowMapping(canvas);
     }
 
 
@@ -460,6 +476,16 @@ public class PixelGridView extends View {
                 }
             }
         }
+    }
+
+    public void arrowMapping (Canvas canvas){
+        int[] arrowImageCoord = this.getArrowImageCoord();
+        RectF rect = new RectF(arrowImageCoord[0] * cellWidth, (19 - arrowImageCoord[1]) * cellHeight,
+                (arrowImageCoord[0] + 1) * cellWidth, (20 - arrowImageCoord[1]) * cellHeight);
+
+        Bitmap arrowBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.arrow_up);
+        canvas.drawBitmap(arrowBitmap,null, rect, null);
+
     }
 
 
@@ -633,7 +659,10 @@ public class PixelGridView extends View {
     // Display Arrow Block on Grid Map
     public void displayArrowBlock (int arrowCol, int arrowRow) {
 
-
+//       int[] arrowPos = new int[2];
+//       arrowPos[0] = arrowCol;
+//       arrowPos[1] = arrowRow;
+       this.setArrowImageCoord(arrowCol,arrowRow);
 
 
         // CODE TO DISPLAY ARROW_UP.PNG ON THE POINT
