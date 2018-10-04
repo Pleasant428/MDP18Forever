@@ -5,15 +5,17 @@
 
 const int LEFT_PULSE = 3; // LEFT M1 Pulse
 const int RIGHT_PULSE = 11; // RIGHT M2 Pulse
-const int MOVE_MAX_SPEED = 265;
+const int MOVE_MAX_SPEED = 210;
 const int MOVE_MIN_SPEED = 210;
 const int TURN_MAX_SPEED = 170;
 const int ROTATE_MAX_SPEED = 110;
-const int TURN_TICKS = 770;
-const int TENCM_TICKS = 555;
+const int TURN_TICKS_L = 777;
+const int TURN_TICKS_R = 763;
+const int TENCM_TICKS = 540;
 const double DIST_WALL_CENTER_BOX = 2.65;
 //const double kp = 6.73, ki = 1.25, kd = 0; // OPTIMAL
-const double kp = 7.25, ki = 1.05, kd = 0;
+//const double kp = 7.25, ki = 1.05, kd = 0; //THIS
+const double kp = 7.25, ki = 1.05, kd = 0.2;
 //double kp = 0, ki = 0, kd = 0;
 //const double kp = 15, ki = 0, kd = 0;
 
@@ -43,11 +45,7 @@ void stopMotorEncoder() {
 void setupPID() {
   myPID.SetMode(AUTOMATIC);
   myPID.SetOutputLimits(-370, 370);
-  myPID.SetSampleTime(10);
-}
-
-void stopPID() {
-  myPID.SetMode(MANUAL);
+  myPID.SetSampleTime(8);
 }
 
 void moveForward(long distance) {
@@ -61,11 +59,25 @@ void moveForward(long distance) {
     currentSpeed = MOVE_MAX_SPEED;
   }
   double offset = 0;
-
+  long last_tick_R = 0;
   while (tick_R < distance || tick_L < distance) {
     //    offset = computePID();
-    if (myPID.Compute())
-      md.setSpeeds(currentSpeed, currentSpeed - speed_O);
+    if ((tick_R - last_tick_R) >= 10 || tick_R == 0) {
+      offset += 0.1;
+      last_tick_R = tick_R;
+    }
+    if (myPID.Compute()) {
+      if (offset >= 1)
+        md.setSpeeds(currentSpeed + speed_O, currentSpeed - speed_O);
+      else
+        md.setSpeeds(offset * (currentSpeed + speed_O), offset * (currentSpeed - speed_O));
+    }
+    //    Serial.print("R: ");
+    //    Serial.print(tick_R);
+    //    Serial.print(" L: ");
+    //    Serial.print(tick_L);
+    //    Serial.print(" S: ");
+    //    Serial.println(offset);
   }
   initializeMotor_End();
 }
@@ -81,37 +93,45 @@ void moveBackwards(long distance) {
     currentSpeed = MOVE_MAX_SPEED;
   }
   double offset = 0;
-
+  long last_tick_R = 0;
   while (tick_R < distance || tick_L < distance) {
     //    offset = computePID();
-    if (myPID.Compute())
-      md.setSpeeds(-currentSpeed, -(currentSpeed - speed_O));
-  }
-  initializeMotor_End();
-}
-
-
-int moveForwardTillWall() {
-  initializeTick();
-  initializeMotor_Start();
-  double currentSpeed = MOVE_MAX_SPEED;
-  double offset = 0;
-
-  while (1) {
-    if (getFrontIR1() <= (DIST_WALL_CENTER_BOX + 2.6) || getFrontIR2() <= (DIST_WALL_CENTER_BOX + 3.3)  || getFrontIR3() <= (DIST_WALL_CENTER_BOX + 2.3) ) {
-      break;
+    if ((tick_R - last_tick_R) >= 10 || tick_R == 0) {
+      offset += 0.1;
+      last_tick_R = tick_R;
     }
-    //    offset = computePID();
-    if (myPID.Compute())
-      md.setSpeeds(currentSpeed, ceil(currentSpeed - speed_O));
-
+    if (myPID.Compute()) {
+      if (offset >= 1)
+        md.setSpeeds(-(currentSpeed + speed_O), -(currentSpeed - speed_O));
+      else
+        md.setSpeeds(-(offset * (currentSpeed + speed_O)), -(offset * (currentSpeed - speed_O)));
+    }
   }
-  //  md.setSpeeds(0, 0);
-  int tick_save = (tick_R + tick_L) / 2;
-  tick_save = ticksToCm(tick_save);
   initializeMotor_End();
-  return tick_save;
 }
+
+
+//int moveForwardTillWall() {
+//  initializeTick();
+//  initializeMotor_Start();
+//  double currentSpeed = MOVE_MAX_SPEED;
+//  double offset = 0;
+//
+//  while (1) {
+//    if (getFrontIR1() <= (DIST_WALL_CENTER_BOX + 2.6) || getFrontIR2() <= (DIST_WALL_CENTER_BOX + 3.3)  || getFrontIR3() <= (DIST_WALL_CENTER_BOX + 2.3) ) {
+//      break;
+//    }
+//    //    offset = computePID();
+//    if (myPID.Compute())
+//      md.setSpeeds(currentSpeed, ceil(currentSpeed - speed_O));
+//
+//  }
+//  //  md.setSpeeds(0, 0);
+//  int tick_save = (tick_R + tick_L) / 2;
+//  tick_save = ticksToCm(tick_save);
+//  initializeMotor_End();
+//  return tick_save;
+//}
 
 void turnLeft() {
   initializeTick();
@@ -119,28 +139,28 @@ void turnLeft() {
   double currentSpeed = TURN_MAX_SPEED;
   double offset = 0;
 
-  while (tick_R < TURN_TICKS || tick_L < TURN_TICKS) {
+  while (tick_R < TURN_TICKS_L || tick_L < TURN_TICKS_L) {
     //    offset = computePID();
     if (myPID.Compute())
-      md.setSpeeds(-currentSpeed, currentSpeed - speed_O);
+      md.setSpeeds(-(currentSpeed + speed_O), currentSpeed - speed_O);
   }
   initializeMotor_End();
 }
 
-void turnLeft(int degree) {
-  initializeTick();
-  initializeMotor_Start();
-  double currentSpeed = TURN_MAX_SPEED;
-  double offset = 0;
-
-  int turn_degree = ceil(ceil(TURN_TICKS / 90.0) * (degree * 0.98));
-  while (tick_R < turn_degree || tick_L < turn_degree) {
-    //    offset = computePID();
-    if (myPID.Compute())
-      md.setSpeeds(-currentSpeed, currentSpeed - speed_O);
-  }
-  initializeMotor_End();
-}
+//void turnLeft(int degree) {
+//  initializeTick();
+//  initializeMotor_Start();
+//  double currentSpeed = TURN_MAX_SPEED;
+//  double offset = 0;
+//
+//  int turn_degree = ceil(ceil(TURN_TICKS / 90.0) * (degree * 0.98));
+//  while (tick_R < turn_degree || tick_L < turn_degree) {
+//    //    offset = computePID();
+//    if (myPID.Compute())
+//      md.setSpeeds(-currentSpeed, currentSpeed - speed_O);
+//  }
+//  initializeMotor_End();
+//}
 
 void turnRight() {
   initializeTick();
@@ -148,28 +168,28 @@ void turnRight() {
   double currentSpeed = TURN_MAX_SPEED;
   double offset = 0;
 
-  while (tick_R < (TURN_TICKS + 10) || tick_L < (TURN_TICKS + 10)) {
+  while (tick_R < (TURN_TICKS_R + 10) || tick_L < (TURN_TICKS_R + 10)) {
     //    offset = computePID();
     if (myPID.Compute())
-      md.setSpeeds(currentSpeed, -(currentSpeed - speed_O));
+      md.setSpeeds((currentSpeed + speed_O), -(currentSpeed - speed_O));
   }
   initializeMotor_End();
 }
 
-void turnRight(int degree) {
-  initializeTick();
-  initializeMotor_Start();
-  double currentSpeed = TURN_MAX_SPEED;
-  double offset = 0;
-
-  int turn_degree = ceil(ceil(TURN_TICKS / 90.0) * (degree * 0.98));
-  while (tick_R < (turn_degree) || tick_L < (turn_degree)) {
-    //    offset = computePID();
-    if (myPID.Compute())
-      md.setSpeeds(currentSpeed, -(currentSpeed - speed_O));
-  }
-  initializeMotor_End();
-}
+//void turnRight(int degree) {
+//  initializeTick();
+//  initializeMotor_Start();
+//  double currentSpeed = TURN_MAX_SPEED;
+//  double offset = 0;
+//
+//  int turn_degree = ceil(ceil(TURN_TICKS / 90.0) * (degree * 0.98));
+//  while (tick_R < (turn_degree) || tick_L < (turn_degree)) {
+//    //    offset = computePID();
+//    if (myPID.Compute())
+//      md.setSpeeds(currentSpeed, -(currentSpeed - speed_O));
+//  }
+//  initializeMotor_End();
+//}
 
 void rotateLeft(long distance) {
   initializeTick();
@@ -180,7 +200,7 @@ void rotateLeft(long distance) {
   while (tick_R < distance || tick_L < distance) {
     //    offset = computePID();
     if (myPID.Compute())
-      md.setSpeeds(-currentSpeed, currentSpeed - speed_O);
+      md.setSpeeds(-(currentSpeed + speed_O), currentSpeed - speed_O);
   }
   initializeMotor_End();
 }
@@ -194,30 +214,35 @@ void rotateRight(long distance) {
   while (tick_R < distance || tick_L < distance) {
     //    offset = computePID();
     if (myPID.Compute())
-      md.setSpeeds(currentSpeed, -(currentSpeed - speed_O));
+      md.setSpeeds((currentSpeed + speed_O), -(currentSpeed - speed_O));
   }
   initializeMotor_End();
 }
 
 void alignRight() {
-  delay(1000);
+  delay(500);
   double diff = getRightIR1() - getRightIR2();
-  while (abs(diff) >= 0.5) {
+  while (abs(diff) >= 0.4) {
     if (diff > 0) {
       rotateLeft(abs(diff * 5));
     } else {
       rotateRight(abs(diff * 5));
     }
-    delay(200);
+    delay(250);
     diff = getRightIR1() - getRightIR2();
+    Serial.print("R1: ");
+    Serial.print(getRightIR1());
+    Serial.print(" R2: ");
+    Serial.println(getRightIR2());
   }
-  delay(1000);
+  delay(500);
 }
 
 void alignFront() {
-  delay(1000);
-  double diff = getFrontIR1() - getFrontIR2();
-  while (abs(diff) >= 0.5) {
+  delay(500);
+  double diff = getFrontIR1() - getFrontIR3();
+  while (abs(diff) >= 0.4) {
+    Serial.println(diff);
     if (diff > 0) {
       rotateLeft(abs(diff * 5));
     } else {
@@ -232,7 +257,7 @@ void alignFront() {
   else
     moveBackwards(abs(diff_dis));
   delay(250);
-  diff = getFrontIR1() - getFrontIR2();
+  diff = getFrontIR1() - getFrontIR3();
   while (abs(diff) >= 0.5) {
     if (diff > 0) {
       rotateLeft(abs(diff * 5));
@@ -242,7 +267,7 @@ void alignFront() {
     delay(250);
     diff = getFrontIR1() - getFrontIR3();
   }
-  delay(1000);
+  delay(500);
 }
 
 void followRightWallTillWall() {
@@ -280,75 +305,75 @@ void initializeMotor_Start() {
 void initializeMotor_End() {
   md.setSpeeds(0, 0);
   md.setBrakes(400, 400);
-  delay(100);
+  delay(85);
 }
 
 //--------------------------PID Codes-------------------------------
-double computePID() {
-  double error, integral;
-
-  error = tick_R - tick_L;
-  integral = previous_error + error;
-
-  double p = kp * error;
-  double i = ki * integral;
-  double d = kd * (previous_tick_R - tick_R);
-  double pid = p + i + d;
-
-  previous_tick_R = tick_R;
-
-  return pid;
-}
+//double computePID() {
+//  double error, integral;
+//
+//  error = tick_R - tick_L;
+//  integral = previous_error + error;
+//
+//  double p = kp * error;
+//  double i = ki * integral;
+//  double d = kd * (previous_tick_R - tick_R);
+//  double pid = p + i + d;
+//
+//  previous_tick_R = tick_R;
+//
+//  return pid;
+//}
 
 
 //--------------------------Check List Codes-------------------------------
-void checkList_A6() {
-  int dist = 150;
-  int dist_moved = moveForwardTillWall();
-  dist = dist - dist_moved;
-  turnLeft();
-  moveForward(30);
-  turnRight();
-  moveForward(40);
-  dist = dist - 40;
-  turnRight();
-  moveForward(30);
-  turnLeft();
-  moveForward(dist);
-}
-
-int moveForwardTillWallA7() {
-  initializeTick();
-  initializeMotor_Start();
-  double currentSpeed = MOVE_MAX_SPEED;
-  double offset = 0;
-  while (1) {
-    if (getFrontIR1() <= (DIST_WALL_CENTER_BOX + 10.6) || getFrontIR2() <= (DIST_WALL_CENTER_BOX + 11.3)  || getFrontIR3() <= (DIST_WALL_CENTER_BOX + 10.3) ) {
-      break;
-    }
-    //    offset = computePID();
-    if (myPID.Compute())
-      md.setSpeeds(currentSpeed, currentSpeed - speed_O);
-  }
-  md.setSpeeds(0, 0);
-  int tick_save = (tick_R + tick_L) / 2;
-  tick_save = ticksToCm(tick_save);
-  initializeMotor_End();
-  return tick_save;
-}
-
-void checkList_A7() {
-  int dist = 150;
-  int dist_moved = moveForwardTillWallA7();
-  dist = dist - dist_moved;
-  turnRight(45);
-  moveForward(38);
-  turnLeft(45);
-  moveForward(10);
-  turnLeft(45);
-  moveForward(28);
-  dist = dist - 54;
-  turnRight(45);
-  moveForward(dist-10);
-}
+//void checkList_A6() {
+//  int dist = 150;
+//  int dist_moved = moveForwardTillWall();
+//  dist = dist - dist_moved;
+//  turnLeft();
+//  moveForward(30);
+//  turnRight();
+//  moveForward(40);
+//  dist = dist - 40;
+//  turnRight();
+//  moveForward(30);
+//  turnLeft();
+//  moveForward(dist);
+//}
+//
+//int moveForwardTillWallA7() {
+//  initializeTick();
+//  initializeMotor_Start();
+//  double currentSpeed = MOVE_MAX_SPEED;
+//  double offset = 0;
+//  while (1) {
+//    if (getFrontIR1() <= (DIST_WALL_CENTER_BOX + 10.6) || getFrontIR2() <= (DIST_WALL_CENTER_BOX + 11.3)  || getFrontIR3() <= (DIST_WALL_CENTER_BOX + 10.3) ) {
+//      break;
+//    }
+//    //    offset = computePID();
+//    if (myPID.Compute())
+//      md.setSpeeds(currentSpeed, currentSpeed - speed_O);
+//  }
+//  md.setSpeeds(0, 0);
+//  int tick_save = (tick_R + tick_L) / 2;
+//  tick_save = ticksToCm(tick_save);
+//  initializeMotor_End();
+//  return tick_save;
+//}
+//
+//void checkList_A7() {
+//  int dist = 150;
+//  int dist_moved = moveForwardTillWallA7();
+//  dist = dist - dist_moved;
+//  turnRight(45);
+//  moveForward(38);
+//  turnLeft(45);
+//  moveForward(10);
+//  turnLeft(45);
+//  moveForward(28);
+//  dist = dist - 54;
+//  turnRight(45);
+//  moveForward(dist-10);
+//}
 

@@ -4,11 +4,11 @@
 
 const int MAX_SMALL_SENSOR = 80;
 const int MAX_BIG_SENSOR = 150;
-const int NUM_SAMPLES_MEDIAN = 10;
+const int NUM_SAMPLES_MEDIAN = 8;
 
-double frontIR1_Diffs[] = {7.75, 17.70, 29.05, 35.00};
-double frontIR2_Diffs[] = {8.15, 19.25, 32.00, 41.00};
-double frontIR3_Diffs[] = {7.5, 17.50, 30.50, 38.00};
+double frontIR1_Diffs[] = {7.55, 17.75, 29.50, 43.00};
+double frontIR2_Diffs[] = {7.9, 18.95, 31.50, 47.00};
+double frontIR3_Diffs[] = {6.95, 17.20, 29.00, 46.00};
 
 
 double rightIR1_Diffs[] = {6.90, 17.05, 27.75, 41.00};
@@ -36,9 +36,9 @@ RunningMedian rightIR2_Median = RunningMedian(NUM_SAMPLES_MEDIAN);
 RunningMedian leftIR_1_Median = RunningMedian(NUM_SAMPLES_MEDIAN);
 
 void setupSensorInterrupt() {
-  ADCSRA &= ~(bit (ADPS0) | bit (ADPS1) | bit (ADPS2)); // clear prescaler bits
-  //  ADCSRA |= bit (ADPS0) | bit (ADPS2);// 32  prescaler
-  ADCSRA |= bit (ADPS2); // 16  prescaler
+  //  ADCSRA &= ~(bit (ADPS0) | bit (ADPS1) | bit (ADPS2)); // clear prescaler bits
+  //  //  ADCSRA |= bit (ADPS0) | bit (ADPS2);// 32  prescaler
+  //  ADCSRA |= bit (ADPS2); // 16  prescaler
   MsTimer2::set(35, readSensors);
   MsTimer2::start();
 }
@@ -183,7 +183,7 @@ void readRightSensor_2() {
   rightIR2_Median.add(irDistance);
   if (rightIR2_Median.getCount() >= NUM_SAMPLES_MEDIAN) {
     if (abs(rightIR2_Median.getHighest() - rightIR2_Median.getLowest()) > 40) {
-      leftIR1_Value = MAX_SMALL_SENSOR;
+      rightIR2_Value = MAX_SMALL_SENSOR;
     } else {
       rightIR2_Value = rightIR2_Median.getMedian();
     }

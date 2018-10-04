@@ -4,8 +4,14 @@ void setup() {
   setupSensorInterrupt();
   setupPID();
   delay(2000);
-  Serial.println("SETUP COMPLETE");
+  //  Serial.println("SETUP COMPLETE");
+
+  //  moveForward(50);
   //  turnLeft();
+  //  turnLeft();
+  //  moveForward(50);
+  //  turnRight();
+  //  turnRight();
   //  delay(2000);
   //  turnRight();
   //  checkList_A7();
@@ -14,6 +20,7 @@ void setup() {
 
 void loop() {
   delay(2);
+  //  returnSensorReading();
   if (Serial.available() > 0) {
     char command = '0';
     int value = -1;
@@ -127,6 +134,7 @@ void returnSensorReading() {
   Serial.print(getLeftIR1());
   Serial.print(":");
   Serial.print(getLeftIR1_Block());
-  Serial.println("");
+  Serial.println("\n");
+  Serial.flush();
 }
 
