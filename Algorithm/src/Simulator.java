@@ -52,7 +52,7 @@ public class Simulator extends Application {
 	private boolean setWaypoint = false;
 	private boolean setRobot = false;
 	
-	private static final NetMgr netMgr = new NetMgr();
+	private static final NetMgr netMgr = NetMgr.getInstance();
 
 	// GUI Components
 	private int stage = 1;
@@ -603,6 +603,10 @@ public class Simulator extends Application {
 			case REAL_FAST:
 				sim = false;
 				System.out.println("RF Here");
+				exploredMap.draw(true);
+				robot.draw();
+				fastTask = new Thread(new FastTask());
+				fastTask.start();
 				break;
 
 			case REAL_EXP:
@@ -612,7 +616,6 @@ public class Simulator extends Application {
 				robot.setSim(false);
 				System.out.println("RE Here");
 				netMgr.send("Alg|Ard|S|0");
-//				msg = netMgr.recieve();
 				robot.sense(exploredMap, map);
 				exploredMap.draw(true);
 				robot.draw();

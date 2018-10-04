@@ -7,7 +7,7 @@ import java.net.UnknownHostException;
 //Class to Manage Connection
 public class NetMgr {
 
-	private String ipAddr = "192.168.18.18";
+	private String ipAddr;
 	private int port = 8080;
 	private static Socket socket = null;
 
@@ -17,7 +17,8 @@ public class NetMgr {
 	private static NetMgr netMgr = null;
 	
 	public NetMgr() {
-		
+		this.ipAddr = "192.168.18.18";
+		this.port = 8080;
 	}
 	
 	public static NetMgr getInstance() {
@@ -55,19 +56,17 @@ public class NetMgr {
 			in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 			System.out.println("Connection Established!");
 		} catch (UnknownHostException e) {
-			
-			System.out.println("Connection Failed (UnknownHostException)!");
-			e.printStackTrace();
+			System.out.println("Connection Failed (UnknownHostException)! "+e.toString());
 			return false;
 		} catch (IOException e) {
-			
-			System.out.println("Connection Failed (IOException)!");
-			e.printStackTrace();
+			System.out.println("Connection Failed (IOException)! "+e.toString());
 			return false;
 		}
-
+		catch (Exception e) {
+			System.out.println("Connection Failed (IOException)! "+e.toString());
+			return false;
+		}
 		return true;
-
 	}
 
 	// Close connection with RPI

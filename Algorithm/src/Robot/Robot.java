@@ -357,7 +357,7 @@ public class Robot {
 					exploredMap
 							.getCell(sensorList.get(i).getRow() + rowInc * j, sensorList.get(i).getCol() + colInc * j)
 							.setExplored(true);
-					if (i == obsBlock) {
+					if (j == obsBlock) {
 						exploredMap.getCell(sensorList.get(i).getRow() + rowInc * j,
 								sensorList.get(i).getCol() + colInc * j).setObstacle(true);
 
@@ -374,7 +374,8 @@ public class Robot {
 					break;
 			}
 		}
-		sendMapDescriptor(exploredMap);
+		if(!sim)
+			sendMapDescriptor(exploredMap);
 		exploredMap.draw(true);
 		draw();
 	}

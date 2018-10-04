@@ -12,13 +12,18 @@ public class TestBed {
 		
 		// TODO Auto-generated method stub
 		System.out.println(Command.FORWARD.ordinal());
-		net = new NetMgr("192.168.18.18", 8080);
-		net.startConn();
+		net = NetMgr.getInstance();
+		//Keep trying to connect if fail to connect
+		while(true) {
+			if(net.startConn())
+				break;
+		}
+			
 		System.out.println("Starting");
 		Scanner sc = new Scanner(System.in);
 		String msg = "";
 		while(true) {
-			net.recieve(msg);
+			msg = net.recieve();
 			System.out.println(msg);
 			System.out.print("Sending: ");
 			net.send(sc.nextLine());
