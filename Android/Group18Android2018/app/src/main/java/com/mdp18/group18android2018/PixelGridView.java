@@ -27,6 +27,7 @@ public class PixelGridView extends View {
     private int frontCurPos, backCurPos, leftCurPos, rightCurPos;
     private int robotDirection;
     private int[] startCoord = new int[2];
+    private boolean autoUpdate;
     private int[] curCoord = new int[2];
     private ArrayList<int[]> wayPoints = new ArrayList<int[]>();
     private boolean selectStartPosition = false, selectWayPoint = false;
@@ -65,6 +66,7 @@ public class PixelGridView extends View {
         this.setNumRows(20);
         this.setStartPos(17, 0, 19, 2);
         this.setRobotDirection(0);
+        this.setAutoUpdate(true);
         this.obstacles = new boolean[this.getNumColumns()][this.getNumRows()];
         this.cellExplored = new boolean[this.getNumColumns()][this.getNumRows()];
 
@@ -154,8 +156,10 @@ public class PixelGridView extends View {
         this.rightCurPos = edges[3];
 
         // Take out this to avoid update during Manual Mode
-        invalidate();
+//        invalidate();
+        this.refreshMap(this.getAutoUpdate());
     }
+
 
     public void setCurPos(int[] pos) {
         this.frontCurPos = pos[0];
@@ -164,7 +168,8 @@ public class PixelGridView extends View {
         this.rightCurPos = pos[3];
 
         // Take out this to avoid update during Manual Mode
-        invalidate();
+//        invalidate();
+        this.refreshMap(this.getAutoUpdate());
     }
 
     public int[] getCurPos() {
@@ -177,11 +182,20 @@ public class PixelGridView extends View {
         return pos;
     }
 
+    public void setAutoUpdate(boolean auto){
+        this.autoUpdate = auto;
+    }
+
+    public boolean getAutoUpdate(){
+        return this.autoUpdate;
+    }
+
     public void setRobotDirection(int direction) {
         this.robotDirection = direction;
 
         // Take out this to avoid update during Manual Mode
-        invalidate();
+//        invalidate();
+        this.refreshMap(this.getAutoUpdate());
     }
 
     public int getRobotDirection() {
@@ -668,8 +682,7 @@ public class PixelGridView extends View {
                 binMapArrayIndex++;
             }
         }
-
-        this.invalidate();
+        this.refreshMap(this.getAutoUpdate());
     }
 }
 
