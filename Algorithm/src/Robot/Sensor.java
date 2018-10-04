@@ -16,6 +16,7 @@ public class Sensor {
 	private int minRange;
     private int maxRange;
     private int prevData;
+    private int prevRawData;
 
     // Sensor's position on the map
     private Point pos;
@@ -121,5 +122,13 @@ public class Sensor {
 
 	public void setPrevData(int prevData) {
 		this.prevData = prevData;
+	}
+
+	public int getPrevRawData() {
+		return prevRawData;
+	}
+
+	public void setPrevRawData(int prevRawData) {
+		this.prevRawData = prevRawData;
 	}
 }

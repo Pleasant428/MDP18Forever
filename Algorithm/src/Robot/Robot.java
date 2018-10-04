@@ -24,6 +24,7 @@ public class Robot {
 	private boolean sim;
 	private boolean reachedGoal;
 	private Direction direction;
+	private Command prevMove;
 	
 	private GraphicsContext gc;
 
@@ -217,6 +218,7 @@ public class Robot {
 			rotateSensors(false);
 			break;
 		}
+		prevMove = m;
 	}
 	
 	public void setStartPos(int col, int row, Map exploredMap) {
@@ -244,90 +246,129 @@ public class Robot {
 	// Robot Sense method for simulator
 	public void sense(Map exploredMap, Map map) {
 		int obsBlock;
+		int[][] sensorData = new int[6][2];
 		int rowInc = 1, colInc = 1;
 		exploredMap.draw(true);
 		draw();
-		for (Sensor sensor : sensorList) {
-			// check if sensor detects any obstacle
-			obsBlock = sensor.detect(map);
-			//Assign the rowInc and colInc based on sensor Direction
-			switch (sensor.getSensorDir()) {
-			case UP: 
-				rowInc = 1;
-				colInc = 0;
-				break;
-				
-			case LEFT:
-				rowInc = 0;
-				colInc = -1;
-				break;
-				
-			case RIGHT:
-				rowInc = 0;
-				colInc = 1;
-				break;
-				
-			case DOWN:
-				rowInc = -1;
-				colInc = 0;
-				break;
+		
+		if(!sim) {
+			String msg = null;
+			NetMgr.getInstance().recieve(msg);
+			String [] msgArr = msg.split("|");
+			String [] strSensor = msgArr[3].split(",");
+			System.out.println("Recieved "+strSensor.length+" sensor data");
+			
+			//Translate string to integer
+			for(int i=0; i< strSensor.length; i++) {
+				String [] arrSensorStr = strSensor[i].split(":");
+				sensorData[i][0] = Integer.parseInt(arrSensorStr[1]);
+				sensorData[i][1] = Integer.parseInt(arrSensorStr[2]);
 			}
 			
-			//Discover each of the blocks infront of the sensor if possible
-			for (int i = sensor.getMinRange(); i <= sensor.getMaxRange(); i++) {
-				
-				//Check if the block is valid otherwise exit (Edge of Map)
-				if (exploredMap.checkValidCell(sensor.getRow()+ rowInc * i, sensor.getCol() + colInc * i)) {
-					//Change the cell to explored first
-					Cell cell = exploredMap.getCell(sensor.getRow() + rowInc * i, sensor.getCol() + colInc * i);
-					exploredMap.getCell(sensor.getRow() + rowInc * i, sensor.getCol() + colInc * i).setExplored(true);
-					if (i == obsBlock) {
-						exploredMap.getCell(sensor.getRow() + rowInc * i, sensor.getCol() + colInc * i).setObstacle(true);
-						
-						//Virtual Wall Initialized
-						for (int r = sensor.getRow() + rowInc * i - 1; r <= sensor.getRow() + rowInc * i + 1; r++)
-							for (int c = sensor.getCol() + colInc * i - 1; c <= sensor.getCol() + colInc * i + 1; c++)
-								if (exploredMap.checkValidCell(r, c))
-									exploredMap.getCell(r, c).setVirtualWall(true);
-						break;
+			//Check Right Alignment
+			if((sensorData[3][0] - sensorData[4][0]) > RobotConstants.RIGHT_THRES){
+				NetMgr.getInstance().send("Alg|And|"+Command.ALIGN_RIGHT.ordinal()+"|");
+				NetMgr.getInstance().send("Alg|Ard|"+Command.ALIGN_RIGHT.ordinal()+"|");
+				sense(exploredMap, map);
+			}
+			
+			//Check Right distance
+			double prevRightAvg = (sensorList.get(3).getPrevRawData() + sensorList.get(4).getPrevRawData())/2;
+			double curRightAvg = (sensorData[3][0] + sensorData[3][0])/2;
+			// if too close/ far from right wall
+			if(Math.abs(curRightAvg - prevRightAvg) > RobotConstants.RIGHT_DIS_THRES){
+				NetMgr.getInstance().send("Alg|And|"+Command.ALIGN_FRONT+"|");
+				NetMgr.getInstance().send("Alg|Ard|"+Command.TURN_RIGHT.ordinal()+"|");
+				NetMgr.getInstance().recieve(msg);
+				NetMgr.getInstance().send("Alg|Ard|"+Command.ALIGN_FRONT.ordinal()+"|");
+				NetMgr.getInstance().recieve(msg);
+				NetMgr.getInstance().send("Alg|Ard|"+Command.TURN_LEFT.ordinal()+"|");
+				NetMgr.getInstance().recieve(msg);
+				NetMgr.getInstance().send("Alg|Ard|"+Command.ALIGN_RIGHT.ordinal()+"|");
+				sense(exploredMap, map);
+			}
+			
+			//Checking Front Alignment too close/far from location
+			
+			if(prevMove == Command.FORWARD|| prevMove == Command.BACKWARD)
+			{
+				boolean frontCal = false;
+				for(int i=0; i<3; i++) {
+					if(sensorList.get(i).getPrevData()!=9 && Math.abs(sensorData[i][1] - sensorList.get(i).getPrevData())!=1)
+					{
+						frontCal = true;
 					}
 				}
-				else
-					break;
+				//Discrepancy detected among the sensor data recieved
+				if(frontCal) {
+					//Unable to calibrate, as obstacles in front of each sensor is not at uniform distance request sensor data again
+					if((sensorData[2][1]<sensorData[0][1] || sensorData[2][1]<sensorData[1][1]) && sensorData[0][1] != sensorData[1][1])
+						NetMgr.getInstance().send("Alg|Ard|SS|");
+					else
+					{
+						NetMgr.getInstance().send("Alg|Ard|"+Command.ALIGN_FRONT.ordinal()+"|");
+						NetMgr.getInstance().send("Alg|And|"+Command.ALIGN_FRONT.ordinal()+"|");
+					}
+					sense(exploredMap, map);
+				}
+					 
 			}
 		}
+			for (int i =0; i< sensorList.size(); i++) {
+				// check if sensor detects any obstacle
+				if(!sim)
+					obsBlock = sensorData[i][1];
+				else
+					obsBlock = sensorList.get(i).detect(map);
+				//Assign the rowInc and colInc based on sensor Direction
+				switch (sensorList.get(i).getSensorDir()) {
+				case UP: 
+					rowInc = 1;
+					colInc = 0;
+					break;
+					
+				case LEFT:
+					rowInc = 0;
+					colInc = -1;
+					break;
+					
+				case RIGHT:
+					rowInc = 0;
+					colInc = 1;
+					break;
+					
+				case DOWN:
+					rowInc = -1;
+					colInc = 0;
+					break;
+				}
+				
+				//Discover each of the blocks infront of the sensor if possible
+				for (int j = sensorList.get(i).getMinRange(); j <= sensorList.get(i).getMaxRange(); j++) {
+					
+					//Check if the block is valid otherwise exit (Edge of Map)
+					if (exploredMap.checkValidCell(sensorList.get(i).getRow()+ rowInc * j, sensorList.get(i).getCol() + colInc * j)) {
+						//Change the cell to explored first
+						exploredMap.getCell(sensorList.get(i).getRow() + rowInc * j, sensorList.get(i).getCol() + colInc * j).setExplored(true);
+						if (i == obsBlock) {
+							exploredMap.getCell(sensorList.get(i).getRow() + rowInc * j, sensorList.get(i).getCol() + colInc * j).setObstacle(true);
+							
+							//Virtual Wall Initialized
+							for (int r = sensorList.get(i).getRow() + rowInc * j - 1; r <= sensorList.get(i).getRow() + rowInc * j + 1; r++)
+								for (int c = sensorList.get(i).getCol() + colInc * j - 1; c <= sensorList.get(i).getCol() + colInc * j + 1; c++)
+									if (exploredMap.checkValidCell(r, c))
+										exploredMap.getCell(r, c).setVirtualWall(true);
+							break;
+						}
+					}
+					else
+						break;
+				}
+			}
 		exploredMap.draw(true);
 		draw();
 	}
 	
-	public boolean sense(Map exploredMap, String sensorDataStr) {
-		String [] strSensor = sensorDataStr.split(",");
-		Sensor s;
-		int[][] sensorData = new int[6][2];
-		System.out.println("Recieved "+strSensor.length+" sensor data");
-		
-		//Translate string to integer
-		for(int i=0; i< strSensor.length; i++) {
-			String [] arrSensorStr = strSensor[i].split(":");
-			sensorData[i][0] = Integer.parseInt(arrSensorStr[0]);
-			sensorData[i][1] = Integer.parseInt(arrSensorStr[1]);
-		}
-		
-		//Check Right Alignment
-		double prevRightAvg = (sensorList.get(3).getPrevData() + sensorList.get(4).getPrevData())/2;
-		double curRightAvg = (sensorData[3][0] + sensorData[3][0])/2;
-		if(Math.abs(curRightAvg - prevRightAvg) > 3){
-			NetMgr.getInstance().send("Alg|And|"+Command.ALIGN_RIGHT+"|");
-			NetMgr.getInstance().send("Alg|Ard|"+Command.ALIGN_RIGHT+"|");
-			return false;
-		}
-		
-		//Checking Front Alignment
-		boolean frontCal = (sensorData[])
-		
-		return true;
-	}
-
 	//Draw Method for Robot
 	public void draw() {
 		gc.setStroke(RobotConstants.ROBOT_OUTLINE);

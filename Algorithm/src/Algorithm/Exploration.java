@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
 import Map.*;
+import Network.NetMgr;
 import Robot.*;
 import Robot.RobotConstants.Command;
 import Robot.RobotConstants.Direction;
@@ -180,31 +181,36 @@ public class Exploration {
 		Direction dir = robot.getDirection();
 		// Check Right if free then turn Right
 		if (movable(Direction.getPrevious(dir))) {
-			TimeUnit.MILLISECONDS.sleep(RobotConstants.MOVE_SPEED/stepPerSecond);
+			if(sim)
+				TimeUnit.MILLISECONDS.sleep(RobotConstants.MOVE_SPEED/stepPerSecond);
 			robot.move(Command.TURN_RIGHT, RobotConstants.MOVE_STEPS, exploredMap);
 			robot.sense(exploredMap, map);
 			if (movable(robot.getDirection())) {
 				// System.out.println("Right Direction then forrwad "+robot.getDirection());
-				TimeUnit.MILLISECONDS.sleep(RobotConstants.MOVE_SPEED/stepPerSecond);
+				if(sim)
+					TimeUnit.MILLISECONDS.sleep(RobotConstants.MOVE_SPEED/stepPerSecond);
 				robot.move(Command.FORWARD, RobotConstants.MOVE_STEPS, exploredMap);
 				robot.sense(exploredMap, map);
 			}
 		}
 		// Check front if free move forward
 		else if (movable(dir)) {
-			TimeUnit.MILLISECONDS.sleep(RobotConstants.MOVE_SPEED/stepPerSecond);
+			if(sim)
+				TimeUnit.MILLISECONDS.sleep(RobotConstants.MOVE_SPEED/stepPerSecond);
 			robot.move(Command.FORWARD, RobotConstants.MOVE_STEPS, exploredMap);
 			robot.sense(exploredMap, map);
 		}
 		// Check left free and move left
 		else if (movable(Direction.getNext(dir))) {
 			//System.out.println("Left Direction " + Direction.getNext(dir).name());
-			TimeUnit.MILLISECONDS.sleep(RobotConstants.MOVE_SPEED/stepPerSecond);
+			if(sim)
+				TimeUnit.MILLISECONDS.sleep(RobotConstants.MOVE_SPEED/stepPerSecond);
 			robot.move(Command.TURN_LEFT, RobotConstants.MOVE_STEPS, exploredMap);
 			robot.sense(exploredMap, map);
 			if (movable(robot.getDirection())) {
 				// System.out.println("Left Direction then forrwad "+robot.getDirection());
-				TimeUnit.MILLISECONDS.sleep(RobotConstants.MOVE_SPEED/stepPerSecond);
+				if(sim)
+					TimeUnit.MILLISECONDS.sleep(RobotConstants.MOVE_SPEED/stepPerSecond);
 				robot.move(Command.FORWARD, RobotConstants.MOVE_STEPS, exploredMap);
 				robot.sense(exploredMap, map);
 			}
@@ -215,19 +221,22 @@ public class Exploration {
 			// Keep Moving back till either can turn right/ left
 			while (!movable(Direction.getPrevious(dir)) && !movable(Direction.getNext(dir))) {
 				//System.out.println("Backward While");
-				TimeUnit.MILLISECONDS.sleep(RobotConstants.MOVE_SPEED/stepPerSecond);
+				if(sim)
+					TimeUnit.MILLISECONDS.sleep(RobotConstants.MOVE_SPEED/stepPerSecond);
 				robot.move(Command.BACKWARD, RobotConstants.MOVE_STEPS, exploredMap);
 				robot.sense(exploredMap, map);
 			}
 			// Turn left if possible
 			if (movable(Direction.getNext(dir))) {
 				System.out.println("Backward Turn Left");
-				TimeUnit.MILLISECONDS.sleep(RobotConstants.MOVE_SPEED/stepPerSecond);
+				if(sim)
+					TimeUnit.MILLISECONDS.sleep(RobotConstants.MOVE_SPEED/stepPerSecond);
 				robot.move(Command.TURN_LEFT, RobotConstants.MOVE_STEPS, exploredMap);
 				robot.sense(exploredMap, map);
 				if (movable(robot.getDirection())) {
 					// System.out.println("Left Direction then forrwad "+robot.getDirection());
-					TimeUnit.MILLISECONDS.sleep(RobotConstants.MOVE_SPEED/stepPerSecond);
+					if(sim)
+						TimeUnit.MILLISECONDS.sleep(RobotConstants.MOVE_SPEED/stepPerSecond);
 					robot.move(Command.FORWARD, RobotConstants.MOVE_STEPS, exploredMap);
 					robot.sense(exploredMap, map);
 				}
@@ -235,14 +244,15 @@ public class Exploration {
 			// All other cases turn right
 			else {
 				System.out.println("Backward Turn Right");
-				TimeUnit.MILLISECONDS.sleep(RobotConstants.MOVE_SPEED/stepPerSecond);
+				if(sim)
+					TimeUnit.MILLISECONDS.sleep(RobotConstants.MOVE_SPEED/stepPerSecond);
 				robot.move(Command.TURN_RIGHT, RobotConstants.MOVE_STEPS, exploredMap);
 				robot.sense(exploredMap, map);
 			}
 
 		}
 	}
-
+	
 	// Returns true if a direction is movable to or not
 	public boolean movable(Direction dir) {
 		int rowInc = 0, colInc = 0;
