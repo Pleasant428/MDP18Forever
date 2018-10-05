@@ -491,8 +491,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                             String mapDes1 = filteredMsg[3];
 
                             // Part 1
-                            String hexMapDes1 = mapDes1.substring(2, 302);
-                            mPGV.mapDescriptorExplored(hexMapDes1);
+//                            String hexMapDes1 = mapDes1.substring(2, 302);
+                            mPGV.mapDescriptorExplored(mapDes1);
                             // use MapDes1 to process MDF String
 
                             break;

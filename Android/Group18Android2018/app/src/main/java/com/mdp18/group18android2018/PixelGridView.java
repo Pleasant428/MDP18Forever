@@ -69,19 +69,22 @@ public class PixelGridView extends View {
     public void initializeMap() {
         this.setNumColumns(15);
         this.setNumRows(20);
+        this.setAutoUpdate(true);
         this.obstacles = new boolean[this.getNumColumns()][this.getNumRows()];
         this.cellExplored = new boolean[this.getNumColumns()][this.getNumRows()];
 
-        for (int i = 0; i < this.getNumColumns(); i++) {
-            for (int j = 0; j < this.getNumRows(); j++) {
-                this.setObstacle(i, j, false);
-                this.setCellExplored(i, j, false);
-            }
-        }
+//        for (int i = 0; i < this.getNumColumns(); i++) {
+//            for (int j = 0; j < this.getNumRows(); j++) {
+//                this.setObstacle(i, j, false);
+//                this.setCellExplored(i, j, false);
+//            }
+//        }
         this.setStartCoord(1,1);
         this.setStartPos(17, 0, 19, 2);
         this.setRobotDirection(0);
-        this.setAutoUpdate(true);
+//        this.refreshMap(this.getAutoUpdate());
+
+
     }
 
     public void setObstacle(int i, int j, boolean obstacle) {
@@ -89,7 +92,7 @@ public class PixelGridView extends View {
     }
 
     public void setCellExplored(int column, int row, boolean explored){
-        this.cellExplored[column][row] = explored;
+            this.cellExplored[column][row] = explored;
     }
 
     public boolean[][] getCellExplored(){
@@ -123,12 +126,12 @@ public class PixelGridView extends View {
         this.leftCurPos = leftStartPos;
         this.backCurPos = backStartPos;
         this.rightCurPos = rightStartPos;
-        for (int i = 0; i < this.getNumColumns(); i++) {
-            for (int j = 0; j < this.getNumRows(); j++) {
-                this.setObstacle(i, j, false);
-                this.setCellExplored(i, j, false);
-            }
-        }
+//        for (int i = 0; i < this.getNumColumns(); i++) {
+//            for (int j = 0; j < this.getNumRows(); j++) {
+////                this.setObstacle(i, j, false);
+////                this.setCellExplored(i, j, false);
+//            }
+//        }
     }
 
     public void setStartCoord(int row, int column) {
@@ -139,6 +142,12 @@ public class PixelGridView extends View {
             for (int j = 0; j < this.getNumRows(); j++) {
                 this.setObstacle(i, j, false);
                 this.setCellExplored(i, j, false);
+            }
+        }
+
+        for(int i = column - 1; i <= column + 1; i++){
+            for(int j = row - 1; j <= row + 1; j++){
+                this.setCellExplored(i, j, true);
             }
         }
 
@@ -154,7 +163,7 @@ public class PixelGridView extends View {
     }
 
     public void moveCurCoord(int xInc, int yInc) {
-        this.setCurPos(this.getCurCoord()[0] + xInc, this.getCurCoord()[1] + yInc);
+        this.setCurPos(this.getCurCoord()[1] + xInc, this.getCurCoord()[0] + yInc);
 //        this.curCoord[0] = this.curCoord[0] + xInc;
 //        this.curCoord[1] = this.curCoord[1] + yInc;
     }
@@ -279,6 +288,7 @@ public class PixelGridView extends View {
 //            this.arrowImageCoords.add(arrowImageCoord);
         }
         arrowImageCoord[2] = robotDir;
+
         this.arrowImageCoords.add(arrowImageCoord);
         this.refreshMap(this.getAutoUpdate());
 
@@ -340,11 +350,9 @@ public class PixelGridView extends View {
 
         for (int i = 0; i < numColumns; i++) {
             for (int j = 0; j < numRows; j++) {
-//                if(!cellExplored[i][j]){
                 canvas.drawRect(i * cellWidth, j * cellHeight,
                         (i + 1) * cellWidth, (j + 1) * cellHeight,
                         grayPaint);
-//                }
             }
         }
 
@@ -431,6 +439,15 @@ public class PixelGridView extends View {
                             exploredColor);
                 }
             }
+        }
+        // vertical lines
+        for (int i = 1; i < this.getNumColumns(); i++) {
+            canvas.drawLine(i * cellWidth, 0, i * cellWidth, (float) 0.92 * this.getHeight(), blackPaint);
+        }
+
+        // horizontal lines
+        for (int i = 1; i < this.getNumRows(); i++) {
+            canvas.drawLine(0, i * cellHeight, this.getWidth(), i * cellHeight, blackPaint);
         }
     }
 
@@ -614,9 +631,11 @@ public class PixelGridView extends View {
                 pos[3]++;
                 this.moveCurCoord(1, 0);
             }
-            this.exploredTile();
-            this.setCurPos(pos);
+
+
         }
+        this.setCurPos(pos);
+        this.exploredTile();
 
         return;
     }
@@ -646,20 +665,25 @@ public class PixelGridView extends View {
             if (dir == 0) {
                 pos[0]++;
                 pos[2]++;
+                this.moveCurCoord(0, -1);
             } else if (dir == 1) {
                 pos[1]++;
                 pos[3]++;
+                this.moveCurCoord(1, 0);
             } else if (dir == 2) {
                 pos[0]--;
                 pos[2]--;
+                this.moveCurCoord(0, 1);
             } else if (dir == 3) {
                 pos[1]--;
                 pos[3]--;
+                this.moveCurCoord(-1, 0);
             }
-            this.exploredTile();
-            this.setCurPos(pos);
-        }
 
+
+        }
+        this.setCurPos(pos);
+        this.exploredTile();
     }
 
     public boolean checkReachedObstacle ( int[] pos, int dir){
@@ -750,6 +774,7 @@ public class PixelGridView extends View {
 ////       arrowPos[1] = arrowRow;
        this.setArrowImageCoord();
 
+
         //WHETHER TO UPDATE THE MAP
         this.refreshMap(this.getAutoUpdate());
     }
@@ -763,8 +788,8 @@ public class PixelGridView extends View {
 
     // Check whether the tile has been explored or not
     public void exploredTile (){
-        for (int i = this.getCurCoord()[0] - 1; i <= this.getCurCoord()[0] + 1; i++){
-            for (int j = this.getCurCoord()[1] - 1; j <= this.getCurCoord()[1] + 1; j++){
+        for (int i = this.getCurCoord()[1] - 1; i <= this.getCurCoord()[1] + 1; i++){
+            for (int j = this.getCurCoord()[0] - 1; j <= this.getCurCoord()[0] + 1; j++){
                 this.setCellExplored(i, j, true);
             }
         }
@@ -786,8 +811,8 @@ public class PixelGridView extends View {
         }
 
         int binMapArrayIndex = 0;
-        for(int i = 0; i < this.getNumColumns(); i++){
-            for(int j = 0; j < this.getNumRows(); j++){
+        for(int j = 0; j < this.getNumRows(); j++){
+            for(int i = 0; i < this.getNumColumns(); i++) {
                 if(binMapArray[binMapArrayIndex] == 1){
                     this.setCellExplored(i, j, true);
                 }
@@ -801,23 +826,26 @@ public class PixelGridView extends View {
 
     // to be done
     public void mapDescriptorObstacle(String hexMap){
-        BigInteger hexBigInteger = new BigInteger(hexMap, 16);
+
+        String hexMapTemp = "1".concat(hexMap);
+        BigInteger hexBigInteger = new BigInteger(hexMapTemp, 16);
         String binMap = hexBigInteger.toString(2);
 //        String binMapTemp = "1".concat(binMap);
 //        String binMapWithLeadingZeros = String.format("%304s", binMap).replace(" ", "0");
 //        String binMap = Integer.toBinaryString(parseHex);
 //        String binMapExtracted = binMap.substring(2,302);
         char cur;
-        Integer[] binMapArray = new Integer[binMap.length()];
-        for (int i = 0; i < binMap.length(); i++){
+        int length = binMap.length();
+        Integer[] binMapArray = new Integer[binMap.length() - 1];
+        for (int i = 1; i < binMap.length() - 1; i++){
             cur = binMap.charAt(i);
-            binMapArray[i] = Integer.parseInt(String.valueOf(cur));
+            binMapArray[i - 1] = Integer.parseInt(String.valueOf(cur));
         }
         boolean[][] exploredCell = this.getCellExplored();
 
         int binMapArrayIndex = 0;
-        for(int i = 0; i < this.getNumColumns(); i++){
-            for(int j = 0; j < this.getNumRows(); j++) {
+        for(int j = 0; j < this.getNumRows(); j++){
+            for(int i = 0; i < this.getNumColumns(); i++) {
                 if (exploredCell[i][j]) {
                     if (binMapArray[binMapArrayIndex] == 1) {
                         this.setObstacle(i, j, true);
@@ -857,4 +885,3 @@ public class PixelGridView extends View {
         this.refreshMap(this.getAutoUpdate());
     }
 }
-
