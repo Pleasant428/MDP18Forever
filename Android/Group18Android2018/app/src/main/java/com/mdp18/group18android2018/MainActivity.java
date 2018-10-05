@@ -42,7 +42,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     PixelGridView mPGV;
     ImageButton forwardButton, leftRotateButton, rightRotateButton, reverseButton;
-    Button btn_update, btn_sendToAlgo;
+    Button btn_update, btn_sendToAlgo, btn_calibrate;
     TextView tv_status, tv_map_exploration, tv_mystatus, tv_mystringcmd;
     ToggleButton tb_setWaypointCoord, tb_setStartCoord, tb_autoManual, tb_fastestpath, tb_exploration;
     ScrollView mScrollView, mScrollView2;
@@ -242,11 +242,69 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                     // Send both coordinates to Algo as one string
                     int convertDirection = mPGV.getRobotDirection();
                     int convertedDirection = mPGV.convertRobotDirectionForAlgo(convertDirection);
-                    String sendAlgoCoord = "And|Alg|".concat(Integer.toString(mPGV.getStartCoord()[0])).concat(",").concat(Integer.toString(mPGV.getStartCoord()[1])).concat(",").concat(Integer.toString(convertedDirection)).concat(",").concat(Integer.toString(mPGV.getWayPoints().get(0)[1])).concat(",").concat(Integer.toString(mPGV.getWayPoints().get(0)[0]));
+                    String sendAlgoCoord = "And|Alg|11|".concat(Integer.toString(mPGV.getStartCoord()[0])).concat(",").concat(Integer.toString(mPGV.getStartCoord()[1])).concat(",").concat(Integer.toString(convertedDirection)).concat(",").concat(Integer.toString(mPGV.getWayPoints().get(0)[1])).concat(",").concat(Integer.toString(mPGV.getWayPoints().get(0)[0]));
                     byte[] bytes = sendAlgoCoord.getBytes(Charset.defaultCharset());
                     BluetoothChat.writeMsg(bytes);
                     Log.d(TAG, "Sent Start and Waypoint Coordinates to Algo");
                     Toast.makeText(MainActivity.this, "Start & Waypoint coordinates sent", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+
+        // To send start coordinates and waypoint coordinates to Algo
+        btn_calibrate = (Button) findViewById(R.id.btn_calibrateRobot);
+        btn_calibrate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // Check BT connectionIf not connected to any bluetooth device
+                if (connectedDevice == null) {
+                    Toast.makeText(MainActivity.this, "Please connect to bluetooth device first!", Toast.LENGTH_SHORT).show();
+                } else {
+
+                    //If already connected to a bluetooth device
+                    tv_mystatus.setText(R.string.calibrating);
+                    tv_mystringcmd.setText(R.string.calibrating);
+
+                    // Help Arduino calibrate robot
+                    int counter = 0;
+                    mPGV.rotateLeft();
+                while (counter < 7){
+                    while ((tv_mystatus.getText().toString().equals(R.string.calibrating))) {
+                    }
+                    switch (counter) {
+                        case 0:
+                        case 2:
+                        case 4:
+
+                            mPGV.rotateLeft();
+                            tv_mystatus.setText(R.string.calibrating);
+                            break;
+
+                        case 1:
+                        case 3:
+                            // ALIGN_FRONT
+                            String sendToArdFront = "And|Alg|4|";
+                            byte[] bytes = sendToArdFront.getBytes(Charset.defaultCharset());
+                            BluetoothChat.writeMsg(bytes);
+                            tv_mystatus.setText(R.string.calibrating);
+                            break;
+
+                        case 5:
+                            //ALIGN_RIGHT
+                            String sendToArdRight = "And|Alg|5|";
+                            byte[] bytess = sendToArdRight.getBytes(Charset.defaultCharset());
+                            BluetoothChat.writeMsg(bytess);
+                            tv_mystatus.setText(R.string.calibrating);
+
+                        case 6:
+                            // Last STOP received
+                            break;
+                    }
+                    counter++;
+                }
+                    Log.d(TAG, "Calibration completed!!");
+                    tv_mystatus.setText("Calibration completed");
+                    Toast.makeText(MainActivity.this, "Calibration completed", Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -339,31 +397,26 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     }
 
-    private void scrollToBottom()
-    {
-        mScrollView.post(new Runnable()
-        {
-            public void run()
-            {
-                mScrollView.smoothScrollTo(0, tv_mystatus.getBottom());
-            }
-        });
-    }
 
-    private void scrollToBottom2()
-    {
-        mScrollView2.post(new Runnable()
-        {
-            public void run()
-            {
-                mScrollView2.smoothScrollTo(0, tv_mystringcmd.getBottom());
-            }
-        });
-    }
 
     @Override
     public void onBackPressed() {
         Toast.makeText(MainActivity.this, "Please navigate with the menu on the top right corner!", Toast.LENGTH_SHORT).show();
+    }
+
+    public void robotTakeAction () {
+
+        Log.d(TAG, "Aligning Robot...");
+
+        String alignFront = "And|Ard|4|";
+        byte[] bytes = alignFront.getBytes(Charset.defaultCharset());
+        BluetoothChat.writeMsg(bytes);
+        Log.d(TAG, "Align Front done");
+
+        String alignRight = "And|Ard|5|";
+        byte[] bytess = alignRight.getBytes(Charset.defaultCharset());
+        BluetoothChat.writeMsg(bytess);
+        Log.d(TAG, "Align Right done");
     }
 
     // Broadcast Receiver for Incoming Messages
@@ -444,21 +497,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                             tv_mystringcmd.setText(R.string.calibrating);
                             break;
 
-
-                        // Action: STARTEXP
-                        case "6":
-                            startExploration();
-                            break;
-
-
                         // Action: ENDEXP
-                        case "7":
-                            endExploration();
-                            break;
-
-                        // Action: STARTFAST
                         case "8":
-                            startFastestPath();
+                            endExploration();
                             break;
 
 
@@ -466,25 +507,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                         case "9":
                             endFastestPath();
                             break;
-
-
-                        //Action: STOP
-                        //No longer using
-                        case "10":
-                            Toast.makeText(MainActivity.this, "COMMAND 10: STOP no longer applicable to Android", Toast.LENGTH_SHORT).show();
-                            break;
-
-
-                        // Action: ROBOT_POS
-                        case "11":
-                            int col = Integer.parseInt(filteredMsg[3]);
-                            int row = Integer.parseInt(filteredMsg[4]);
-                            int dir = Integer.parseInt(filteredMsg[5]);
-                            int convertedDirection = mPGV.convertRobotDirectionForAlgo(dir);
-                            mPGV.setRobotDirection(convertedDirection);
-                            mPGV.setCurPos(row, col);
-                            break;
-
 
                         // Action: MD1
                         case "md1":
@@ -518,7 +540,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                             // Sent by Algo: Upwards arrow on coordinate
                             // Format: Rpi|And|A|
 
-                            mPGV.displayArrowBlock();
+                            mPGV.setArrowImageCoord();
                             mPGV.refreshMap(mPGV.getAutoUpdate());
                             break;
 
@@ -587,7 +609,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     public void startExploration() {
         Toast.makeText(MainActivity.this, "Exploration started", Toast.LENGTH_SHORT).show();
-        String startExp = "And|Alg|6|";
+        String startExp = "And|Alg|12|";
         byte[] bytes = startExp.getBytes(Charset.defaultCharset());
         BluetoothChat.writeMsg(bytes);
         Log.d(TAG, "Android Controller: Start Exploration");
@@ -604,7 +626,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     public void startFastestPath() {
         Toast.makeText(MainActivity.this, "Fastest Path started", Toast.LENGTH_SHORT).show();
-        String startFP = "And|Alg|8|";
+        String startFP = "And|Alg|13|";
         byte[] bytes = startFP.getBytes(Charset.defaultCharset());
         BluetoothChat.writeMsg(bytes);
         Log.d(TAG, "Android Controller: Start Fastest Path");

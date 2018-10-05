@@ -163,7 +163,7 @@ public class PixelGridView extends View {
     }
 
     public void moveCurCoord(int xInc, int yInc) {
-        this.setCurPos(this.getCurCoord()[1] + xInc, this.getCurCoord()[0] + yInc);
+        this.setCurPos(this.getCurCoord()[1] + yInc, this.getCurCoord()[0] + xInc);
 //        this.curCoord[0] = this.curCoord[0] + xInc;
 //        this.curCoord[1] = this.curCoord[1] + yInc;
     }
@@ -268,21 +268,22 @@ public class PixelGridView extends View {
 //            this.arrowImageCoords.add(arrowImageCoord);
         }
 
-        // If robot is facing right, arrow direction would be up.
+        // If robot is facing down, arrow direction would be up.
         // Arrow coordinates will be col+1, row-2
         else if (robotDir == 2) {
-            arrowImageCoord[0] = robotColumn+1;
-            arrowImageCoord[1] = robotRow-2;
+            arrowImageCoord[0] = robotColumn-2;
+            arrowImageCoord[1] = robotRow-1;
+
 
             // Add arrow_up_u.png
 //            this.arrowImageCoords.add(arrowImageCoord);
         }
 
-        // If robot is facing down, arrow direction would be right.
+        // If robot is facing right, arrow direction would be right.
         // Arrow coordinates will be col-2, row-1
         else {
-            arrowImageCoord[0] = robotColumn-2;
-            arrowImageCoord[1] = robotRow-1;
+            arrowImageCoord[0] = robotColumn+1;
+            arrowImageCoord[1] = robotRow-2;
 
             // Add arrow_up_r.png
 //            this.arrowImageCoords.add(arrowImageCoord);
@@ -572,14 +573,14 @@ public class PixelGridView extends View {
             // If robot is facing right, arrow direction would be up.
             // Arrow coordinates will be col+1, row+2
             else if(arrowImageCoords.get(i)[2] == 2){
-                Bitmap arrowBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.arrow_up_u);
+                Bitmap arrowBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.arrow_up_r);
                 canvas.drawBitmap(arrowBitmap,null, rect, null);
             }
 
             // If robot is facing down, arrow direction would be right.
             // Arrow coordinates will be col-2, row-1
             else if(arrowImageCoords.get(i)[2] == 3){
-                Bitmap arrowBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.arrow_up_r);
+                Bitmap arrowBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.arrow_up_u);
                 canvas.drawBitmap(arrowBitmap,null, rect, null);
             }
 
@@ -763,21 +764,21 @@ public class PixelGridView extends View {
     }
 
     // Display Arrow Block on Grid Map
-    public void displayArrowBlock () {
-        int[] robotPos = this.getCurCoord();
-        int robotCol = robotPos[0];
-        int robotRow = robotPos[1];
-        int robotDir = this.getRobotDirection();
-
-//       int[] arrowPos = new int[2];
-////       arrowPos[0] = arrowCol;
-////       arrowPos[1] = arrowRow;
-       this.setArrowImageCoord();
-
-
-        //WHETHER TO UPDATE THE MAP
-        this.refreshMap(this.getAutoUpdate());
-    }
+//    public void displayArrowBlock () {
+//        int[] robotPos = this.getCurCoord();
+//        int robotCol = robotPos[0];
+//        int robotRow = robotPos[1];
+//        int robotDir = this.getRobotDirection();
+//
+////       int[] arrowPos = new int[2];
+//////       arrowPos[0] = arrowCol;
+//////       arrowPos[1] = arrowRow;
+//       this.setArrowImageCoord();
+//
+//
+//        //WHETHER TO UPDATE THE MAP
+//        this.refreshMap(this.getAutoUpdate());
+//    }
 
     // Refresh map
     public void refreshMap (boolean updateMap) {
@@ -790,7 +791,7 @@ public class PixelGridView extends View {
     public void exploredTile (){
         for (int i = this.getCurCoord()[1] - 1; i <= this.getCurCoord()[1] + 1; i++){
             for (int j = this.getCurCoord()[0] - 1; j <= this.getCurCoord()[0] + 1; j++){
-                this.setCellExplored(i, j, true);
+                this.setCellExplored(j, i, true);
             }
         }
         this.refreshMap(this.getAutoUpdate());
