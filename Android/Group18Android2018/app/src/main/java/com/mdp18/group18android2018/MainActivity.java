@@ -491,10 +491,18 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
                         case "a":
                             // Sent by Algo: Upwards arrow on coordinate
-                            // Format: Alg|And|A|col,row
+                            // Format: Alg|And|A|col,row,dir
                             int arrow_col = Integer.parseInt(filteredMsg[3]);
                             int arrow_row = Integer.parseInt(filteredMsg[4]);
+                            int arrow_dir = Integer.parseInt(filteredMsg[5]);
+
+                            //Convert arrow direction
+                            int convertedArrowDirection = mPGV.convertRobotDirectionForAlgo(arrow_dir);
+
                             mPGV.displayArrowBlock(arrow_col, arrow_row);
+
+                            // Display direction of upward arrow also
+
                             mPGV.refreshMap(mPGV.getAutoUpdate());
                             break;
 

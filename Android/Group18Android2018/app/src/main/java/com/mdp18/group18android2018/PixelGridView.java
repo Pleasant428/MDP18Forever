@@ -671,12 +671,6 @@ public class PixelGridView extends View {
 //       arrowPos[1] = arrowRow;
        this.setArrowImageCoord(arrowCol,arrowRow);
 
-
-        // CODE TO DISPLAY ARROW_UP.PNG ON THE POINT
-
-
-
-
         //WHETHER TO UPDATE THE MAP
         this.refreshMap(this.getAutoUpdate());
     }
