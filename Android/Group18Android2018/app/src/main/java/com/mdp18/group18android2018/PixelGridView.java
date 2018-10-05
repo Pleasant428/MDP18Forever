@@ -513,7 +513,7 @@ public class PixelGridView extends View {
     public void moveForward () {
         int[] pos = this.getCurPos();
         int[] prev = this.getCurPos();
-        int[] prevCoord = this.getCurCoord();
+
         int dir = this.getRobotDirection();
         boolean reachedWall = this.checkReachedWall(pos, dir);
         boolean reachedObstacle = this.checkReachedObstacle(pos, dir);
@@ -539,11 +539,7 @@ public class PixelGridView extends View {
                 pos[3]++;
                 this.moveCurCoord(1, 0);
             }
-
-            int[] curCoord = this.getCurCoord();
-
-//            this.exploredTile(prevCoord, curCoord);
-
+            this.exploredTile();
             this.setCurPos(pos);
         }
 
@@ -585,7 +581,7 @@ public class PixelGridView extends View {
                 pos[1]--;
                 pos[3]--;
             }
-
+            this.exploredTile();
             this.setCurPos(pos);
         }
 
@@ -693,16 +689,13 @@ public class PixelGridView extends View {
     }
 
     // Check whether the tile has been explored or not
-    public void exploredTile ( int[] prevCoord, int[] curCoord){
-        if (prevCoord[0] == curCoord[0]) {
-            this.cellExplored[curCoord[0] - 1][curCoord[1]] = true;
-            this.cellExplored[curCoord[0]][curCoord[1]] = true;
-            this.cellExplored[curCoord[0] + 1][curCoord[1]] = true;
-        } else {
-            this.cellExplored[curCoord[0]][curCoord[1] - 1] = true;
-            this.cellExplored[curCoord[0]][curCoord[1]] = true;
-            this.cellExplored[curCoord[0]][curCoord[1] + 1] = true;
+    public void exploredTile (){
+        for (int i = this.getCurCoord()[0] - 1; i <= this.getCurCoord()[0] + 1; i++){
+            for (int j = this.getCurCoord()[1] - 1; j <= this.getCurCoord()[1] + 1; j++){
+                this.setCellExplored(i, j, true);
+            }
         }
+        this.refreshMap(this.getAutoUpdate());
     }
 
     // to be done
@@ -737,8 +730,9 @@ public class PixelGridView extends View {
     public void mapDescriptorObstacle(String hexMap){
         BigInteger hexBigInteger = new BigInteger(hexMap, 16);
         String binMap = hexBigInteger.toString(2);
+//        String binMapTemp = "1".concat(binMap);
 //        String binMapWithLeadingZeros = String.format("%304s", binMap).replace(" ", "0");
-        //        String binMap = Integer.toBinaryString(parseHex);
+//        String binMap = Integer.toBinaryString(parseHex);
 //        String binMapExtracted = binMap.substring(2,302);
         char cur;
         Integer[] binMapArray = new Integer[binMap.length()];
