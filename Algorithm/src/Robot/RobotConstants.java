@@ -19,7 +19,7 @@ public class RobotConstants {
 
 	// Sensors default range (In grids)
 	public static final int SHORT_MIN = 1;
-	public static final int SHORT_MAX = 2;
+	public static final int SHORT_MAX = 3;
 
 	public static final int LONG_MIN = 1;
 	public static final int LONG_MAX = 5;
@@ -53,6 +53,6 @@ public class RobotConstants {
 	
 	
 	public static enum Command{
-		FORWARD, TURN_LEFT, TURN_RIGHT, BACKWARD, ALIGN_FRONT, ALIGN_RIGHT, SEND_SENSORS, ERROR, ENDEXP, ENDFAST, STOP, ROBOT_POS;
+		FORWARD, TURN_LEFT, TURN_RIGHT, BACKWARD, ALIGN_FRONT, ALIGN_RIGHT, SEND_SENSORS, ERROR, ENDEXP, ENDFAST, ROBOT_POS, START_EXP, START_FAST;
 	}
 }

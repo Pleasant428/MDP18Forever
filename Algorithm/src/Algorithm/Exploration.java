@@ -82,16 +82,15 @@ public class Exploration {
 		// Loop to explore the map
 		outerloop:
 		do {
-			
+			if(areaExplored >= 100)
+				break;
 			try {
 				getMove();
 			} catch (InterruptedException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
-			
 			areaExplored = exploredMap.exploredPercentage();
-			
 			//returned to start
 			if (prevArea == areaExplored||robot.getPosition().distance(start)==0) {
 				while(prevArea == areaExplored){
@@ -102,8 +101,7 @@ public class Exploration {
 				}
 				checkingStep = 2;
 			}
-			if(areaExplored >= 100)
-				break;
+			
 			if(moves%checkingStep==0)
 				prevArea = areaExplored;
 			

@@ -24,7 +24,6 @@ import java.util.HashMap;
 public class FastestPath {
 	
 	private Robot robot;
-	private Direction robotDir;
 	private Map exploredMap;
 	private HashMap <Cell, Cell> prevCell;	//Used to identify predecessor cell
 	private ArrayList<Cell> toVisit;		//Store cells to be visited

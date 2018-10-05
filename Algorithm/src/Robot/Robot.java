@@ -201,7 +201,7 @@ public class Robot {
 		if(!sim) {
 			System.out.println("Alg|Ard|"+m.ordinal()+"|"+steps);
 			NetMgr.getInstance().send("Alg|Ard|"+m.ordinal()+"|"+steps);
-			NetMgr.getInstance().send("Alg|And|"+m.ordinal()+"|"+steps);
+			//NetMgr.getInstance().send("Alg|And|"+m.ordinal()+"|"+steps);
 		}
 		switch(m) {
 		case FORWARD:
@@ -255,20 +255,22 @@ public class Robot {
 		if(!sim) {
 			String msg = null;
 			msg = NetMgr.getInstance().recieve();
-			String [] msgArr = msg.split("|");
-			String [] strSensor = msgArr[3].split(",");
-			System.out.println("Recieved "+strSensor.length+" sensor data");
+			String [] msgArr = msg.split("\\|");
+			String [] strSensor = msgArr[3].split("\\,");
+			System.out.println(msgArr[3]);
 			
 			//Translate string to integer
 			for(int i=0; i< strSensor.length; i++) {
-				String [] arrSensorStr = strSensor[i].split(":");
+				String [] arrSensorStr = strSensor[i].split("\\:");
 				sensorData[i][0] = Integer.parseInt(arrSensorStr[1]);
 				sensorData[i][1] = Integer.parseInt(arrSensorStr[2]);
 			}
 			
 			//Check Right Alignment
-			if((sensorData[3][0] - sensorData[4][0]) > RobotConstants.RIGHT_THRES){
-				NetMgr.getInstance().send("Alg|And|"+Command.ALIGN_RIGHT.ordinal()+"|0");
+			System.out.println("R1:"+sensorData[3][1]+" R2:"+sensorData[4][1]);
+			if(sensorData[3][1]==1&& sensorData[4][1]==1&&(sensorData[3][0] - sensorData[4][0]) > RobotConstants.RIGHT_THRES){
+				System.out.println("Right Alignment!");
+				//NetMgr.getInstance().send("Alg|And|"+Command.ALIGN_RIGHT.ordinal()+"|0");
 				NetMgr.getInstance().send("Alg|Ard|"+Command.ALIGN_RIGHT.ordinal()+"|0");
 				sense(exploredMap, map);
 				return;
@@ -278,8 +280,9 @@ public class Robot {
 			double prevRightAvg = (sensorList.get(3).getPrevRawData() + sensorList.get(4).getPrevRawData())/2;
 			double curRightAvg = (sensorData[3][0] + sensorData[3][0])/2;
 			// if too close/ far from right wall
-			if(Math.abs(curRightAvg - prevRightAvg) > RobotConstants.RIGHT_DIS_THRES){
-				NetMgr.getInstance().send("Alg|And|"+Command.ALIGN_FRONT+"|0");
+			if(sensorData[3][1]==1&& sensorData[4][1]==1&&(Math.abs(curRightAvg - prevRightAvg) > RobotConstants.RIGHT_DIS_THRES)){
+				System.out.println("Right Distance Alignment");
+				//NetMgr.getInstance().send("Alg|And|"+Command.ALIGN_FRONT+"|0");
 				NetMgr.getInstance().send("Alg|Ard|"+Command.TURN_RIGHT.ordinal()+"|0");
 				msg = NetMgr.getInstance().recieve();
 				NetMgr.getInstance().send("Alg|Ard|"+Command.ALIGN_FRONT.ordinal()+"|0");
@@ -292,11 +295,12 @@ public class Robot {
 			}
 			
 			//Checking Front Alignment too close/far from location
-			
+			System.out.println("prevMove :"+prevMove);
 			if(prevMove == Command.FORWARD|| prevMove == Command.BACKWARD)
 			{
 				boolean frontCal = false;
 				for(int i=0; i<3; i++) {
+					System.out.println("Front "+i+": "+sensorData[i][1]+" SensorDiff: "+Math.abs(sensorData[i][1] - sensorList.get(i).getPrevData()));
 					if(sensorList.get(i).getPrevData()!=9 && Math.abs(sensorData[i][1] - sensorList.get(i).getPrevData())!=1)
 					{
 						frontCal = true;
@@ -305,12 +309,15 @@ public class Robot {
 				//Discrepancy detected among the sensor data recieved
 				if(frontCal) {
 					//Unable to calibrate, as obstacles in front of each sensor is not at uniform distance request sensor data again
-					if((sensorData[2][1]<sensorData[0][1] || sensorData[2][1]<sensorData[1][1]) && sensorData[0][1] != sensorData[1][1])
+					System.out.println("FR==FL: "+(sensorData[0][1] == sensorData[1][1]));
+					if(sensorData[0][1] != sensorData[1][1]) {
+						System.out.println("Unable to Front Cal Requesting Sensor Data Again!");
 						NetMgr.getInstance().send("Alg|Ard|S|0");
+					}
 					else
 					{
 						NetMgr.getInstance().send("Alg|Ard|"+Command.ALIGN_FRONT.ordinal()+"|0");
-						NetMgr.getInstance().send("Alg|And|"+Command.ALIGN_FRONT.ordinal()+"|0");
+//						NetMgr.getInstance().send("Alg|And|"+Command.ALIGN_FRONT.ordinal()+"|0");
 					}
 					sense(exploredMap, map);
 					return;
@@ -320,8 +327,10 @@ public class Robot {
 		}
 		for (int i = 0; i < sensorList.size(); i++) {
 			// check if sensor detects any obstacle
-			if (!sim)
+			if (!sim) {
 				obsBlock = sensorData[i][1];
+				sensorList.get(i).setPrevData(obsBlock);
+			}
 			else
 				obsBlock = sensorList.get(i).detect(map);
 			// Assign the rowInc and colInc based on sensor Direction
@@ -375,7 +384,7 @@ public class Robot {
 			}
 		}
 		if(!sim)
-			sendMapDescriptor(exploredMap);
+			//sendMapDescriptor(exploredMap);
 		exploredMap.draw(true);
 		draw();
 	}

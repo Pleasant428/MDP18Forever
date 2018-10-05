@@ -172,6 +172,15 @@ public class Map {
 
 		return neighbours;
 	}
+	
+	//Remove existing cells with path
+	public void removePaths() {
+		for(int r=0; r<MapConstants.MAP_HEIGHT; r++) {
+			for(int c=0; c<MapConstants.MAP_WIDTH; c++) {
+				grid[r][c].setPath(false);
+			}
+		}
+	}
 
 	// Draw the Map Graphics Cells
 	public void draw(boolean explored) {

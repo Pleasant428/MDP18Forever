@@ -21,18 +21,13 @@ import javafx.scene.layout.*;
 import javafx.scene.control.*;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.shape.*;
 import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import javafx.collections.*;
 import javafx.concurrent.Task;
-import javafx.scene.control.Alert.AlertType;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
-import javafx.scene.text.*;
 
 //Program Classes
 /**
@@ -44,7 +39,7 @@ public class Simulator extends Application {
 	// Program Variables
 	private Map map; // Used to hold loaded map for sim
 	private Map exploredMap;
-	private Point wayPoint = null;
+	private Point wayPoint = new Point(MapConstants.GOALZONE);
 	private Robot robot;
 	private boolean sim = true;
 
@@ -55,7 +50,6 @@ public class Simulator extends Application {
 	private static final NetMgr netMgr = NetMgr.getInstance();
 
 	// GUI Components
-	private int stage = 1;
 	private Canvas mapGrid;
 	private GraphicsContext gc;
 
@@ -63,8 +57,8 @@ public class Simulator extends Application {
 	private Button loadMapBtn, saveMapBtn, resetMapBtn, startBtn, connectBtn, setWaypointBtn, setRobotBtn,
 			setObstacleBtn;
 	private ScrollBar timeLimitSB, coverageLimitSB, stepsSB;
-	private TextField ipTxt, portTxt, timeLimitTxt, coverageLimitTxt, stepsTxt;
-	private Label ipLbl, portLbl, timeLimitLbl, coverageLimitLbl, stepsLbl;
+	private TextField timeLimitTxt, coverageLimitTxt, stepsTxt;
+	private Label timeLimitLbl, coverageLimitLbl, stepsLbl;
 	private ComboBox<String> modeCB;
 	private FileChooser fileChooser;
 
@@ -75,7 +69,7 @@ public class Simulator extends Application {
 	private final String SIM_EXP = "Simulation Exploration Path";
 	
 	//Threads for each of the tasks
-	private Thread fastTask, expTask, netMgrTask;
+	private Thread fastTask, expTask;
 
 	public void start(Stage primaryStage) {
 		//Init for Map and Robot
@@ -89,8 +83,6 @@ public class Simulator extends Application {
 		robot.setStartPos(robot.getPosition().x, robot.getPosition().y, exploredMap);
 		
 		//Threads
-		netMgrTask = new Thread();
-		
 
 		// Setting the Title and Values for the Window
 		primaryStage.setTitle("MDP Group 18: Algorithm Simulator");
@@ -122,11 +114,6 @@ public class Simulator extends Application {
 		mapGrid.setOnMouseClicked(MapClick);
 
 		// Lbl Init
-		ipLbl = new Label("IP Address:");
-		ipTxt = new TextField();
-		portLbl = new Label("Port:");
-		portTxt = new TextField();
-		
 		timeLimitLbl = new Label("Time Limit: ");
 		coverageLimitLbl = new Label("Coverage Limit:");
 		timeLimitTxt = new TextField();
@@ -308,8 +295,7 @@ public class Simulator extends Application {
 		controlGrid.add(setRobotBtn, 0, 9, 2, 1);
 		controlGrid.add(setObstacleBtn, 2, 9, 4, 1);
 
-		controlGrid.setFillWidth(ipTxt, true);
-		controlGrid.setFillWidth(modeCB, true);
+		GridPane.setFillWidth(modeCB, true);
 		controlGrid.setFillWidth(startBtn, true);
 		controlGrid.setFillWidth(loadMapBtn, true);
 		controlGrid.setFillWidth(saveMapBtn, true);
@@ -565,12 +551,14 @@ public class Simulator extends Application {
 
 	// Set the waypoint
 	private boolean setWayPoint(int row, int col) {
-		if (map.checkValidMove(row, col)) {
+		if (exploredMap.checkValidMove(row, col)) {
 			if (wayPoint != null)
 				map.getCell(wayPoint).setWayPoint(false);
 
 			wayPoint = new Point(col, row);
-			map.getCell(wayPoint).setWayPoint(true);
+			exploredMap.setWayPoint(wayPoint);
+			if(!setObstacle)
+				exploredMap.draw(true);
 			return true;
 		} else
 			return false;
@@ -614,7 +602,29 @@ public class Simulator extends Application {
 				sim = false;
 				String msg = null;
 				robot.setSim(false);
-				System.out.println("RE Here");
+				//Wait for Start Command
+				outer:
+				while(true) {
+					msg = netMgr.recieve();
+					String []msgArr = msg.split("\\|");
+					Command c = Command.values()[Integer.parseInt(msgArr[2])];
+					
+					switch(c) {
+					case START_EXP:
+						break outer;
+					case ROBOT_POS:
+						String [] data = msgArr[3].split("\\,");
+						int row = Integer.parseInt(data[0]);
+						int col = Integer.parseInt(data[1]);
+						Direction dir = Direction.values()[Integer.parseInt(data[2])];
+						int wayRow = Integer.parseInt(data[3]);
+						int wayCol = Integer.parseInt(data[4]);
+						robot.setStartPos(col, row, exploredMap);
+						robot.setDirection(dir);
+						wayPoint = new Point(wayCol, wayRow);
+						break;
+					}
+				}
 				netMgr.send("Alg|Ard|S|0");
 				robot.sense(exploredMap, map);
 				exploredMap.draw(true);
@@ -626,7 +636,7 @@ public class Simulator extends Application {
 			case SIM_FAST:
 				sim = true;
 				System.out.println("SF Here");
-				
+				exploredMap.removePaths();
 				exploredMap.draw(true);
 				robot.draw();
 				fastTask = new Thread(new FastTask());
@@ -665,7 +675,12 @@ public class Simulator extends Application {
 			
 			Exploration explore = new Exploration(exploredMap, map, robot,coverageLimit, timeLimit,steps, sim);
 			explore.exploration(new Point(MapConstants.STARTZONE_COL,MapConstants.STARTZONE_COL));
-			
+			if(!sim) {
+				netMgr.send("Alg|And|"+Command.ENDEXP+"|");
+				while(true) {
+					
+				}
+			}
 	        return 1;
 	    }
 	}
@@ -674,7 +689,17 @@ public class Simulator extends Application {
 		@Override
 	    protected Integer call() throws Exception {
 			FastestPath fp = new FastestPath(exploredMap, robot,sim);
-			ArrayList<Cell> path = fp.run(new Point(robot.getPosition().x,robot.getPosition().y), new Point(MapConstants.GOALZONE_COL,MapConstants.GOALZONE_ROW), robot.getDirection());
+			ArrayList<Cell> path;
+			if(wayPoint.distance(MapConstants.GOALZONE) != 0)
+			{
+				path = fp.run(new Point(robot.getPosition().x,robot.getPosition().y), wayPoint, robot.getDirection());
+				
+				System.out.println("HERE");
+				path.addAll(fp.run(wayPoint, MapConstants.GOALZONE, robot.getDirection()));
+			}
+			else
+				path = fp.run(new Point(robot.getPosition().x,robot.getPosition().y), MapConstants.GOALZONE, robot.getDirection());
+			
 			fp.displayFastestPath(path, true);
 			ArrayList<Command> commands = fp.getPathCommands(path);
 			

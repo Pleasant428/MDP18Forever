@@ -13,6 +13,7 @@ public class NetMgr {
 
 	private BufferedWriter out;
 	private BufferedReader in;
+	private int msgCounter = 0;
 	
 	private static NetMgr netMgr = null;
 	
@@ -48,6 +49,9 @@ public class NetMgr {
 	// connection
 	public boolean startConn() {
 		// Init Connection
+		while(true) {
+			
+		}
 		try {
 			System.out.println("Initiating Connection with RPI...");
 			socket = new Socket(ipAddr, port);
@@ -57,14 +61,12 @@ public class NetMgr {
 			System.out.println("Connection Established!");
 		} catch (UnknownHostException e) {
 			System.out.println("Connection Failed (UnknownHostException)! "+e.toString());
-			return false;
+			
 		} catch (IOException e) {
 			System.out.println("Connection Failed (IOException)! "+e.toString());
-			return false;
 		}
 		catch (Exception e) {
 			System.out.println("Connection Failed (IOException)! "+e.toString());
-			return false;
 		}
 		return true;
 	}
@@ -94,7 +96,8 @@ public class NetMgr {
 			System.out.println("Sending Message...");
 			out.write(msg);
 			out.flush();
-			System.out.println("Message: "+msg+" sent!");
+			msgCounter++;
+			System.out.println(msgCounter+" Message: "+msg+" sent!");
 			
 		} catch (Exception e) {
 			
