@@ -82,7 +82,8 @@ public class PixelGridView extends View {
         this.setStartCoord(1,1);
         this.setStartPos(17, 0, 19, 2);
         this.setRobotDirection(0);
-        this.refreshMap(this.getAutoUpdate());
+//        this.refreshMap(this.getAutoUpdate());
+
 
     }
 
@@ -91,7 +92,7 @@ public class PixelGridView extends View {
     }
 
     public void setCellExplored(int column, int row, boolean explored){
-        this.cellExplored[column][row] = explored;
+            this.cellExplored[column][row] = explored;
     }
 
     public boolean[][] getCellExplored(){
@@ -729,8 +730,8 @@ public class PixelGridView extends View {
         }
 
         int binMapArrayIndex = 0;
-        for(int i = 0; i < this.getNumColumns(); i++){
-            for(int j = 0; j < this.getNumRows(); j++){
+        for(int j = 0; j < this.getNumRows(); j++){
+            for(int i = 0; i < this.getNumColumns(); i++) {
                 if(binMapArray[binMapArrayIndex] == 1){
                     this.setCellExplored(i, j, true);
                 }
@@ -744,23 +745,26 @@ public class PixelGridView extends View {
 
     // to be done
     public void mapDescriptorObstacle(String hexMap){
-        BigInteger hexBigInteger = new BigInteger(hexMap, 16);
+
+        String hexMapTemp = "1".concat(hexMap);
+        BigInteger hexBigInteger = new BigInteger(hexMapTemp, 16);
         String binMap = hexBigInteger.toString(2);
 //        String binMapTemp = "1".concat(binMap);
 //        String binMapWithLeadingZeros = String.format("%304s", binMap).replace(" ", "0");
 //        String binMap = Integer.toBinaryString(parseHex);
 //        String binMapExtracted = binMap.substring(2,302);
         char cur;
-        Integer[] binMapArray = new Integer[binMap.length()];
-        for (int i = 0; i < binMap.length(); i++){
+        int length = binMap.length();
+        Integer[] binMapArray = new Integer[binMap.length() - 1];
+        for (int i = 1; i < binMap.length() - 1; i++){
             cur = binMap.charAt(i);
-            binMapArray[i] = Integer.parseInt(String.valueOf(cur));
+            binMapArray[i - 1] = Integer.parseInt(String.valueOf(cur));
         }
         boolean[][] exploredCell = this.getCellExplored();
 
         int binMapArrayIndex = 0;
-        for(int i = 0; i < this.getNumColumns(); i++){
-            for(int j = 0; j < this.getNumRows(); j++) {
+        for(int j = 0; j < this.getNumRows(); j++){
+            for(int i = 0; i < this.getNumColumns(); i++) {
                 if (exploredCell[i][j]) {
                     if (binMapArray[binMapArrayIndex] == 1) {
                         this.setObstacle(i, j, true);
