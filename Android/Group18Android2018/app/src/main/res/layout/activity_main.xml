@@ -12,10 +12,11 @@
 
 
     <RelativeLayout
+        android:id="@+id/relativeLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:layout_editor_absoluteX="16dp"
-        tools:layout_editor_absoluteY="0dp">
+        tools:layout_editor_absoluteX="0dp"
+        tools:layout_editor_absoluteY="16dp">
 
 
         <com.mdp18.group18android2018.PixelGridView
@@ -23,118 +24,198 @@
             android:layout_width="wrap_content"
             android:layout_height="600dp"
             android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
             android:layout_centerHorizontal="true"
             android:layout_marginLeft="75dp"
+            android:layout_marginTop="0dp"
             android:layout_marginRight="75dp"
             android:contentDescription="pixelGrid"
             android:gravity="center"
             android:stretchMode="columnWidth"
             android:visibility="visible"></com.mdp18.group18android2018.PixelGridView>
-
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_below="@id/map"
-            android:orientation="horizontal"
-            android:weightSum="1">
-
-            <LinearLayout
-                android:id="@+id/status_panel"
-                android:layout_width="276dp"
-                android:layout_height="match_parent"
-                android:layout_weight="0.5"
-                android:orientation="vertical">
-
-                <TextView
-                    android:id="@+id/tv_status"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Robot status"
-                    app:layout_constraintHorizontal_bias="0.228"
-                    app:layout_constraintVertical_bias="0.422" />
-
-                <TextView
-                    android:id="@+id/tv_mystatus"
-                    android:layout_width="match_parent"
-                    android:layout_height="32dp"
-                    android:layout_below="@+id/tv_status"
-                    android:background="@drawable/textbar"
-                    android:ems="15"
-                    android:text="" />
-
-                <TextView
-                    android:id="@+id/tv_map_exploration"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@id/tv_mystatus"
-                    android:text="String Commands" />
-
-
-                <TextView
-                    android:id="@+id/tv_mystringcmd"
-                    android:layout_width="match_parent"
-                    android:layout_height="32dp"
-                    android:layout_below="@+id/tv_map_exploration"
-                    android:background="@drawable/textbar"
-                    android:ems="15"
-                    android:text="" />
-
-                <ToggleButton
-                    android:id="@+id/tb_setStartCoord"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textOff="@string/setStart"
-                    android:textOn="@string/onStart"
-                    android:textSize="@dimen/font_size_small" />
-
-                <ToggleButton
-                    android:id="@+id/tb_setWaypointCoord"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textOff="@string/setWaypoint"
-                    android:textOn="@string/onWaypoint"
-                    android:textSize="@dimen/font_size_small" />
-            </LinearLayout>
-
-            <ImageButton
-                android:id="@+id/fwd_btn"
-                android:layout_width="67dp"
-                android:layout_height="67dip"
-                android:layout_marginBottom="143dp"
-                android:background="@drawable/fwdarrowbtn"
-                android:clickable="true"
-                android:visibility="visible" />
-
-            <ImageButton
-                android:id="@+id/left_btn"
-                android:layout_width="67dp"
-                android:layout_height="67dp"
-                android:background="@drawable/leftturnbtn"
-                android:clickable="true"
-                android:visibility="visible" />
-
-            <ImageButton
-                android:id="@+id/right_btn"
-                android:layout_width="67dp"
-                android:layout_height="67dp"
-                android:background="@drawable/rightturnbtn"
-                android:clickable="true"
-                android:visibility="visible" />
-
-            <ImageButton
-                android:id="@+id/rev_btn"
-                android:layout_width="67dp"
-                android:layout_height="67dp"
-                android:background="@drawable/reversearrowbtn"
-                android:clickable="true"
-                android:visibility="visible" />
-
-
-        </LinearLayout>
-
-
     </RelativeLayout>
+
+    <ImageButton
+        android:id="@+id/fwd_btn"
+        android:layout_width="55dp"
+        android:layout_height="55dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
+        android:background="@drawable/fwdarrowbtn"
+        android:clickable="true"
+        android:visibility="visible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.631"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.864" />
+
+    <ImageButton
+        android:id="@+id/left_btn"
+        android:layout_width="55dp"
+        android:layout_height="55dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
+        android:background="@drawable/leftturnbtn"
+        android:clickable="true"
+        android:visibility="visible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.753"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.863" />
+
+    <ImageButton
+        android:id="@+id/right_btn"
+        android:layout_width="55dp"
+        android:layout_height="55dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="32dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
+        android:background="@drawable/rightturnbtn"
+        android:clickable="true"
+        android:visibility="visible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.877"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.86" />
+
+    <ImageButton
+        android:id="@+id/rev_btn"
+        android:layout_width="55dp"
+        android:layout_height="55dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
+        android:background="@drawable/reversearrowbtn"
+        android:clickable="true"
+        android:visibility="visible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.862" />
+
+    <TextView
+        android:id="@+id/tv_status"
+        android:layout_width="86dp"
+        android:layout_height="21dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
+        android:text="Robot status"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.826" />
+
+    <TextView
+        android:id="@+id/tv_mystatus"
+        android:layout_width="307dp"
+        android:layout_height="32dp"
+        android:layout_below="@+id/tv_status"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
+        android:background="@drawable/textbar"
+        android:ems="15"
+        android:text=""
+        android:scrollbars = "vertical"
+        android:gravity="bottom"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.863" />
+
+    <TextView
+        android:id="@+id/tv_map_exploration"
+        android:layout_width="132dp"
+        android:layout_height="17dp"
+        android:layout_below="@id/tv_mystatus"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="424dp"
+        android:layout_marginBottom="8dp"
+        android:text="String Commands"
+        app:layout_constraintBottom_toBottomOf="@+id/tb_setWaypointCoord"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.444"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.728" />
+
+
+    <TextView
+        android:id="@+id/tv_mystringcmd"
+        android:layout_width="match_parent"
+        android:layout_height="52dp"
+        android:layout_below="@+id/tv_map_exploration"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
+        android:background="@drawable/textbar"
+        android:ems="15"
+        android:text=""
+        android:scrollbars = "vertical"
+        android:gravity="bottom"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.785" />
+
+    <ToggleButton
+        android:id="@+id/tb_setStartCoord"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
+        android:textOff="@string/setStart"
+        android:textOn="@string/onStart"
+        android:textSize="@dimen/font_size_small"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.932" />
+
+    <ToggleButton
+        android:id="@+id/tb_setWaypointCoord"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
+        android:textOff="@string/setWaypoint"
+        android:textOn="@string/onWaypoint"
+        android:textSize="@dimen/font_size_small"
+        app:layout_constraintBottom_toBottomOf="@+id/relativeLayout"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="1.0" />
 
 
     <ToggleButton
@@ -219,10 +300,10 @@
         android:textSize="@dimen/font_size_small"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.373"
+        app:layout_constraintHorizontal_bias="0.371"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.931" />
+        app:layout_constraintVertical_bias="0.938" />
 
     <Button
         android:id="@+id/btn_calibrateRobot"
@@ -236,7 +317,7 @@
         android:textSize="@dimen/font_size_small"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.387"
+        app:layout_constraintHorizontal_bias="0.385"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="1.0" />
@@ -251,15 +332,15 @@
         android:layout_marginBottom="8dp"
         android:checked="false"
         android:onClick="onClickTiltSwitch"
-        android:text="Tilt  "
+        android:text="Tilt"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.782"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.869" />
+        app:layout_constraintVertical_bias="0.0" />
 
 
 </android.support.constraint.ConstraintLayout>

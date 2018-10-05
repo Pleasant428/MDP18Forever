@@ -27,7 +27,7 @@
     <!-- myStatus strings -->
     <string name="neutral"> </string>
     <string name="moving">Moving</string>
-    <string name="stop">Stopped</string>
+    <string name="stop">Stop</string>
     <string name="calibrating">Calibrating robot...</string>
     <string name="startexp">Start Exploration</string>
     <string name="endexp">End Exploration</string>

@@ -14,23 +14,19 @@ import android.hardware.SensorManager;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
-import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.RadioButton;
-import android.widget.RadioGroup;
-import android.widget.ScrollView;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
-import org.w3c.dom.Text;
 
 import java.nio.charset.Charset;
 import java.util.UUID;
@@ -38,14 +34,11 @@ import java.util.UUID;
 public class MainActivity extends AppCompatActivity implements SensorEventListener{
     private static final String TAG = "MainActivity";
 
-//    boolean updateMap = true;
-
     PixelGridView mPGV;
     ImageButton forwardButton, leftRotateButton, rightRotateButton, reverseButton;
     Button btn_update, btn_sendToAlgo, btn_calibrate;
     TextView tv_status, tv_map_exploration, tv_mystatus, tv_mystringcmd;
     ToggleButton tb_setWaypointCoord, tb_setStartCoord, tb_autoManual, tb_fastestpath, tb_exploration;
-    ScrollView mScrollView, mScrollView2;
 
 
     // FOR TILT SENSOR
@@ -78,7 +71,15 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         //REGISTER BROADCAST RECEIVER FOR IMCOMING MSG
         LocalBroadcastManager.getInstance(this).registerReceiver(incomingMessageReceiver, new IntentFilter("IncomingMsg"));
 
+        tv_status = (TextView) findViewById(R.id.tv_status);
+        tv_map_exploration = (TextView) findViewById(R.id.tv_map_exploration);
 
+        tv_mystatus = (TextView) findViewById(R.id.tv_mystatus);
+        tv_mystatus.setText("Stop\n");
+        tv_mystatus.setMovementMethod(new ScrollingMovementMethod());
+
+        tv_mystringcmd = (TextView) findViewById(R.id.tv_mystringcmd);
+        tv_mystringcmd.setMovementMethod(new ScrollingMovementMethod());
 
         mPGV = findViewById(R.id.map);
         mPGV.initializeMap();
@@ -90,8 +91,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         //TILT
         tiltNavi = false;
         tiltBtn = findViewById(R.id.tiltSwitch);
-
-            //declaring Sensor Manager and sensor type
+        //declaring Sensor Manager and sensor type
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         sensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
 
@@ -112,8 +112,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                     byte[] bytes = navigate.getBytes(Charset.defaultCharset());
                     BluetoothChat.writeMsg(bytes);
                     Log.d(TAG, "Android Controller: Move Forward sent");
-                    tv_mystatus.setText("Moving");
-                    tv_mystringcmd.setText(R.string.navFwd);
+                    tv_mystatus.append("Moving\n");
+                    tv_mystringcmd.append("Android Controller: Move Forward\n");
                     mPGV.moveForward();
                 }
             }
@@ -134,8 +134,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                     byte[] bytes = navigate.getBytes(Charset.defaultCharset());
                     BluetoothChat.writeMsg(bytes);
                     Log.d(TAG, "Android Controller: Turn Left sent");
-                    tv_mystatus.setText("Moving");
-                    tv_mystringcmd.setText(R.string.navLeft);
+                    tv_mystatus.append("Moving\n");
+                    tv_mystringcmd.append("Android Controller: Turn Left\n");
                     mPGV.rotateLeft();
                 }
             }
@@ -156,8 +156,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                     byte[] bytes = navigate.getBytes(Charset.defaultCharset());
                     BluetoothChat.writeMsg(bytes);
                     Log.d(TAG, "Android Controller: Turn Right sent");
-                    tv_mystatus.setText("Moving");
-                    tv_mystringcmd.setText(R.string.navRight);
+                    tv_mystatus.append("Moving\n");
+                    tv_mystringcmd.append("Android Controller: Turn Right\n");
                     mPGV.rotateRight();
                 }
             }
@@ -177,20 +177,12 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                     byte[] bytes = navigate.getBytes(Charset.defaultCharset());
                     BluetoothChat.writeMsg(bytes);
                     Log.d(TAG, "Android Controller: Move Backwards sent");
-                    tv_mystatus.setText("Moving");
-                    tv_mystringcmd.setText(R.string.navRev);
+                    tv_status.append("Moving\n");
+                    tv_mystringcmd.append("Android Controller: Move Backwards\n");
                     mPGV.moveBackwards();
                 }
             }
         });
-
-        tv_status = (TextView) findViewById(R.id.tv_status);
-        tv_map_exploration = (TextView) findViewById(R.id.tv_map_exploration);
-
-        tv_mystatus = (TextView) findViewById(R.id.tv_mystatus);
-        tv_mystatus.setText("Stop");
-
-        tv_mystringcmd = (TextView) findViewById(R.id.tv_mystringcmd);
 
         tb_setWaypointCoord = (ToggleButton) findViewById(R.id.tb_setWaypointCoord);
         tb_setWaypointCoord.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -262,49 +254,63 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 } else {
 
                     //If already connected to a bluetooth device
-                    tv_mystatus.setText(R.string.calibrating);
-                    tv_mystringcmd.setText(R.string.calibrating);
+                    tv_status.append("Calibrating robot...\n");
+                    Log.d(TAG, "Set status as calibrating");
+                    tv_mystringcmd.append("Calibrating robot...\n");
+                    Log.d(TAG, "Set string cmd as calibrating");
+
 
                     // Help Arduino calibrate robot
                     int counter = 0;
+                    Log.d(TAG, "Set counter = 0");
                     mPGV.rotateLeft();
-                while (counter < 7){
-                    while ((tv_mystatus.getText().toString().equals(R.string.calibrating))) {
+                    Log.d(TAG, "1st left rotate");
+                    while (counter < 7){
+                        Log.d(TAG, "entered counter loop");
+
+                        // FIND A WAY TO DELAY THE INSTRUCTION COUNT
+                        while ((tv_status.getText().toString().equals(R.string.calibrating))) {
+                            Log.d(TAG, "entered while loop");
+                        }
+                        switch (counter) {
+                            case 0:
+                            case 2:
+                            case 4:
+
+                                mPGV.rotateLeft();
+                                Log.d(TAG, "Rotate Left");
+                                tv_status.append("Calibrating robot...\n");
+                                Log.d(TAG, "Set status as calibrating");
+                                break;
+
+                            case 1:
+                            case 3:
+                                // ALIGN_FRONT
+                                String sendToArdFront = "And|Alg|4|";
+                                byte[] bytes = sendToArdFront.getBytes(Charset.defaultCharset());
+                                BluetoothChat.writeMsg(bytes);
+                                tv_status.append("Calibrating robot...\n");
+                                Log.d(TAG, "Set status as calibrating");
+                                break;
+
+                            case 5:
+                                //ALIGN_RIGHT
+                                String sendToArdRight = "And|Alg|5|";
+                                byte[] bytess = sendToArdRight.getBytes(Charset.defaultCharset());
+                                BluetoothChat.writeMsg(bytess);
+                                tv_status.append("Calibrating robot...\n");
+                                Log.d(TAG, "Set status as calibrating");
+
+                            case 6:
+                                // Last STOP received
+                                Log.d(TAG, "LAST STOP RECEIVED");
+                                break;
+                        }
+                        counter++;
+                        Log.d(TAG, "counter++");
                     }
-                    switch (counter) {
-                        case 0:
-                        case 2:
-                        case 4:
-
-                            mPGV.rotateLeft();
-                            tv_mystatus.setText(R.string.calibrating);
-                            break;
-
-                        case 1:
-                        case 3:
-                            // ALIGN_FRONT
-                            String sendToArdFront = "And|Alg|4|";
-                            byte[] bytes = sendToArdFront.getBytes(Charset.defaultCharset());
-                            BluetoothChat.writeMsg(bytes);
-                            tv_mystatus.setText(R.string.calibrating);
-                            break;
-
-                        case 5:
-                            //ALIGN_RIGHT
-                            String sendToArdRight = "And|Alg|5|";
-                            byte[] bytess = sendToArdRight.getBytes(Charset.defaultCharset());
-                            BluetoothChat.writeMsg(bytess);
-                            tv_mystatus.setText(R.string.calibrating);
-
-                        case 6:
-                            // Last STOP received
-                            break;
-                    }
-                    counter++;
-                }
                     Log.d(TAG, "Calibration completed!!");
-                    tv_mystatus.setText("Calibration completed");
-                    Toast.makeText(MainActivity.this, "Calibration completed", Toast.LENGTH_SHORT).show();
+                    tv_status.append("Calibration completed\n");
                 }
             }
         });
@@ -398,25 +404,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     }
 
 
-
     @Override
     public void onBackPressed() {
         Toast.makeText(MainActivity.this, "Please navigate with the menu on the top right corner!", Toast.LENGTH_SHORT).show();
-    }
-
-    public void robotTakeAction () {
-
-        Log.d(TAG, "Aligning Robot...");
-
-        String alignFront = "And|Ard|4|";
-        byte[] bytes = alignFront.getBytes(Charset.defaultCharset());
-        BluetoothChat.writeMsg(bytes);
-        Log.d(TAG, "Align Front done");
-
-        String alignRight = "And|Ard|5|";
-        byte[] bytess = alignRight.getBytes(Charset.defaultCharset());
-        BluetoothChat.writeMsg(bytess);
-        Log.d(TAG, "Align Right done");
     }
 
     // Broadcast Receiver for Incoming Messages
@@ -427,7 +417,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             String incomingMsg = intent.getStringExtra("receivingMsg");
 
             Log.d(TAG, "Receiving incoming message: " + incomingMsg);
-            tv_mystringcmd.setText(incomingMsg);
+            tv_mystringcmd.append(incomingMsg + "\n");
 
             // Filter empty and concatenated string from receiving channel
             if (incomingMsg.length() > 8 && incomingMsg.length() < 345) {
@@ -447,8 +437,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                         case "0":
                             for (int counter = Integer.parseInt(filteredMsg[3]); counter >= 1; counter--) {
                                 mPGV.moveForward();
-                                tv_mystringcmd.setText(R.string.fwd);
-                                tv_mystatus.setText(R.string.moving);
+                                tv_mystringcmd.append("Move Forward\n");
+                                tv_mystatus.append("Moving\n");
                             }
                             break;
 
@@ -458,8 +448,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
                             for (int counter = Integer.parseInt(filteredMsg[3]); counter >= 1; counter--) {
                                 mPGV.rotateLeft();
-                                tv_mystringcmd.setText(R.string.left);
-                                tv_mystatus.setText(R.string.moving);
+                                tv_mystringcmd.append("Turn Left\n");
+                                tv_mystatus.append("Moving\n");
                             }
                                 break;
 
@@ -468,8 +458,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                         case "2":
                             for (int counter = Integer.parseInt(filteredMsg[3]); counter >= 1; counter--) {
                                 mPGV.rotateRight();
-                                tv_mystringcmd.setText(R.string.right);
-                                tv_mystatus.setText(R.string.moving);
+                                tv_mystringcmd.append("Turn Right\n");
+                                tv_mystatus.append("Moving\n");
                             }
                             break;
 
@@ -478,23 +468,23 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                         case "3":
                             for (int counter = Integer.parseInt(filteredMsg[3]); counter >= 1; counter--) {
                                 mPGV.moveBackwards();
-                                tv_mystringcmd.setText(R.string.back);
-                                tv_mystatus.setText(R.string.moving);
+                                tv_mystringcmd.append("Move Backwards\n");
+                                tv_mystatus.append("Moving\n");
                             }
                             break;
 
 
                         // Action: CALIBRATE : ALIGN_FRONT
                         case "4":
-                            tv_mystatus.setText(R.string.calibrating);
-                            tv_mystringcmd.setText(R.string.calibrating);
+                            tv_mystatus.append("Calibrating robot...\n");
+                            tv_mystringcmd.append("Calibrating robot...\n");
                             break;
 
 
                         // Action: CALIBRATE : ALIGN_RIGHT
                         case "5":
-                            tv_mystatus.setText(R.string.calibrating);
-                            tv_mystringcmd.setText(R.string.calibrating);
+                            tv_mystatus.append("Calibrating robot...\n");
+                            tv_mystringcmd.append("Calibrating robot...\n");
                             break;
 
                         // Action: ENDEXP
@@ -511,12 +501,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                         // Action: MD1
                         case "md1":
                             String mapDes1 = filteredMsg[3];
-
-                            // Part 1
-//                            String hexMapDes1 = mapDes1.substring(2, 302);
                             mPGV.mapDescriptorExplored(mapDes1);
-                            // use MapDes1 to process MDF String
-
                             break;
 
 
@@ -524,22 +509,18 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                         case "md2":
                             String mapDes2 = filteredMsg[3];
                             mPGV.mapDescriptorObstacle(mapDes2);
-                            // Part 2
-                            // use MapDes2 to process MDF String
-                            //mPGV.updateMapInfo(mapDes2, updateMap);
-
                             break;
 
                         case "s":
                             // Sent by Arduino: robot stop
-                            tv_mystatus.setText(R.string.stop);
-                            tv_mystringcmd.setText("");
+                            tv_mystatus.append("Stop\n");
+                            tv_mystringcmd.append("\n");
                             break;
 
                         case "a":
                             // Sent by Algo: Upwards arrow on coordinate
                             // Format: Rpi|And|A|
-
+                            tv_mystatus.append("Upwards arrow detected\n");
                             mPGV.setArrowImageCoord();
                             mPGV.refreshMap(mPGV.getAutoUpdate());
                             break;
@@ -613,14 +594,14 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         byte[] bytes = startExp.getBytes(Charset.defaultCharset());
         BluetoothChat.writeMsg(bytes);
         Log.d(TAG, "Android Controller: Start Exploration");
-        tv_mystringcmd.setText(R.string.startexp);
-        tv_mystatus.setText(R.string.moving);
+        tv_mystringcmd.append("Start Exploration\n");
+        tv_mystatus.append("Moving\n");
     }
 
     public void endExploration() {
         Log.d(TAG, "Algorithm: End Exploration");
-        tv_mystringcmd.setText(R.string.endexp);
-        tv_mystatus.setText(R.string.stop);
+        tv_mystringcmd.append("End Exploration\n");
+        tv_mystatus.append("Stop\n");
         Toast.makeText(MainActivity.this, "Exploration ended", Toast.LENGTH_SHORT).show();
     }
 
@@ -630,14 +611,14 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         byte[] bytes = startFP.getBytes(Charset.defaultCharset());
         BluetoothChat.writeMsg(bytes);
         Log.d(TAG, "Android Controller: Start Fastest Path");
-        tv_mystringcmd.setText(R.string.startfp);
-        tv_mystatus.setText(R.string.moving);
+        tv_mystringcmd.append("Start Fastest Path\n");
+        tv_mystatus.append("Moving\n");
     }
 
     public void endFastestPath() {
         Log.d(TAG, "Algorithm: Fastest Path Ended.");
-        tv_mystringcmd.setText(R.string.endfp);
-        tv_mystatus.setText(R.string.stop);
+        tv_mystringcmd.append("End Fastest Path\n");
+        tv_mystatus.append("Stop\n");
         Toast.makeText(MainActivity.this, "Fastest Path ended", Toast.LENGTH_SHORT).show();
     }
 
@@ -754,30 +735,30 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             if (x < 0) {
                 Log.d("MainActivity:", "RIGHT TILT!!");
 
-                tv_mystatus.setText("Moving");
-                tv_mystringcmd.setText(R.string.navRight);
+                tv_mystatus.append("Moving\n");
+                tv_mystringcmd.append("Android Controller: Turn Right\n");
                 mPGV.rotateRight();
             }
             if (x > 0) {
                 Log.d("MainActivity:", "LEFT TILT!!");
 
-                tv_mystatus.setText("Moving");
-                tv_mystringcmd.setText(R.string.navLeft);
+                tv_mystatus.append("Moving\n");
+                tv_mystringcmd.append("Android Controller: Turn Left\n");
                 mPGV.rotateLeft();
             }
         } else {
             if (y < 0) {
                 Log.d("MainActivity:", "UP TILT!!");
 
-                tv_mystatus.setText("Moving");
-                tv_mystringcmd.setText(R.string.navFwd);
+                tv_mystatus.append("Moving\n");
+                tv_mystringcmd.append("Android Controller: Move Forward\n");
                 mPGV.moveForward();
             }
             if (y > 0) {
                 Log.d("MainActivity:", "DOWN TILT!!");
 
-                tv_mystatus.setText("Moving");
-                tv_mystringcmd.setText(R.string.navRev);
+                tv_mystatus.append("Moving\n");
+                tv_mystringcmd.append("Android Controller: Move Backwards\n");
                 mPGV.moveBackwards();
             }
         }
