@@ -86,8 +86,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         btn_update = (Button) findViewById(R.id.btn_update);
         btn_update.setEnabled(false);
 
-        mScrollView = (ScrollView) findViewById(R.id.SCROLLER_ID);
-        mScrollView2 = (ScrollView) findViewById(R.id.SCROLLER_ID2);
 
         //TILT
         tiltNavi = false;
@@ -433,17 +431,17 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                             break;
 
 
-                        // Action: CALIBRATE
+                        // Action: CALIBRATE : ALIGN_FRONT
                         case "4":
                             tv_mystatus.setText(R.string.calibrating);
                             tv_mystringcmd.setText(R.string.calibrating);
                             break;
 
 
-                        // Action: ERROR
+                        // Action: CALIBRATE : ALIGN_RIGHT
                         case "5":
-                            tv_mystatus.setText(R.string.error);
-                            tv_mystringcmd.setText(R.string.error);
+                            tv_mystatus.setText(R.string.calibrating);
+                            tv_mystringcmd.setText(R.string.calibrating);
                             break;
 
 
@@ -518,18 +516,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
                         case "a":
                             // Sent by Algo: Upwards arrow on coordinate
-                            // Format: Alg|And|A|col,row,dir
-                            int arrow_col = Integer.parseInt(filteredMsg[3]);
-                            int arrow_row = Integer.parseInt(filteredMsg[4]);
-                            int arrow_dir = Integer.parseInt(filteredMsg[5]);
+                            // Format: Rpi|And|A|
 
-                            //Convert arrow direction
-                            int convertedArrowDirection = mPGV.convertRobotDirectionForAlgo(arrow_dir);
-
-                            mPGV.displayArrowBlock(arrow_col, arrow_row);
-
-                            // Display direction of upward arrow also
-
+                            mPGV.displayArrowBlock();
                             mPGV.refreshMap(mPGV.getAutoUpdate());
                             break;
 
