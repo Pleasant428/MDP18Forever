@@ -1,0 +1,45 @@
+Communication format for Android with other teams
+=================================================
+
+Android to Arduino:
+===================
+And|Ard|0|		// Forward 1
+And|Ard|1|		// Left 1
+And|Ard|2|		// Right 1
+And|Ard|3|		// Down 1
+And|Ard|4|		// Align_front (on click calibration button)
+And|Ard|5|		// Align_right (on click calibration button)
+
+Robot Calibration process:
+left (S) left (S) af (S) left (S) af (S) left (S) ar (S)
+
+
+Arduino to Android:
+===================
+Ard|And|S|		// Robot stop moving
+
+
+Android to Algo:
+================
+And|Alg|11|StartCol,StartRow,StartDir,WayCol,WayRow	// Send start + waypoint coordinates
+And|Alg|12|						// Start Exploration
+And|Alg|13|						// Start Fastest Path
+
+
+Algo to Android:
+================
+Alg|And|0|{1-10}	// Forward {1-10}
+Alg|And|1|{1-10}	// Left {1-10}
+Alg|And|2|{1-10}	// Right {1-10}
+Alg|And|3|{1-10}	// Down {1-10}
+Alg|And|4|		// Update status: Calibrating...
+Alg|And|5|		// Update status: Calibrating...
+Alg|And|8|		// Update status: End Exploration
+Alg|And|9|		// Update status: End Fastest Path
+Alg|And|MD1|hex		// Part 1 of MD
+Alg|And|MD2|hex		// Part 2 of MD
+
+
+Rpi to Android:
+===============
+Rpi|And|A|		// Detected arrow (camera is on the bottom right)
