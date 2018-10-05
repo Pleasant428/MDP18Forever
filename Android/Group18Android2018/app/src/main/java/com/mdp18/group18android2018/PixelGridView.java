@@ -238,7 +238,7 @@ public class PixelGridView extends View {
     public int getRobotDirection() {
         return this.robotDirection;
     }
-
+ 
     public void setArrowImageCoord(int column, int row) {
         int[] arrowImageCoord = new int[2];
         arrowImageCoord[0] = column;
@@ -692,7 +692,7 @@ public class PixelGridView extends View {
 //       int[] arrowPos = new int[2];
 //       arrowPos[0] = arrowCol;
 //       arrowPos[1] = arrowRow;
-       this.setArrowImageCoord(arrowCol,arrowRow);
+        this.setArrowImageCoord(arrowCol,arrowRow);
 
         //WHETHER TO UPDATE THE MAP
         this.refreshMap(this.getAutoUpdate());
