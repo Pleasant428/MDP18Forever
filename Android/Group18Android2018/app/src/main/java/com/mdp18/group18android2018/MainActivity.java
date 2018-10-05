@@ -24,6 +24,7 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.ScrollView;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -44,6 +45,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     Button btn_update, btn_sendToAlgo;
     TextView tv_status, tv_map_exploration, tv_mystatus, tv_mystringcmd;
     ToggleButton tb_setWaypointCoord, tb_setStartCoord, tb_autoManual, tb_fastestpath, tb_exploration;
+    ScrollView mScrollView, mScrollView2;
 
 
     // FOR TILT SENSOR
@@ -83,6 +85,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         btn_update = (Button) findViewById(R.id.btn_update);
         btn_update.setEnabled(false);
+
+        mScrollView = (ScrollView) findViewById(R.id.SCROLLER_ID);
+        mScrollView2 = (ScrollView) findViewById(R.id.SCROLLER_ID2);
 
         //TILT
         tiltNavi = false;
@@ -334,6 +339,28 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         }
         return super.onOptionsItemSelected(item);
 
+    }
+
+    private void scrollToBottom()
+    {
+        mScrollView.post(new Runnable()
+        {
+            public void run()
+            {
+                mScrollView.smoothScrollTo(0, tv_mystatus.getBottom());
+            }
+        });
+    }
+
+    private void scrollToBottom2()
+    {
+        mScrollView2.post(new Runnable()
+        {
+            public void run()
+            {
+                mScrollView2.smoothScrollTo(0, tv_mystringcmd.getBottom());
+            }
+        });
     }
 
     @Override
