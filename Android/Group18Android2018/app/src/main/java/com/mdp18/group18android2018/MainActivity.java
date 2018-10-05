@@ -24,6 +24,7 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.ScrollView;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -44,6 +45,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     Button btn_update, btn_sendToAlgo;
     TextView tv_status, tv_map_exploration, tv_mystatus, tv_mystringcmd;
     ToggleButton tb_setWaypointCoord, tb_setStartCoord, tb_autoManual, tb_fastestpath, tb_exploration;
+    ScrollView mScrollView, mScrollView2;
 
 
     // FOR TILT SENSOR
@@ -83,6 +85,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         btn_update = (Button) findViewById(R.id.btn_update);
         btn_update.setEnabled(false);
+
+        mScrollView = (ScrollView) findViewById(R.id.SCROLLER_ID);
+        mScrollView2 = (ScrollView) findViewById(R.id.SCROLLER_ID2);
 
         //TILT
         tiltNavi = false;
@@ -336,6 +341,28 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     }
 
+    private void scrollToBottom()
+    {
+        mScrollView.post(new Runnable()
+        {
+            public void run()
+            {
+                mScrollView.smoothScrollTo(0, tv_mystatus.getBottom());
+            }
+        });
+    }
+
+    private void scrollToBottom2()
+    {
+        mScrollView2.post(new Runnable()
+        {
+            public void run()
+            {
+                mScrollView2.smoothScrollTo(0, tv_mystringcmd.getBottom());
+            }
+        });
+    }
+
     @Override
     public void onBackPressed() {
         Toast.makeText(MainActivity.this, "Please navigate with the menu on the top right corner!", Toast.LENGTH_SHORT).show();
@@ -491,10 +518,18 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
                         case "a":
                             // Sent by Algo: Upwards arrow on coordinate
-                            // Format: Alg|And|A|col,row
+                            // Format: Alg|And|A|col,row,dir
                             int arrow_col = Integer.parseInt(filteredMsg[3]);
                             int arrow_row = Integer.parseInt(filteredMsg[4]);
+                            int arrow_dir = Integer.parseInt(filteredMsg[5]);
+
+                            //Convert arrow direction
+                            int convertedArrowDirection = mPGV.convertRobotDirectionForAlgo(arrow_dir);
+
                             mPGV.displayArrowBlock(arrow_col, arrow_row);
+
+                            // Display direction of upward arrow also
+
                             mPGV.refreshMap(mPGV.getAutoUpdate());
                             break;
 
