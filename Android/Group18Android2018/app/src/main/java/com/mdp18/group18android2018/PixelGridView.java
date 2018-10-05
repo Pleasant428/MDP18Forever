@@ -320,6 +320,7 @@ public class PixelGridView extends View {
             canvas.drawLine(0, i * cellHeight, width, i * cellHeight, blackPaint);
         }
 
+        this.setExploredMapping(canvas, lightGrayPaint);
         this.setStartPointColor(canvas, greenPaint);
         this.setEndPointColor(canvas, 18, 13, redPaint);
         this.setWayPointColor(canvas, cyanPaint);
@@ -382,6 +383,20 @@ public class PixelGridView extends View {
             return false;
         }
         return true;
+    }
+
+    public void setExploredMapping (Canvas canvas, Paint exploredColor){
+        boolean[][] exploredCell = this.getCellExplored();
+
+        for(int i = 0; i < this.getNumColumns(); i++){
+            for(int j = 0; j < this.getNumRows(); j++){
+                if (exploredCell[i][j]){
+                    canvas.drawRect(i * cellWidth, (19 - j) * cellHeight,
+                            (i + 1) * cellWidth, (20 - j) * cellHeight,
+                            exploredColor);
+                }
+            }
+        }
     }
 
     public void setStartPointColor (Canvas canvas, Paint colorStart){
@@ -489,10 +504,7 @@ public class PixelGridView extends View {
             Bitmap arrowBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.arrow_up);
             canvas.drawBitmap(arrowBitmap,null, rect, null);
         }
-
-
     }
-
 
     public boolean checkReachedWall ( int[] pos, int direction){
 
@@ -705,33 +717,76 @@ public class PixelGridView extends View {
     }
 
     // to be done
-    public void mapDescriptorExplored () {
+    public void mapDescriptorExplored (String hexMap) {
+        BigInteger hexBigInteger = new BigInteger(hexMap, 16);
+        String binMap = hexBigInteger.toString(2);
+//        String binMapWithLeadingZeros = String.format("%304s", binMap).replace(" ", "0");
+        //        String binMap = Integer.toBinaryString(parseHex);
+        String binMapExtracted = binMap.substring(2,302);
+        char cur;
+        Integer[] binMapArray = new Integer[binMapExtracted.length()];
+        for (int i = 0; i < binMapExtracted.length(); i++){
+            cur = binMapExtracted.charAt(i);
+            binMapArray[i] = Integer.parseInt(String.valueOf(cur));
+        }
 
+        int binMapArrayIndex = 0;
+        for(int i = 0; i < this.getNumColumns(); i++){
+            for(int j = 0; j < this.getNumRows(); j++){
+                if(binMapArray[binMapArrayIndex] == 1){
+                    this.setCellExplored(i, j, true);
+                }
+                else
+                    this.setCellExplored(i, j, false);
+                binMapArrayIndex++;
+            }
+        }
+        this.refreshMap(this.getAutoUpdate());
     }
 
     // to be done
-    public void mapDescriptorObstacle(){
+    public void mapDescriptorObstacle(String hexMap){
+        BigInteger hexBigInteger = new BigInteger(hexMap, 16);
+        String binMap = hexBigInteger.toString(2);
+//        String binMapWithLeadingZeros = String.format("%304s", binMap).replace(" ", "0");
+        //        String binMap = Integer.toBinaryString(parseHex);
+//        String binMapExtracted = binMap.substring(2,302);
+        char cur;
+        Integer[] binMapArray = new Integer[binMap.length()];
+        for (int i = 0; i < binMap.length(); i++){
+            cur = binMap.charAt(i);
+            binMapArray[i] = Integer.parseInt(String.valueOf(cur));
+        }
+        boolean[][] exploredCell = this.getCellExplored();
 
+        int binMapArrayIndex = 0;
+        for(int i = 0; i < this.getNumColumns(); i++){
+            for(int j = 0; j < this.getNumRows(); j++) {
+                if (exploredCell[i][j]) {
+                    if (binMapArray[binMapArrayIndex] == 1) {
+                        this.setObstacle(i, j, true);
+                    } else
+                        this.setObstacle(i, j, false);
+                    binMapArrayIndex++;
+                }
+            }
+        }
+        this.refreshMap(this.getAutoUpdate());
     }
 
     public void mapDescriptorChecklist(String hexMap){
-        Log.d(TAG,"hexMap" + hexMap);
-        char[] hexMapChar = hexMap.toCharArray();
+//        char[] hexMapChar = hexMap.toCharArray();
         BigInteger hexBigInteger = new BigInteger(hexMap, 16);
         String binMap = hexBigInteger.toString(2);
         String binMapWithLeadingZeros = String.format("%300s", binMap).replace(" ", "0");
-        Log.d(TAG, "hexBigInteger: " + hexBigInteger);
-        Log.d(TAG,"bitmap: "+ binMap);
-        Log.d(TAG, "binmap length:" + binMap.length());
-//        String binMap = Integer.toBinaryString(parseHex);
+        //        String binMap = Integer.toBinaryString(parseHex);
         char cur;
         Integer[] binMapArray = new Integer[binMapWithLeadingZeros.length()];
         for (int i = 0; i < binMapWithLeadingZeros.length(); i++){
             cur = binMapWithLeadingZeros.charAt(i);
             binMapArray[i] = Integer.parseInt(String.valueOf(cur));
         }
-//        int columnLimit = this.getNumColumns();
-//        int columnCount = 0;
+
         int binMapArrayIndex = 0;
         for(int j = this.getNumRows() - 1; j >= 0; j--){
             for(int i = 0; i < this.getNumColumns(); i++){
@@ -742,7 +797,6 @@ public class PixelGridView extends View {
                     this.setObstacle(i, j, false);
                 binMapArrayIndex++;
             }
-//            binMapArrayIndex = 0;
         }
         this.refreshMap(this.getAutoUpdate());
     }
