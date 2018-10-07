@@ -56,6 +56,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     boolean currentActivity;
 
 
+    // For calibration
+    boolean allowCalibration;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -177,7 +181,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                     byte[] bytes = navigate.getBytes(Charset.defaultCharset());
                     BluetoothChat.writeMsg(bytes);
                     Log.d(TAG, "Android Controller: Move Backwards sent");
-                    tv_status.append("Moving\n");
+                    tv_mystatus.append("Moving\n");
                     tv_mystringcmd.append("Android Controller: Move Backwards\n");
                     mPGV.moveBackwards();
                 }
@@ -254,63 +258,73 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 } else {
 
                     //If already connected to a bluetooth device
-                    tv_status.append("Calibrating robot...\n");
+                    allowCalibration = false;
+                    Log.d(TAG, "allowCalibration = false");
+
+                    tv_mystatus.append("Calibrating robot...\n");
                     Log.d(TAG, "Set status as calibrating");
+
                     tv_mystringcmd.append("Calibrating robot...\n");
                     Log.d(TAG, "Set string cmd as calibrating");
 
 
                     // Help Arduino calibrate robot
-                    int counter = 0;
-                    Log.d(TAG, "Set counter = 0");
-                    mPGV.rotateLeft();
-                    Log.d(TAG, "1st left rotate");
-                    while (counter < 7){
-                        Log.d(TAG, "entered counter loop");
-
-                        // FIND A WAY TO DELAY THE INSTRUCTION COUNT
-                        while ((tv_status.getText().toString().equals(R.string.calibrating))) {
-                            Log.d(TAG, "entered while loop");
-                        }
-                        switch (counter) {
-                            case 0:
-                            case 2:
-                            case 4:
-
-                                mPGV.rotateLeft();
-                                Log.d(TAG, "Rotate Left");
-                                tv_status.append("Calibrating robot...\n");
-                                Log.d(TAG, "Set status as calibrating");
-                                break;
-
-                            case 1:
-                            case 3:
-                                // ALIGN_FRONT
-                                String sendToArdFront = "And|Alg|4|";
-                                byte[] bytes = sendToArdFront.getBytes(Charset.defaultCharset());
-                                BluetoothChat.writeMsg(bytes);
-                                tv_status.append("Calibrating robot...\n");
-                                Log.d(TAG, "Set status as calibrating");
-                                break;
-
-                            case 5:
-                                //ALIGN_RIGHT
-                                String sendToArdRight = "And|Alg|5|";
-                                byte[] bytess = sendToArdRight.getBytes(Charset.defaultCharset());
-                                BluetoothChat.writeMsg(bytess);
-                                tv_status.append("Calibrating robot...\n");
-                                Log.d(TAG, "Set status as calibrating");
-
-                            case 6:
-                                // Last STOP received
-                                Log.d(TAG, "LAST STOP RECEIVED");
-                                break;
-                        }
-                        counter++;
-                        Log.d(TAG, "counter++");
-                    }
-                    Log.d(TAG, "Calibration completed!!");
-                    tv_status.append("Calibration completed\n");
+//                    int counter = 0;
+//                    Log.d(TAG, "Set counter = 0");
+//                    mPGV.rotateLeft();
+//                    Log.d(TAG, "1st left rotate");
+//                    while (counter < 7){
+//                        while (!allowCalibration) {
+//                            // Stuck in this loop!!!
+//                            Log.d(TAG, "Waiting for STOP from Arduino...");
+//                        }
+//                        switch (counter) {
+//                            case 0:
+//                            case 2:
+//                            case 4:
+//
+//                                mPGV.rotateLeft();
+//                                Log.d(TAG, "Rotate Left");
+//                                tv_mystatus.append("Calibrating robot...\n");
+//                                Log.d(TAG, "Set status as calibrating");
+//                                allowCalibration = false;
+//                                Log.d(TAG, "allowCalibration = false");
+//                                break;
+//
+//                            case 1:
+//                            case 3:
+//                                // ALIGN_FRONT
+//                                String sendToArdFront = "And|Alg|4|";
+//                                byte[] bytes = sendToArdFront.getBytes(Charset.defaultCharset());
+//                                BluetoothChat.writeMsg(bytes);
+//                                tv_mystatus.append("Calibrating robot...\n");
+//                                Log.d(TAG, "Set status as calibrating");
+//                                allowCalibration = false;
+//                                Log.d(TAG, "allowCalibration = false");
+//                                break;
+//
+//                            case 5:
+//                                //ALIGN_RIGHT
+//                                String sendToArdRight = "And|Alg|5|";
+//                                byte[] bytess = sendToArdRight.getBytes(Charset.defaultCharset());
+//                                BluetoothChat.writeMsg(bytess);
+//                                tv_mystatus.append("Calibrating robot...\n");
+//                                Log.d(TAG, "Set status as calibrating");
+//                                allowCalibration = false;
+//                                Log.d(TAG, "allowCalibration = false");
+//
+//                            case 6:
+//                                // Last STOP received
+//                                Log.d(TAG, "LAST STOP RECEIVED");
+//                                allowCalibration = false;
+//                                Log.d(TAG, "allowCalibration = false");
+//                                break;
+//                        }
+//                        counter++;
+//                        Log.d(TAG, "counter++");
+//                    }
+//                    Log.d(TAG, "Calibration completed!!");
+//                    tv_mystatus.append("Calibration completed\n");
                 }
             }
         });
@@ -514,7 +528,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                         case "s":
                             // Sent by Arduino: robot stop
                             tv_mystatus.append("Stop\n");
-                            tv_mystringcmd.append("\n");
+                            tv_mystringcmd.append(" \n");
+                            allowCalibration = true;
                             break;
 
                         case "a":
