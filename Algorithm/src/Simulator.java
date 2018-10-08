@@ -296,13 +296,13 @@ public class Simulator extends Application {
 		controlGrid.add(setObstacleBtn, 2, 9, 4, 1);
 
 		GridPane.setFillWidth(modeCB, true);
-		controlGrid.setFillWidth(startBtn, true);
-		controlGrid.setFillWidth(loadMapBtn, true);
-		controlGrid.setFillWidth(saveMapBtn, true);
-		controlGrid.setFillWidth(resetMapBtn, true);
-		controlGrid.setFillWidth(setWaypointBtn, true);
-		controlGrid.setFillWidth(setRobotBtn, true);
-		controlGrid.setFillWidth(setObstacleBtn, true);
+//		controlGrid.setFillWidth(startBtn, true);
+//		controlGrid.setFillWidth(loadMapBtn, true);
+//		controlGrid.setFillWidth(saveMapBtn, true);
+//		controlGrid.setFillWidth(resetMapBtn, true);
+//		controlGrid.setFillWidth(setWaypointBtn, true);
+//		controlGrid.setFillWidth(setRobotBtn, true);
+//		controlGrid.setFillWidth(setObstacleBtn, true);
 		// Button Init
 
 		// Choosing where to place components on the Grid
@@ -332,6 +332,8 @@ public class Simulator extends Application {
 					robot.setDirection(Direction.getPrevious(robot.getDirection()));
 					robot.rotateSensors(false);
 					break;
+					default:
+						break;
 				}
 				robot.sense(exploredMap, map);
 				System.out.println("Robot Direction AFTER:" + robot.getDirection());
@@ -600,12 +602,12 @@ public class Simulator extends Application {
 			case REAL_EXP:
 				netMgr.startConn();
 				sim = false;
-				String msg = null;
 				robot.setSim(false);
+				String msg = null;
 				//Wait for Start Command
 				outer:
 				while(true) {
-					msg = netMgr.recieve();
+					msg = netMgr.receive();
 					String []msgArr = msg.split("\\|");
 					Command c = Command.values()[Integer.parseInt(msgArr[2])];
 					
@@ -623,6 +625,9 @@ public class Simulator extends Application {
 						robot.setDirection(dir);
 						wayPoint = new Point(wayCol, wayRow);
 						break;
+					default:
+						System.out.println("Unexpected Msg Recieved: "+msg);
+						break;
 					}
 				}
 				netMgr.send("Alg|Ard|S|0");
@@ -631,6 +636,24 @@ public class Simulator extends Application {
 				robot.draw();
 				expTask = new Thread(new ExplorationTask());
 				expTask.start();
+				NetMgr.getInstance().send("Alg|And|"+RobotConstants.Command.ENDEXP);
+				
+				while(true) {
+					String [] msgArr = NetMgr.getInstance().receive().split("//|");
+					if(msgArr[0].equals("And") && Command.values()[Integer.parseInt(msgArr[2])] == Command.START_FAST)
+					{
+						sim = false;
+						System.out.println("RF Here");
+						exploredMap.draw(true);
+						robot.draw();
+						fastTask = new Thread(new FastTask());
+						fastTask.start();
+						NetMgr.getInstance().send("Alg|And|"+RobotConstants.Command.ENDFAST);
+						break;
+					}
+				}
+				
+				
 				break;
 
 			case SIM_FAST:

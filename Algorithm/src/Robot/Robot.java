@@ -5,7 +5,6 @@ package Robot;
 
 import java.awt.Point;
 import java.util.ArrayList;
-import java.util.concurrent.TimeUnit;
 
 import Map.*;
 import Network.NetMgr;
@@ -105,6 +104,8 @@ public class Robot {
 		case DOWN:
 			rotateSensors(true);
 			rotateSensors(true);
+			break;
+		default:
 			break;
 		}
 	
@@ -218,6 +219,9 @@ public class Robot {
 			direction = Direction.getPrevious(direction);
 			rotateSensors(false);
 			break;
+			default:
+				System.out.println("Invalid Move Received");
+				break;
 		}
 		prevMove = m;
 	}
@@ -254,10 +258,11 @@ public class Robot {
 		
 		if(!sim) {
 			String msg = null;
-			msg = NetMgr.getInstance().recieve();
-			String [] msgArr = msg.split("\\|");
-			String [] strSensor = msgArr[3].split("\\,");
-			System.out.println(msgArr[3]);
+			
+			msg = NetMgr.getInstance().receive("Alg|Ard|S|0");
+			String [] msgArr = msg.split("|");
+			String [] strSensor = msgArr[3].split(",");
+			System.out.println("Recieved "+strSensor.length+" sensor data");
 			
 			//Translate string to integer
 			for(int i=0; i< strSensor.length; i++) {
@@ -284,11 +289,11 @@ public class Robot {
 				System.out.println("Right Distance Alignment");
 				//NetMgr.getInstance().send("Alg|And|"+Command.ALIGN_FRONT+"|0");
 				NetMgr.getInstance().send("Alg|Ard|"+Command.TURN_RIGHT.ordinal()+"|0");
-				msg = NetMgr.getInstance().recieve();
+				msg = NetMgr.getInstance().receive("Alg|Ard|S|0");
 				NetMgr.getInstance().send("Alg|Ard|"+Command.ALIGN_FRONT.ordinal()+"|0");
-				msg = NetMgr.getInstance().recieve();
+				msg = NetMgr.getInstance().receive("Alg|Ard|S|0");
 				NetMgr.getInstance().send("Alg|Ard|"+Command.TURN_LEFT.ordinal()+"|0");
-				msg = NetMgr.getInstance().recieve();
+				msg = NetMgr.getInstance().receive("Alg|Ard|S|0");
 				NetMgr.getInstance().send("Alg|Ard|"+Command.ALIGN_RIGHT.ordinal()+"|0");
 				sense(exploredMap, map);
 				return;
@@ -354,6 +359,27 @@ public class Robot {
 				rowInc = -1;
 				colInc = 0;
 				break;
+			}
+			
+			int existingObsBlock = -1;
+			Cell cell;
+			
+			// Check Map for existing obstacle location
+			for (int j = sensorList.get(i).getMinRange(); j <= sensorList.get(i).getMaxRange(); j++) {
+				cell = exploredMap.getCell(sensorList.get(i).getRow() + rowInc * j, sensorList.get(i).getCol() + colInc * j);
+				if (exploredMap.checkValidCell(sensorList.get(i).getRow() + rowInc * j, sensorList.get(i).getCol() + colInc * j) && cell.isObstacle()) {
+					existingObsBlock = j;
+					break;
+				}
+			}
+			
+			//Discrepancy between explored map and sensor reading request sensor reading again
+			if(existingObsBlock != -1 && existingObsBlock != obsBlock)
+			{
+				System.out.println("Error Possible Phantom Block Detected! Resensing");
+				NetMgr.getInstance().send("Alg|Ard|S|0");
+				sense(exploredMap, map);
+				return;
 			}
 
 			// Discover each of the blocks infront of the sensor if possible

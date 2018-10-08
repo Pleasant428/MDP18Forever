@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
 import Map.*;
-import Network.NetMgr;
 import Robot.*;
 import Robot.RobotConstants.Command;
 import Robot.RobotConstants.Direction;
@@ -129,6 +128,7 @@ public class Exploration {
 	// Fast Algo to a point (used to go back to start
 	public boolean goToPoint(Point loc) {
 		// robot already at start
+		System.out.println("In Go to Point");
 		if (robot.getPosition().equals(start)&&loc.equals(start)) {
 			while (robot.getDirection() != Direction.UP) {
 				if(sim) {

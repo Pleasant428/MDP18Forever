@@ -5,7 +5,6 @@ package Map;
 
 import java.io.*;
 
-import Map.*;
 import Map.MapConstants;
 
 /**
@@ -62,12 +61,10 @@ public class MapDescriptor {
 	public static String generateMDFStringPart2(Map map) {
 
 		String mapString = "";
-		String binStr = "";
 		String temp = "";
 		for (int row = 0; row < MapConstants.MAP_HEIGHT; row++) {
 			for (int col = 0; col < MapConstants.MAP_WIDTH; col++) {
 				if (map.getCell(row, col).isExplored()) {
-					binStr += map.getCell(row, col).isObstacle() ? "1" : "0";
 					temp += map.getCell(row, col).isObstacle() ? "1" : "0";
 					if(temp.length()==4){
 						mapString += binToHex(temp);

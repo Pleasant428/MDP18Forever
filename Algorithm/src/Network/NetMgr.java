@@ -3,6 +3,10 @@ package Network;
 import java.io.*;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.Timer;
+import java.util.TimerTask;
+
+import Robot.RobotConstants;
 
 //Class to Manage Connection
 public class NetMgr {
@@ -49,9 +53,6 @@ public class NetMgr {
 	// connection
 	public boolean startConn() {
 		// Init Connection
-		while(true) {
-			
-		}
 		try {
 			System.out.println("Initiating Connection with RPI...");
 			socket = new Socket(ipAddr, port);
@@ -99,8 +100,22 @@ public class NetMgr {
 			msgCounter++;
 			System.out.println(msgCounter+" Message: "+msg+" sent!");
 			
-		} catch (Exception e) {
-			
+		}
+		catch (IOException e) {
+			System.out.println("Sending Message Failed (IOException)!");
+			if(socket.isConnected())
+				System.out.println("Connection still Established!");
+			else {
+				while(true)
+				{
+					System.out.println("Connection disrupted! Trying to Reconnect!");
+					if(netMgr.startConn())
+						break;
+				}
+			}
+			return netMgr.send(msg);
+		}
+		catch (Exception e) {
 			System.out.println("Sending Message Failed (IOException)!");
 			e.printStackTrace();
 			return false;
@@ -109,23 +124,79 @@ public class NetMgr {
 
 	}
 
-	// Send Message
-	public String recieve() {
+	// Receive Message Waiting
+	public String receive() {
 		try {
-			System.out.println("Recieving Message...");
+			System.out.println("Receiving Message...");
 			// KIV determine format for message traversal
-			String recievedMsg = in.readLine();
+			String receivedMsg = in.readLine();
 			
-			if(recievedMsg!=null&&recievedMsg.length()>0) {
-				System.out.println("Recieved Message: "+recievedMsg);
-				return recievedMsg;
+			if(receivedMsg!=null&&receivedMsg.length()>0) {
+				System.out.println("Received Message: "+receivedMsg);
+				return receivedMsg;
 			}
 			
+		} catch (IOException e) {
+			System.out.println("Recieving Message Failed (IOException)!");
+			if(socket.isConnected())
+				System.out.println("Connection still Established!");
+			else {
+				while(true)
+				{
+					System.out.println("Connection disrupted! Trying to Reconnect!");
+					if(netMgr.startConn())
+						break;
+				}
+			}
+			return receive();
 		} catch (Exception e) {
-			System.out.println("Recieving Message Failed!");
+			System.out.println("Receiving Message Failed!");
 			e.printStackTrace();
 		}
 		
+		return null;
+	}
+	
+	// Receive Message Repeat non waiting receive
+	public String receive(String msg) {
+		try {
+			
+			//Set timer to resend specified msg if nothing received
+			Timer wait = new Timer();
+			TimerTask retransmit = new TimerTask() {
+				public void run() {
+					netMgr.send(msg);
+				}
+			};
+			wait.schedule(retransmit, RobotConstants.WAIT_TIME, RobotConstants.WAIT_TIME);
+			System.out.println("Receiving Message");
+			// KIV determine format for message traversal
+			String recievedMsg = in.readLine();
+			wait.cancel();
+			wait.purge();
+			if (recievedMsg != null && recievedMsg.length() > 0) {
+				System.out.println("Received Message: " + recievedMsg);
+				return recievedMsg;
+			}
+
+		} catch (IOException e) {
+			System.out.println("Recieving Message Failed (IOException)!");
+			if(socket.isConnected())
+				System.out.println("Connection still Established!");
+			else {
+				while(true)
+				{
+					System.out.println("Connection disrupted! Trying to Reconnect!");
+					if(netMgr.startConn())
+						break;
+				}
+			}
+			return receive(msg);
+		} catch (Exception e) {
+			System.out.println("Receiving Message Failed!");
+			e.printStackTrace();
+		}
+
 		return null;
 	}
 }
