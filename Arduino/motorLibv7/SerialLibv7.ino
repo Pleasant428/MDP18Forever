@@ -20,7 +20,7 @@ void setup() {
 
 void loop() {
   delay(2);
-  //  returnSensorReading();
+//  returnSensorReading_Raw();
   if (Serial.available() > 0) {
     char command = '0';
     int value = -1;
@@ -67,22 +67,26 @@ void loop() {
     switch (command) {
       case '0':
         moveForward(value * 10);
+        delay(100);
         returnSensorReading();
         break;
       case '1':
         for (int k = 0; k < value; k++) {
           turnLeft();
         }
+        delay(200);
         returnSensorReading();
         break;
       case '2':
         for (int k = 0; k < value; k++) {
           turnRight();
         }
+        delay(200);
         returnSensorReading();
         break;
       case '3':
         moveBackwards(value * 10);
+        delay(100);
         returnSensorReading();
         break;
       case '4':
@@ -109,32 +113,64 @@ void setupSerialConnection() {
   while (!Serial);
 }
 
-void returnSensorReading() {
+void returnSensorReading_Raw() {
   Serial.print("Ard|Alg|S|1:");
   Serial.print(getFrontIR1());
   Serial.print(":");
   Serial.print(getFrontIR1_Block());
-  Serial.print(",2:");
+  Serial.print("|2:");
   Serial.print(getFrontIR2());
   Serial.print(":");
   Serial.print(getFrontIR2_Block());
-  Serial.print(",3:");
+  Serial.print("|3:");
   Serial.print(getFrontIR3());
   Serial.print(":");
   Serial.print(getFrontIR3_Block());
-  Serial.print(",4:");
+  Serial.print("|4:");
   Serial.print(getRightIR1());
   Serial.print(":");
   Serial.print(getRightIR1_Block());
-  Serial.print(",5:");
+  Serial.print("|5:");
   Serial.print(getRightIR2());
   Serial.print(":");
   Serial.print(getRightIR2_Block());
-  Serial.print(",6:");
+  Serial.print("|6:");
   Serial.print(getLeftIR1());
   Serial.print(":");
-  Serial.print(getLeftIR1_Block());
-  Serial.println("\n");
+  Serial.println(getLeftIR1_Block());
+  //  Serial.println("Ard|And|S|");
   Serial.flush();
 }
+
+
+void returnSensorReading() {
+  Serial.print("Ard|Alg|S|1:");
+  Serial.print((int)getFrontIR1());
+  Serial.print(":");
+  Serial.print(getFrontIR1_Block());
+  Serial.print(",2:");
+  Serial.print((int)getFrontIR2());
+  Serial.print(":");
+  Serial.print(getFrontIR2_Block());
+  Serial.print(",3:");
+  Serial.print((int)getFrontIR3());
+  Serial.print(":");
+  Serial.print(getFrontIR3_Block());
+  Serial.print(",4:");
+  Serial.print((int)getRightIR1());
+  Serial.print(":");
+  Serial.print(getRightIR1_Block());
+  Serial.print(",5:");
+  Serial.print((int)getRightIR2());
+  Serial.print(":");
+  Serial.print(getRightIR2_Block());
+  Serial.print(",6:");
+  Serial.print((int)getLeftIR1());
+  Serial.print(":");
+  Serial.print(getLeftIR1_Block());
+  Serial.print("\n");
+  Serial.println("Ard|And|S|");
+  Serial.flush();
+}
+
 

@@ -7,10 +7,10 @@ const int LEFT_PULSE = 3; // LEFT M1 Pulse
 const int RIGHT_PULSE = 11; // RIGHT M2 Pulse
 const int MOVE_MAX_SPEED = 210;
 const int MOVE_MIN_SPEED = 210;
-const int TURN_MAX_SPEED = 170;
+const int TURN_MAX_SPEED = 180;
 const int ROTATE_MAX_SPEED = 110;
 const int TURN_TICKS_L = 777;
-const int TURN_TICKS_R = 763;
+const int TURN_TICKS_R = 777;
 const int TENCM_TICKS = 540;
 const double DIST_WALL_CENTER_BOX = 2.65;
 //const double kp = 6.73, ki = 1.25, kd = 0; // OPTIMAL
@@ -230,19 +230,39 @@ void alignRight() {
     }
     delay(250);
     diff = getRightIR1() - getRightIR2();
-    Serial.print("R1: ");
-    Serial.print(getRightIR1());
-    Serial.print(" R2: ");
-    Serial.println(getRightIR2());
   }
   delay(500);
 }
 
 void alignFront() {
   delay(500);
+  long diff_dis;
+  double f1 = getFrontIR1();
+  double f2 = getFrontIR2();
+  double f3 = getFrontIR3();
+  if (getFrontIR1_Block() != getFrontIR3_Block() || getFrontIR3_Block() != getFrontIR2_Block() || getFrontIR1_Block() != getFrontIR2_Block()) {
+    if (f1 < f2) {
+      if (f1 < f3) {
+        diff_dis = getFrontIR1() - (DIST_WALL_CENTER_BOX - 1);
+      } else {
+        diff_dis = getFrontIR3() - DIST_WALL_CENTER_BOX;
+      }
+    } else {
+      if (f2 < f3) {
+        diff_dis = getFrontIR2() - DIST_WALL_CENTER_BOX;
+      } else {
+        diff_dis = getFrontIR3() - (DIST_WALL_CENTER_BOX - 1);
+      }
+    }
+    if (diff_dis > 0)
+      moveForward(abs(diff_dis));
+    else
+      moveBackwards(abs(diff_dis));
+    return;
+  }
   double diff = getFrontIR1() - getFrontIR3();
+  Serial.println(diff);
   while (abs(diff) >= 0.4) {
-    Serial.println(diff);
     if (diff > 0) {
       rotateLeft(abs(diff * 5));
     } else {
@@ -251,14 +271,14 @@ void alignFront() {
     delay(250);
     diff = getFrontIR1() - getFrontIR3();
   }
-  long diff_dis = getFrontIR2() - DIST_WALL_CENTER_BOX;
+  diff_dis = getFrontIR2() - DIST_WALL_CENTER_BOX - 1;
   if (diff_dis > 0)
     moveForward(abs(diff_dis));
   else
     moveBackwards(abs(diff_dis));
   delay(250);
   diff = getFrontIR1() - getFrontIR3();
-  while (abs(diff) >= 0.5) {
+  while (abs(diff) >= 0.4) {
     if (diff > 0) {
       rotateLeft(abs(diff * 5));
     } else {
@@ -376,4 +396,5 @@ void initializeMotor_End() {
 //  turnRight(45);
 //  moveForward(dist-10);
 //}
+
 

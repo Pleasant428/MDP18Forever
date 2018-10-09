@@ -36,24 +36,12 @@ RunningMedian rightIR2_Median = RunningMedian(NUM_SAMPLES_MEDIAN);
 RunningMedian leftIR_1_Median = RunningMedian(NUM_SAMPLES_MEDIAN);
 
 void setupSensorInterrupt() {
-  //  ADCSRA &= ~(bit (ADPS0) | bit (ADPS1) | bit (ADPS2)); // clear prescaler bits
+  ADCSRA &= ~(bit (ADPS0) | bit (ADPS1) | bit (ADPS2)); // clear prescaler bits
   //  //  ADCSRA |= bit (ADPS0) | bit (ADPS2);// 32  prescaler
-  //  ADCSRA |= bit (ADPS2); // 16  prescaler
+  ADCSRA |= bit (ADPS2); // 16  prescaler
   MsTimer2::set(35, readSensors);
   MsTimer2::start();
 }
-
-void stopSensorInterrupt() {
-  MsTimer2::stop();
-  //  MsTimer2::set(80, readSensors);
-  //  MsTimer2::start();
-}
-
-//void restoreSensorInterrupt() {
-//  MsTimer2::stop();
-//  MsTimer2::set(40, readSensors);
-//  MsTimer2::start();
-//}
 
 void readSensors() {
   readFrontSensor_1();
@@ -65,21 +53,42 @@ void readSensors() {
 }
 
 double getFrontIR1() {
+  readFrontSensor_1();
+  readFrontSensor_1();
+  readFrontSensor_1();
+  readFrontSensor_1();
   return frontIR1_Value;
 }
 double getFrontIR2() {
+  readFrontSensor_2();
+  readFrontSensor_2();
+  readFrontSensor_2();
+  readFrontSensor_2();
   return frontIR2_Value;
 }
 double getFrontIR3() {
+  readFrontSensor_3();
+  readFrontSensor_3();
+  readFrontSensor_3();
+  readFrontSensor_3();
   return frontIR3_Value;
 }
 double getRightIR1() {
+  readRightSensor_1();
+  readRightSensor_1();
+  readRightSensor_1();
+  readRightSensor_1();
   return rightIR1_Value;
 }
 double getRightIR2() {
+  readRightSensor_2();
+  readRightSensor_2();
+  readRightSensor_2();
+  readRightSensor_2();
   return rightIR2_Value;
 }
 double getLeftIR1() {
+  readLeftSensor_1();
   return leftIR1_Value;
 }
 
@@ -215,4 +224,5 @@ void readLeftSensor_1() {
   }
   leftIR1_Block = 9;
 }
+
 
