@@ -292,6 +292,114 @@ public class Robot {
 //			}
 //			System.out.println("No Zeros Detected!");
 			
+		}
+		for (int i = 0; i < sensorList.size(); i++) {
+			// check if sensor detects any obstacle
+			if (!sim) {
+				obsBlock = sensorData[i][1];
+				
+				int existingObsBlock = -1;
+				
+				// Check Map for existing obstacle location
+				for (int j = sensorList.get(i).getMinRange(); j <= sensorList.get(i).getMaxRange(); j++) {
+					if (exploredMap.checkValidCell(sensorList.get(i).getRow() + rowInc * j, sensorList.get(i).getCol() + colInc * j)) {
+						if(exploredMap.getCell(sensorList.get(i).getRow() + rowInc * j, sensorList.get(i).getCol() + colInc * j).isObstacle())
+							existingObsBlock = j;
+							break;
+					}
+				}
+				
+				System.out.println(sensorList.get(i).getId()+" exisiting:"+existingObsBlock+" obsBlock:"+obsBlock);
+				//Discrepancy between explored map and sensor reading request sensor reading again
+				if(existingObsBlock != -1 && existingObsBlock != obsBlock)
+				{
+					System.out.println("Possible Phantom block conflict with existing block---------------------------------");
+					System.out.println("SenseCount: "+senseCount);
+					senseCount++;
+					//Second Reading reset existing block
+					if(senseCount==1) {
+						senseCount = 0;
+						System.out.println("Discarding existing block");
+						exploredMap.getCell(sensorList.get(i).getRow() + rowInc * existingObsBlock, sensorList.get(i).getCol() + colInc * existingObsBlock).setObstacle(false);
+						// Set Virtual Wall off
+						for (int r = sensorList.get(i).getRow() + rowInc * existingObsBlock - 1; r <= sensorList.get(i).getRow()
+								+ rowInc * existingObsBlock + 1; r++)
+							for (int c = sensorList.get(i).getCol() + colInc * existingObsBlock - 1; c <= sensorList.get(i).getCol()
+									+ colInc * existingObsBlock + 1; c++)
+								if (exploredMap.checkValidCell(r, c))
+									exploredMap.getCell(r, c).setVirtualWall(false);
+					}
+					else {
+						System.out.println("Error Possible Phantom Block Detected! Resensing");
+						NetMgr.getInstance().send("Alg|Ard|S|0");
+						sense(exploredMap, map);
+						return;
+					}
+				}
+				sensorList.get(i).setPrevData(obsBlock);
+				sensorList.get(i).setPrevRawData(sensorData[i][0]);
+			}
+			else
+				obsBlock = sensorList.get(i).detect(map);
+			// Assign the rowInc and colInc based on sensor Direction
+			switch (sensorList.get(i).getSensorDir()) {
+			case UP:
+				rowInc = 1;
+				colInc = 0;
+				break;
+
+			case LEFT:
+				rowInc = 0;
+				colInc = -1;
+				break;
+
+			case RIGHT:
+				rowInc = 0;
+				colInc = 1;
+				break;
+
+			case DOWN:
+				rowInc = -1;
+				colInc = 0;
+				break;
+			}
+			
+
+			// Discover each of the blocks infront of the sensor if possible
+			for (int j = sensorList.get(i).getMinRange(); j <= sensorList.get(i).getMaxRange(); j++) {
+
+				// Check if the block is valid otherwise exit (Edge of Map)
+				if (exploredMap.checkValidCell(sensorList.get(i).getRow() + rowInc * j,
+						sensorList.get(i).getCol() + colInc * j)) {
+					
+					// Change the cell to explored first
+					exploredMap.getCell(sensorList.get(i).getRow() + rowInc * j, sensorList.get(i).getCol() + colInc * j).setExplored(true);
+				
+					if (j == obsBlock) {
+						if(!exploredMap.getCell(sensorList.get(i).getRow() + rowInc * j,
+								sensorList.get(i).getCol() + colInc * j).isExplored()) {
+							exploredMap.getCell(sensorList.get(i).getRow() + rowInc * j,
+									sensorList.get(i).getCol() + colInc * j).setObstacle(true);
+
+							// Virtual Wall Initialized
+							for (int r = sensorList.get(i).getRow() + rowInc * j - 1; r <= sensorList.get(i).getRow()
+									+ rowInc * j + 1; r++)
+								for (int c = sensorList.get(i).getCol() + colInc * j - 1; c <= sensorList.get(i).getCol()
+										+ colInc * j + 1; c++)
+									if (exploredMap.checkValidCell(r, c))
+										exploredMap.getCell(r, c).setVirtualWall(true);
+							
+						}
+						break;
+						
+					}
+				} else
+					break;
+			}
+		}
+		if(!sim)
+		{
+			String msg = null;
 			//Check Right Alignment
 			if(Math.abs(sensorData[3][0] - sensorData[4][0])> RobotConstants.RIGHT_THRES && sensorData[3][1] <=1 && sensorData[4][1] <=1){
 				System.out.println("Right Alignment------------------------");
@@ -358,117 +466,10 @@ public class Robot {
 					NetMgr.getInstance().send("Alg|And|"+Command.ALIGN_FRONT.ordinal()+"|1");
 					NetMgr.getInstance().receive();
 				}
-					 
+				frontCalSense = 0;	 
 			}
-		}
-		for (int i = 0; i < sensorList.size(); i++) {
-			// check if sensor detects any obstacle
-			if (!sim) {
-				obsBlock = sensorData[i][1];
-			}
-			else
-				obsBlock = sensorList.get(i).detect(map);
-			// Assign the rowInc and colInc based on sensor Direction
-			switch (sensorList.get(i).getSensorDir()) {
-			case UP:
-				rowInc = 1;
-				colInc = 0;
-				break;
-
-			case LEFT:
-				rowInc = 0;
-				colInc = -1;
-				break;
-
-			case RIGHT:
-				rowInc = 0;
-				colInc = 1;
-				break;
-
-			case DOWN:
-				rowInc = -1;
-				colInc = 0;
-				break;
-			}
-			
-//			int existingObsBlock = -1;
-//			
-//			// Check Map for existing obstacle location
-//			for (int j = sensorList.get(i).getMinRange(); j <= sensorList.get(i).getMaxRange(); j++) {
-//				if (exploredMap.checkValidCell(sensorList.get(i).getRow() + rowInc * j, sensorList.get(i).getCol() + colInc * j)) {
-//					if(exploredMap.getCell(sensorList.get(i).getRow() + rowInc * j, sensorList.get(i).getCol() + colInc * j).isObstacle())
-//						existingObsBlock = j;
-//						break;
-//				}
-//			}
-//			
-//			System.out.println(sensorList.get(i).getId()+" exisiting:"+existingObsBlock+" obsBlock:"+obsBlock);
-//			//Discrepancy between explored map and sensor reading request sensor reading again
-//			if(existingObsBlock != -1 && existingObsBlock != obsBlock)
-//			{
-//				System.out.println("Possible Phantom block conflict with existing block---------------------------------");
-//				System.out.println("SenseCount: "+senseCount);
-//				senseCount++;
-//				//Second Reading reset existing block
-//				if(senseCount>0) {
-//					senseCount = 0;
-//					System.out.println("Discarding existing block");
-//					exploredMap.getCell(sensorList.get(i).getRow() + rowInc * existingObsBlock, sensorList.get(i).getCol() + colInc * existingObsBlock).setObstacle(false);
-//				}
-//				else {
-//					System.out.println("Error Possible Phantom Block Detected! Resensing");
-//					NetMgr.getInstance().send("Alg|Ard|S|0");
-//					sense(exploredMap, map);
-//					return;
-//				}
-//			}
-			sensorList.get(i).setPrevData(obsBlock);
-			sensorList.get(i).setPrevRawData(sensorData[i][0]);
-
-			// Discover each of the blocks infront of the sensor if possible
-			for (int j = sensorList.get(i).getMinRange(); j <= sensorList.get(i).getMaxRange(); j++) {
-
-				// Check if the block is valid otherwise exit (Edge of Map)
-				if (exploredMap.checkValidCell(sensorList.get(i).getRow() + rowInc * j,
-						sensorList.get(i).getCol() + colInc * j)) {
-					
-					if (j == obsBlock) {
-						if(!exploredMap.getCell(sensorList.get(i).getRow() + rowInc * j,
-								sensorList.get(i).getCol() + colInc * j).isExplored()) {
-							exploredMap.getCell(sensorList.get(i).getRow() + rowInc * j,
-									sensorList.get(i).getCol() + colInc * j).setObstacle(true);
-
-							// Virtual Wall Initialized
-							for (int r = sensorList.get(i).getRow() + rowInc * j - 1; r <= sensorList.get(i).getRow()
-									+ rowInc * j + 1; r++)
-								for (int c = sensorList.get(i).getCol() + colInc * j - 1; c <= sensorList.get(i).getCol()
-										+ colInc * j + 1; c++)
-									if (exploredMap.checkValidCell(r, c))
-										exploredMap.getCell(r, c).setVirtualWall(true);
-							
-							// Change the cell to explored first
-							exploredMap.getCell(sensorList.get(i).getRow() + rowInc * j, sensorList.get(i).getCol() + colInc * j).setExplored(true);
-						}
-						break;
-						
-					}
-					else if(exploredMap.getCell(sensorList.get(i).getRow() + rowInc * j, sensorList.get(i).getCol() + colInc * j).isObstacle()) {
-						exploredMap.getCell(sensorList.get(i).getRow() + rowInc * j, sensorList.get(i).getCol() + colInc * j).setExplored(true);
-						exploredMap.getCell(sensorList.get(i).getRow() + rowInc * j, sensorList.get(i).getCol() + colInc * j).setObstacle(false);
-						// Set Virtual Wall off
-						for (int r = sensorList.get(i).getRow() + rowInc * j - 1; r <= sensorList.get(i).getRow()
-								+ rowInc * j + 1; r++)
-							for (int c = sensorList.get(i).getCol() + colInc * j - 1; c <= sensorList.get(i).getCol()
-									+ colInc * j + 1; c++)
-								if (exploredMap.checkValidCell(r, c))
-									exploredMap.getCell(r, c).setVirtualWall(false);
-					}
-				} else
-					break;
-			}
-		}
-		if(!sim)
 			sendMapDescriptor(exploredMap);
+		}
 		exploredMap.draw(true);
 		draw();
 	}
