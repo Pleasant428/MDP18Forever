@@ -105,7 +105,7 @@ public class BluetoothChat extends Thread {
 
         try {
             myOutPutStream.write(bytes);
-        } catch (IOException e) {
+        } catch (Exception e) {
             Log.d(TAG, "Write: Error writing to output stream: " + e.getMessage());
         }
     }

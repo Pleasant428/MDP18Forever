@@ -443,7 +443,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                         case "8":
                         case "ENDEXP":
                             endExploration();
-                            tb_exploration.toggle();
                             break;
 
 
@@ -451,7 +450,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                         case "9":
                         case "ENDFAST":
                             endFastestPath();
-                            tb_fastestpath.toggle();
 
                             break;
 
@@ -559,7 +557,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                                 case "8":
                                 case "ENDEXP":
                                     endExploration();
-                                    tb_exploration.toggle();
                                     break;
 
 
@@ -567,7 +564,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                                 case "9":
                                 case "ENDFAST":
                                     endFastestPath();
-                                    tb_fastestpath.toggle();
                                     break;
 
                                 // Action: MD1
@@ -692,7 +688,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     public void endFastestPath() {
         Log.d(TAG, "Algorithm: Fastest Path Ended.");
-        tb_fastestpath.toggle();
         tv_mystringcmd.append("End Fastest Path\n");
         tv_mystatus.append("Stop\n");
         Toast.makeText(MainActivity.this, "Fastest Path ended", Toast.LENGTH_SHORT).show();
