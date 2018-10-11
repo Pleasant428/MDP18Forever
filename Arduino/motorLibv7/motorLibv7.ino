@@ -10,12 +10,13 @@ const int MOVE_MIN_SPEED = 210;
 const int TURN_MAX_SPEED = 180;
 const int ROTATE_MAX_SPEED = 110;
 const int TURN_TICKS_L = 777;
-const int TURN_TICKS_R = 777;
-const int TENCM_TICKS = 540;
+const int TURN_TICKS_R = 770;
+const int TENCM_TICKS = 550;
 const double DIST_WALL_CENTER_BOX = 2.65;
 //const double kp = 6.73, ki = 1.25, kd = 0; // OPTIMAL
 //const double kp = 7.25, ki = 1.05, kd = 0; //THIS
 const double kp = 7.25, ki = 1.05, kd = 0.2;
+//const double kp = 4.25, ki = 0.3, kd = 0;
 //double kp = 0, ki = 0, kd = 0;
 //const double kp = 15, ki = 0, kd = 0;
 
@@ -261,7 +262,7 @@ void alignFront() {
     return;
   }
   double diff = getFrontIR1() - getFrontIR3();
-  Serial.println(diff);
+  //  Serial.println(diff);
   while (abs(diff) >= 0.4) {
     if (diff > 0) {
       rotateLeft(abs(diff * 5));

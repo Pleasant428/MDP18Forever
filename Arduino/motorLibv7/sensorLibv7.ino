@@ -4,17 +4,17 @@
 
 const int MAX_SMALL_SENSOR = 80;
 const int MAX_BIG_SENSOR = 150;
-const int NUM_SAMPLES_MEDIAN = 8;
+const int NUM_SAMPLES_MEDIAN = 15;
 
-double frontIR1_Diffs[] = {7.55, 17.75, 29.50, 43.00};
-double frontIR2_Diffs[] = {7.9, 18.95, 31.50, 47.00};
-double frontIR3_Diffs[] = {6.95, 17.20, 29.00, 46.00};
+double frontIR1_Diffs[] = {5.50, 13.85, 23.30, 35.00};
+double frontIR2_Diffs[] = {5.70, 15.15, 25.75, 39.00};
+double frontIR3_Diffs[] = {5.05, 13.75, 22.50, 36.00};
 
 
 double rightIR1_Diffs[] = {6.90, 17.05, 27.75, 41.00};
 double rightIR2_Diffs[] = {7.5, 17.75, 29.75, 47.00};
 
-double leftIR1_Diffs[] = {20.25, 26.25, 34.5, 43.75, 53.80, 64.00};
+double leftIR1_Diffs[] = {20.25, 24.15, 32.00, 40.55, 49.00, 56.00};
 
 double frontIR1_Value = 0, frontIR2_Value = 0, frontIR3_Value = 0;
 int  frontIR1_Block = 0, frontIR2_Block = 0, frontIR3_Block = 0;
@@ -36,11 +36,11 @@ RunningMedian rightIR2_Median = RunningMedian(NUM_SAMPLES_MEDIAN);
 RunningMedian leftIR_1_Median = RunningMedian(NUM_SAMPLES_MEDIAN);
 
 void setupSensorInterrupt() {
-  ADCSRA &= ~(bit (ADPS0) | bit (ADPS1) | bit (ADPS2)); // clear prescaler bits
+  //  ADCSRA &= ~(bit (ADPS0) | bit (ADPS1) | bit (ADPS2)); // clear prescaler bits
   //  //  ADCSRA |= bit (ADPS0) | bit (ADPS2);// 32  prescaler
-  ADCSRA |= bit (ADPS2); // 16  prescaler
-  MsTimer2::set(35, readSensors);
-  MsTimer2::start();
+  //  ADCSRA |= bit (ADPS2); // 16  prescaler
+  //    MsTimer2::set(35, readSensors);
+  //    MsTimer2::start();
 }
 
 void readSensors() {
@@ -52,43 +52,41 @@ void readSensors() {
   readLeftSensor_1();
 }
 
+
 double getFrontIR1() {
-  readFrontSensor_1();
-  readFrontSensor_1();
-  readFrontSensor_1();
-  readFrontSensor_1();
+  for (int n = 0; n < NUM_SAMPLES_MEDIAN; n++) {
+    readFrontSensor_1();
+  }
   return frontIR1_Value;
 }
 double getFrontIR2() {
-  readFrontSensor_2();
-  readFrontSensor_2();
-  readFrontSensor_2();
-  readFrontSensor_2();
+  for (int n = 0; n < NUM_SAMPLES_MEDIAN; n++) {
+    readFrontSensor_2();
+  }
   return frontIR2_Value;
 }
 double getFrontIR3() {
-  readFrontSensor_3();
-  readFrontSensor_3();
-  readFrontSensor_3();
-  readFrontSensor_3();
+  for (int n = 0; n < NUM_SAMPLES_MEDIAN; n++) {
+    readFrontSensor_3();
+  }
   return frontIR3_Value;
 }
 double getRightIR1() {
-  readRightSensor_1();
-  readRightSensor_1();
-  readRightSensor_1();
-  readRightSensor_1();
+  for (int n = 0; n < NUM_SAMPLES_MEDIAN; n++) {
+    readRightSensor_1();
+  }
   return rightIR1_Value;
 }
 double getRightIR2() {
-  readRightSensor_2();
-  readRightSensor_2();
-  readRightSensor_2();
-  readRightSensor_2();
+  for (int n = 0; n < NUM_SAMPLES_MEDIAN; n++) {
+    readRightSensor_2();
+  }
   return rightIR2_Value;
 }
 double getLeftIR1() {
-  readLeftSensor_1();
+  for (int n = 0; n < NUM_SAMPLES_MEDIAN; n++) {
+    readLeftSensor_1();
+  }
   return leftIR1_Value;
 }
 
@@ -113,6 +111,7 @@ int getLeftIR1_Block() {
 
 void readFrontSensor_1() {
   double irDistance = frontIR_1.getDistance() - 9;
+//  Serial.println(irDistance + 9);
   frontIR1_Median.add(irDistance);
   if (frontIR1_Median.getCount() >= NUM_SAMPLES_MEDIAN) {
     if (abs(frontIR1_Median.getHighest() - frontIR1_Median.getLowest()) > 40) {

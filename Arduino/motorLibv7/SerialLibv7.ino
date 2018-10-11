@@ -17,17 +17,22 @@ void setup() {
   //  checkList_A7();
 }
 
-
+boolean readSomething = false;
 void loop() {
   delay(2);
-//  returnSensorReading_Raw();
+  if (!Serial){
+    Serial.println("Waiting for connection");
+  }
+  //  getFrontIR1();
+  //  getFrontIR3();
+  //    returnSensorReading_Raw();
   if (Serial.available() > 0) {
     char command = '0';
     int value = -1;
     char arr[15];
     int c = 0;
     char hold = Serial.read();
-    if (hold == '[') {
+    if (hold == '[' || readSomething) {
       delay(2);
       hold = Serial.read();
       while (hold != ']') {
@@ -38,10 +43,13 @@ void loop() {
       }
     } else {
       while (Serial.available() > 0) {
-        delay(2);
+        if ((char)Serial.peek() == '[' )
+          return;
+        Serial.println("DISCARDING");
         Serial.read();
+        delay(1);
+        return;
       }
-      return;
     }
     command = arr[8];
     char value_ca[c - 10 + 1];
@@ -67,26 +75,26 @@ void loop() {
     switch (command) {
       case '0':
         moveForward(value * 10);
-        delay(100);
+        delay(50);
         returnSensorReading();
         break;
       case '1':
         for (int k = 0; k < value; k++) {
           turnLeft();
         }
-        delay(200);
+        delay(50);
         returnSensorReading();
         break;
       case '2':
         for (int k = 0; k < value; k++) {
           turnRight();
         }
-        delay(200);
+        delay(50);
         returnSensorReading();
         break;
       case '3':
         moveBackwards(value * 10);
-        delay(100);
+        delay(50);
         returnSensorReading();
         break;
       case '4':
@@ -169,7 +177,7 @@ void returnSensorReading() {
   Serial.print(":");
   Serial.print(getLeftIR1_Block());
   Serial.print("\n");
-  Serial.println("Ard|And|S|");
+  //  Serial.println("Ard|And|S|");
   Serial.flush();
 }
 
