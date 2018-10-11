@@ -361,10 +361,10 @@ public class PixelGridView extends View {
                 this.setStartPos(inverseRowCoord(row), column);
                 selectStartPosition = false;
                 // For checklist C5
-                String startCoord = "Start Point: ".concat(Integer.toString(this.getStartCoord()[0])).concat(",").concat(Integer.toString(this.getStartCoord()[1]));
-                Log.d(TAG, "Start Point: " + Integer.toString(this.getStartCoord()[0]) + "," + Integer.toString(this.getStartCoord()[1]));
-                byte[] bytes = startCoord.getBytes(Charset.defaultCharset());
-                BluetoothChat.writeMsg(bytes);
+//                String startCoord = "Start Point: ".concat(Integer.toString(this.getStartCoord()[0])).concat(",").concat(Integer.toString(this.getStartCoord()[1]));
+//                Log.d(TAG, "Start Point: " + Integer.toString(this.getStartCoord()[0]) + "," + Integer.toString(this.getStartCoord()[1]));
+//                byte[] bytes = startCoord.getBytes(Charset.defaultCharset());
+//                BluetoothChat.writeMsg(bytes);
                 invalidate();
 
             } else if (selectWayPoint) {
@@ -373,10 +373,10 @@ public class PixelGridView extends View {
                 // For checklist C5
 //                String waypointCoordinate = "Waypoint: ".concat(Integer.toString(this.getWayPoints().get(0)[0])).concat(",").concat(Integer.toString(this.getWayPoints().get(0)[1]));
 //                Log.d(TAG, "Waypoint: " + Integer.toString(this.getWayPoints().get(0)[0]).concat(",").concat(Integer.toString(this.getWayPoints().get(0)[1])));
-                String waypointCoordinate = "Waypoint: ".concat(Integer.toString(this.getWayPoint()[0])).concat(",").concat(Integer.toString(this.getWayPoint()[1]));
-                Log.d(TAG, "Waypoint: " + Integer.toString(this.getWayPoint()[0]).concat(",").concat(Integer.toString(this.getWayPoint()[1])));
-                byte[] bytes = waypointCoordinate.getBytes(Charset.defaultCharset());
-                BluetoothChat.writeMsg(bytes);
+//                String waypointCoordinate = "Waypoint: ".concat(Integer.toString(this.getWayPoint()[0])).concat(",").concat(Integer.toString(this.getWayPoint()[1]));
+//                Log.d(TAG, "Waypoint: " + Integer.toString(this.getWayPoint()[0]).concat(",").concat(Integer.toString(this.getWayPoint()[1])));
+//                byte[] bytes = waypointCoordinate.getBytes(Charset.defaultCharset());
+//                BluetoothChat.writeMsg(bytes);
                 invalidate();
             }
         }
@@ -805,7 +805,7 @@ public class PixelGridView extends View {
         char cur;
         int length = binMap.length();
         Integer[] binMapArray = new Integer[binMap.length() - 1];
-        for (int i = 1; i < binMap.length() - 1; i++){
+        for (int i = 1; i < binMap.length(); i++){
             cur = binMap.charAt(i);
             binMapArray[i - 1] = Integer.parseInt(String.valueOf(cur));
         }
