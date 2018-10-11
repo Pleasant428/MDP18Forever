@@ -487,7 +487,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
                     if (filteredMsg.length >= 5){
 
-                        Log.d(TAG, "Incoming Message 2: " + filteredMsg[4] + "|" + filteredMsg[5] + "|" + filteredMsg[6] + "|" + filteredMsg[7]);
+//                        Log.d(TAG, "Incoming Message 2: " + filteredMsg[4] + "|" + filteredMsg[5] + "|" + filteredMsg[6] + "|" + filteredMsg[7]);
 
                         if (filteredMsg[5].equals("and")) {
 
