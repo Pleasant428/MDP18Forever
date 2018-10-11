@@ -426,6 +426,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
                         // Action: CALIBRATE : ALIGN_FRONT
                         case "4":
+                        case "ALIGN_FRONT":
                             tv_mystatus.append("Calibrating robot...\n");
                             tv_mystringcmd.append("Calibrating robot...\n");
                             break;
@@ -440,13 +441,18 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
                         // Action: ENDEXP
                         case "8":
+                        case "ENDEXP":
                             endExploration();
+                            tb_exploration.toggle();
                             break;
 
 
                         // Action: ENDFAST
                         case "9":
+                        case "ENDFAST":
                             endFastestPath();
+                            tb_fastestpath.toggle();
+
                             break;
 
                         // Action: MD1
@@ -553,6 +559,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                                 case "8":
                                 case "ENDEXP":
                                     endExploration();
+                                    tb_exploration.toggle();
                                     break;
 
 
@@ -560,6 +567,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                                 case "9":
                                 case "ENDFAST":
                                     endFastestPath();
+                                    tb_fastestpath.toggle();
                                     break;
 
                                 // Action: MD1
@@ -667,7 +675,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     public void endExploration() {
         Log.d(TAG, "Algorithm: End Exploration");
-        tb_exploration.toggle();
         tv_mystringcmd.append("End Exploration\n");
         tv_mystatus.append("Stop\n");
         Toast.makeText(MainActivity.this, "Exploration ended", Toast.LENGTH_SHORT).show();
