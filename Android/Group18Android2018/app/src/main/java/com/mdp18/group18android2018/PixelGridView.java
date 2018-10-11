@@ -29,7 +29,8 @@ public class PixelGridView extends View {
     private ArrayList<int[]> arrowImageCoords = new ArrayList<>();
     private boolean autoUpdate;
     private int[] curCoord = new int[2];
-    private ArrayList<int[]> wayPoints = new ArrayList<int[]>();
+//    private ArrayList<int[]> wayPoints = new ArrayList<int[]>();
+    private int[] wayPoint;
     private boolean selectStartPosition = false, selectWayPoint = false;
     private Paint blackPaint = new Paint();
     private Paint cyanPaint = new Paint();
@@ -275,8 +276,12 @@ public class PixelGridView extends View {
         else return originalDir;
     }
 
-    public ArrayList<int[]> getWayPoints() {
-        return this.wayPoints;
+//    public ArrayList<int[]> getWayPoints() {
+//        return this.wayPoints;
+//    }
+
+    public int[] getWayPoint(){
+        return this.wayPoint;
     }
 
     public boolean[][] getObstacles () {
@@ -333,7 +338,8 @@ public class PixelGridView extends View {
         this.setExploredMapping(canvas, lightGrayPaint);
         this.setStartPointColor(canvas, greenPaint);
         this.setEndPointColor(canvas, 18, 13, redPaint);
-        this.setWayPointColor(canvas, cyanPaint);
+        if (this.wayPoint != null)
+            this.setWayPointColor(canvas, cyanPaint);
         this.robotPosMapping(canvas, pos, robotDirection);
         this.obstacleMapping(canvas);
         this.arrowMapping(canvas);
@@ -365,8 +371,10 @@ public class PixelGridView extends View {
                 this.setWayPoint(inverseRowCoord(row), column);
                 selectWayPoint = false;
                 // For checklist C5
-                String waypointCoordinate = "Waypoint: ".concat(Integer.toString(this.getWayPoints().get(0)[1])).concat(",").concat(Integer.toString(this.getWayPoints().get(0)[0]));
-                Log.d(TAG, "Waypoint: " + Integer.toString(this.getWayPoints().get(0)[0]).concat(",").concat(Integer.toString(this.getWayPoints().get(0)[1])));
+//                String waypointCoordinate = "Waypoint: ".concat(Integer.toString(this.getWayPoints().get(0)[0])).concat(",").concat(Integer.toString(this.getWayPoints().get(0)[1]));
+//                Log.d(TAG, "Waypoint: " + Integer.toString(this.getWayPoints().get(0)[0]).concat(",").concat(Integer.toString(this.getWayPoints().get(0)[1])));
+                String waypointCoordinate = "Waypoint: ".concat(Integer.toString(this.getWayPoint()[0])).concat(",").concat(Integer.toString(this.getWayPoint()[1]));
+                Log.d(TAG, "Waypoint: " + Integer.toString(this.getWayPoint()[0]).concat(",").concat(Integer.toString(this.getWayPoint()[1])));
                 byte[] bytes = waypointCoordinate.getBytes(Charset.defaultCharset());
                 BluetoothChat.writeMsg(bytes);
                 invalidate();
@@ -378,9 +386,10 @@ public class PixelGridView extends View {
 
     public void setWayPoint ( int row, int column){
         int[] wayPoint = new int[2];
-        wayPoint[0] = row;
-        wayPoint[1] = column;
-        wayPoints.add(wayPoint);
+        wayPoint[0] = column;
+        wayPoint[1] = row;
+        if (this.wayPoint == null) this.wayPoint = new int[2];
+        this.wayPoint = wayPoint;
     }
 
     private boolean checkStartPoint ( int row, int column){
@@ -436,21 +445,34 @@ public class PixelGridView extends View {
     }
 
     private void setWayPointColor (Canvas canvas, Paint wayPointPaint){
-        ArrayList<int[]> wayPoints = this.getWayPoints();
-        ArrayList<int[]> wayPointsEdges = new ArrayList<int[]>();
-        for (int i[] : wayPoints) {
-            wayPointsEdges.add(convertTileToEdge(i[0], i[1]));
-        }
+//        ArrayList<int[]> wayPoints = this.getWayPoints();
+//        ArrayList<int[]> wayPointsEdges = new ArrayList<int[]>();
 
-        for (int i[] : wayPointsEdges) {
-            for (int j = i[1]; j < i[3]; j++) {
-                for (int k = i[0]; k < i[2]; k++) {
-                    canvas.drawRect(j * cellWidth, k * cellHeight,
-                            (j + 1) * cellWidth, (k + 1) * cellHeight,
+//        for (int i[] : wayPoints) {
+//            wayPointsEdges.add(convertTileToEdge(i[0], i[1]));
+//        }
+
+//        for (int i[] : wayPointsEdges) {
+//            for (int j = i[1]; j < i[3]; j++) {
+//                for (int k = i[0]; k < i[2]; k++) {
+//                    canvas.drawRect(j * cellWidth, k * cellHeight,
+//                            (j + 1) * cellWidth, (k + 1) * cellHeight,
+//                            wayPointPaint);
+//                }
+//            }
+//        }
+
+        int[] wayPoint = this.getWayPoint();
+        int[] wayPointEdges = this.convertTileToEdge(wayPoint[1], wayPoint[0]);
+
+        for (int i = wayPointEdges[1]; i < wayPointEdges[3]; i++){
+            for (int j = wayPointEdges[0]; j < wayPointEdges[2]; j++) {
+                canvas.drawRect(i * cellWidth, j * cellHeight,
+                            (i + 1) * cellWidth, (j + 1) * cellHeight,
                             wayPointPaint);
-                }
             }
         }
+
     }
 
     public void robotPosMapping (Canvas canvas,int[] pos, int robotDirection){

@@ -234,7 +234,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                     // Send both coordinates to Algo as one string
                     int convertDirection = mPGV.getRobotDirection();
                     int convertedDirection = mPGV.convertRobotDirectionForAlgo(convertDirection);
-                    String sendAlgoCoord = "And|Alg|10|".concat(Integer.toString(mPGV.getStartCoord()[0])).concat(",").concat(Integer.toString(mPGV.getStartCoord()[1])).concat(",").concat(Integer.toString(convertedDirection)).concat(",").concat(Integer.toString(mPGV.getWayPoints().get(0)[1])).concat(",").concat(Integer.toString(mPGV.getWayPoints().get(0)[0]));
+                    String sendAlgoCoord = "And|Alg|10|".concat(Integer.toString(mPGV.getStartCoord()[0])).concat(",").concat(Integer.toString(mPGV.getStartCoord()[1])).concat(",").concat(Integer.toString(convertedDirection)).concat(",").concat(Integer.toString(mPGV.getWayPoint()[0])).concat(",").concat(Integer.toString(mPGV.getWayPoint()[1]));
                     byte[] bytes = sendAlgoCoord.getBytes(Charset.defaultCharset());
                     BluetoothChat.writeMsg(bytes);
                     Log.d(TAG, "Sent Start and Waypoint Coordinates to Algo");
