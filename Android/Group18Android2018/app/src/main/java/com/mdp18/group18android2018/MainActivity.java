@@ -234,7 +234,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                     // Send both coordinates to Algo as one string
                     int convertDirection = mPGV.getRobotDirection();
                     int convertedDirection = mPGV.convertRobotDirectionForAlgo(convertDirection);
-                    String sendAlgoCoord = "And|Alg|11|".concat(Integer.toString(mPGV.getStartCoord()[0])).concat(",").concat(Integer.toString(mPGV.getStartCoord()[1])).concat(",").concat(Integer.toString(convertedDirection)).concat(",").concat(Integer.toString(mPGV.getWayPoints().get(0)[1])).concat(",").concat(Integer.toString(mPGV.getWayPoints().get(0)[0]));
+                    String sendAlgoCoord = "And|Alg|10|".concat(Integer.toString(mPGV.getStartCoord()[0])).concat(",").concat(Integer.toString(mPGV.getStartCoord()[1])).concat(",").concat(Integer.toString(convertedDirection)).concat(",").concat(Integer.toString(mPGV.getWayPoints().get(0)[1])).concat(",").concat(Integer.toString(mPGV.getWayPoints().get(0)[0]));
                     byte[] bytes = sendAlgoCoord.getBytes(Charset.defaultCharset());
                     BluetoothChat.writeMsg(bytes);
                     Log.d(TAG, "Sent Start and Waypoint Coordinates to Algo");
@@ -431,6 +431,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                             break;
 
 
+
                         // Action: CALIBRATE : ALIGN_RIGHT
                         case "5":
                             tv_mystatus.append("Calibrating robot...\n");
@@ -540,7 +541,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     public void startExploration() {
         Toast.makeText(MainActivity.this, "Exploration started", Toast.LENGTH_SHORT).show();
-        String startExp = "And|Alg|12|";
+        String startExp = "And|Alg|11|";
         byte[] bytes = startExp.getBytes(Charset.defaultCharset());
         BluetoothChat.writeMsg(bytes);
         Log.d(TAG, "Android Controller: Start Exploration");
@@ -557,7 +558,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     public void startFastestPath() {
         Toast.makeText(MainActivity.this, "Fastest Path started", Toast.LENGTH_SHORT).show();
-        String startFP = "And|Alg|13|";
+        String startFP = "And|Alg|12|";
         byte[] bytes = startFP.getBytes(Charset.defaultCharset());
         BluetoothChat.writeMsg(bytes);
         Log.d(TAG, "Android Controller: Start Fastest Path");
