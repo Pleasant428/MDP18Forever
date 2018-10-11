@@ -97,7 +97,8 @@ public class NetMgr {
 		try {
 			// KIV determine format for message traversal
 			System.out.println("Sending Message...");
-			out.write(msg+"\n");
+			out.write(msg);
+			out.newLine();
 			out.flush();
 			msgCounter++;
 			System.out.println(msgCounter+" Message Sent: "+msg);

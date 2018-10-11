@@ -723,6 +723,20 @@ public class Simulator extends Application {
 
 				}
 			}
+			while(true) {
+				String [] msgArr = NetMgr.getInstance().receive().split("//|");
+				if(msgArr[0].equals("And") && Command.values()[Integer.parseInt(msgArr[2])] == Command.START_FAST)
+				{
+					sim = false;
+					System.out.println("RF Here");
+					exploredMap.draw(true);
+					robot.draw();
+					fastTask = new Thread(new FastTask());
+					fastTask.start();
+					NetMgr.getInstance().send("Alg|And|"+RobotConstants.Command.ENDFAST);
+					break;
+				}
+			}
 			return 1;
 		}
 	}
@@ -781,7 +795,7 @@ public class Simulator extends Application {
 			// Limits not set
 			if (steps == 0)
 				steps = 5;
-
+			
 			for (Command c : commands) {
 				if (sim) {
 					try {
