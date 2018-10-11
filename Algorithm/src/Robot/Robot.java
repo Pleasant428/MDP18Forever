@@ -431,23 +431,29 @@ public class Robot {
 				// Check if the block is valid otherwise exit (Edge of Map)
 				if (exploredMap.checkValidCell(sensorList.get(i).getRow() + rowInc * j,
 						sensorList.get(i).getCol() + colInc * j)) {
-					// Change the cell to explored first
-					exploredMap.getCell(sensorList.get(i).getRow() + rowInc * j, sensorList.get(i).getCol() + colInc * j).setExplored(true);
 					
 					if (j == obsBlock) {
-						exploredMap.getCell(sensorList.get(i).getRow() + rowInc * j,
-								sensorList.get(i).getCol() + colInc * j).setObstacle(true);
+						if(!exploredMap.getCell(sensorList.get(i).getRow() + rowInc * j,
+								sensorList.get(i).getCol() + colInc * j).isExplored()) {
+							exploredMap.getCell(sensorList.get(i).getRow() + rowInc * j,
+									sensorList.get(i).getCol() + colInc * j).setObstacle(true);
 
-						// Virtual Wall Initialized
-						for (int r = sensorList.get(i).getRow() + rowInc * j - 1; r <= sensorList.get(i).getRow()
-								+ rowInc * j + 1; r++)
-							for (int c = sensorList.get(i).getCol() + colInc * j - 1; c <= sensorList.get(i).getCol()
-									+ colInc * j + 1; c++)
-								if (exploredMap.checkValidCell(r, c))
-									exploredMap.getCell(r, c).setVirtualWall(true);
+							// Virtual Wall Initialized
+							for (int r = sensorList.get(i).getRow() + rowInc * j - 1; r <= sensorList.get(i).getRow()
+									+ rowInc * j + 1; r++)
+								for (int c = sensorList.get(i).getCol() + colInc * j - 1; c <= sensorList.get(i).getCol()
+										+ colInc * j + 1; c++)
+									if (exploredMap.checkValidCell(r, c))
+										exploredMap.getCell(r, c).setVirtualWall(true);
+							
+							// Change the cell to explored first
+							exploredMap.getCell(sensorList.get(i).getRow() + rowInc * j, sensorList.get(i).getCol() + colInc * j).setExplored(true);
+						}
 						break;
+						
 					}
 					else if(exploredMap.getCell(sensorList.get(i).getRow() + rowInc * j, sensorList.get(i).getCol() + colInc * j).isObstacle()) {
+						exploredMap.getCell(sensorList.get(i).getRow() + rowInc * j, sensorList.get(i).getCol() + colInc * j).setExplored(true);
 						exploredMap.getCell(sensorList.get(i).getRow() + rowInc * j, sensorList.get(i).getCol() + colInc * j).setObstacle(false);
 						// Set Virtual Wall off
 						for (int r = sensorList.get(i).getRow() + rowInc * j - 1; r <= sensorList.get(i).getRow()
