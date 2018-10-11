@@ -152,8 +152,12 @@ public class Exploration {
 		backToStart.displayFastestPath(path, true);
 		commands = backToStart.getPathCommands(path);
 		for (Command c : commands) {
-			robot.move(c, RobotConstants.MOVE_STEPS, exploredMap);
-			robot.sense(exploredMap, map);
+			if((c==Command.FORWARD) && movable(robot.getDirection())||(c==Command.BACKWARD && movable(Direction.reverse(robot.getDirection())))) {
+				robot.move(c, RobotConstants.MOVE_STEPS, exploredMap);
+				robot.sense(exploredMap, map);
+			}
+			else
+				break;
 			if(sim) {
 				try {
 					TimeUnit.MILLISECONDS.sleep(RobotConstants.MOVE_SPEED/stepPerSecond);
@@ -188,7 +192,7 @@ public class Exploration {
 			robot.move(Command.TURN_RIGHT, RobotConstants.MOVE_STEPS, exploredMap);
 			robot.sense(exploredMap, map);
 			if (movable(robot.getDirection())) {
-				// System.out.println("Right Direction then forrwad "+robot.getDirection());
+				// System.out.println("Right Direction then forward "+robot.getDirection());
 				if(sim)
 					TimeUnit.MILLISECONDS.sleep(RobotConstants.MOVE_SPEED/stepPerSecond);
 				robot.move(Command.FORWARD, RobotConstants.MOVE_STEPS, exploredMap);

@@ -200,6 +200,7 @@ public class Robot {
 	
 	//Moving using the Command enum
 	public void move(Command m, int steps, Map exploredMap) {
+		//System.out.println(m+" steps:"+steps);
 		if(!sim) {
 			//System.out.println("Alg|Ard|"+m+"|"+steps);
 			NetMgr.getInstance().send("Alg|And|"+m.ordinal()+"|"+steps+"|");
@@ -463,6 +464,8 @@ public class Robot {
 								if (exploredMap.checkValidCell(r, c))
 									exploredMap.getCell(r, c).setVirtualWall(false);
 					}
+					else
+						exploredMap.getCell(sensorList.get(i).getRow() + rowInc * j, sensorList.get(i).getCol() + colInc * j).setExplored(true);
 				} else
 					break;
 			}

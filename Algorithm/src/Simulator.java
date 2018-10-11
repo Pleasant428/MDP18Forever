@@ -662,46 +662,48 @@ public class Simulator extends Application {
 			String msg = null;
 			Command c;
 			// Wait for Start Command
-			do {
-				msg = netMgr.receive();
-				String[] msgArr = msg.split("\\|");
-				c = Command.values()[Integer.parseInt(msgArr[2])];
-				if (c == Command.ROBOT_POS) {
-					String[] data = msgArr[3].split("\\,");
-					int col = Integer.parseInt(data[0]);
-					int row = Integer.parseInt(data[1]);
-					Direction dir = Direction.values()[Integer.parseInt(data[2])];
-					int wayCol = Integer.parseInt(data[3]);
-					int wayRow = Integer.parseInt(data[4]);
-					robot.setStartPos(col, row, exploredMap);
-					robot.setDirection(dir);
-					switch(dir) {
-					case LEFT:
-						robot.rotateSensors(true);
-						break;
-					case RIGHT:
-						robot.rotateSensors(false);
-						break;
-					case DOWN:
-						robot.rotateSensors(true);
-						robot.rotateSensors(true);
-						break;
-					default:
-						break;
+			if (!sim) {
+				do {
+					msg = netMgr.receive();
+					String[] msgArr = msg.split("\\|");
+					c = Command.values()[Integer.parseInt(msgArr[2])];
+					if (c == Command.ROBOT_POS) {
+						String[] data = msgArr[3].split("\\,");
+						int col = Integer.parseInt(data[0]);
+						int row = Integer.parseInt(data[1]);
+						Direction dir = Direction.values()[Integer.parseInt(data[2])];
+						int wayCol = Integer.parseInt(data[3]);
+						int wayRow = Integer.parseInt(data[4]);
+						robot.setStartPos(col, row, exploredMap);
+						robot.setDirection(dir);
+						switch (dir) {
+						case LEFT:
+							robot.rotateSensors(true);
+							break;
+						case RIGHT:
+							robot.rotateSensors(false);
+							break;
+						case DOWN:
+							robot.rotateSensors(true);
+							robot.rotateSensors(true);
+							break;
+						default:
+							break;
+						}
+						wayPoint = new Point(wayCol, wayRow);
+						exploredMap.setWayPoint(wayPoint);
+						exploredMap.draw(true);
+						robot.draw();
 					}
-					wayPoint = new Point(wayCol, wayRow);
-					exploredMap.setWayPoint(wayPoint);
-					exploredMap.draw(true);
-					robot.draw();
-				}
-				if (c == Command.START_EXP) {
-					netMgr.send("Alg|Ard|S|0");
-					robot.sense(exploredMap, map);
-					exploredMap.draw(true);
-					robot.draw();
-				}
-			} while (c != Command.START_EXP);
+					if (c == Command.START_EXP) {
+						netMgr.send("Alg|Ard|S|0");
 
+					}
+				} while (c != Command.START_EXP);
+			}
+			robot.sense(exploredMap, map);
+			exploredMap.draw(true);
+			robot.draw();
 			System.out.println("coverage: " + coverageLimitSB.getValue());
 			System.out.println("time: " + timeLimitSB.getValue());
 			double coverageLimit = (int) (coverageLimitSB.getValue());
@@ -719,24 +721,23 @@ public class Simulator extends Application {
 			explore.exploration(new Point(MapConstants.STARTZONE_COL, MapConstants.STARTZONE_COL));
 			if (!sim) {
 				netMgr.send("Alg|And|" + Command.ENDEXP + "|");
-				while (true) {
-
-				}
+				do{
+					String [] msgArr = NetMgr.getInstance().receive().split("//|");
+					c = Command.values()[Integer.parseInt(msgArr[2])];
+					if(msgArr[0].equals("And") && c == Command.START_FAST)
+					{
+						sim = false;
+						System.out.println("RF Here");
+						exploredMap.draw(true);
+						robot.draw();
+						fastTask = new Thread(new FastTask());
+						fastTask.start();
+						NetMgr.getInstance().send("Alg|And|"+RobotConstants.Command.ENDFAST);
+						break;
+					}
+				}while(c != Command.START_FAST);
 			}
-			while(true) {
-				String [] msgArr = NetMgr.getInstance().receive().split("//|");
-				if(msgArr[0].equals("And") && Command.values()[Integer.parseInt(msgArr[2])] == Command.START_FAST)
-				{
-					sim = false;
-					System.out.println("RF Here");
-					exploredMap.draw(true);
-					robot.draw();
-					fastTask = new Thread(new FastTask());
-					fastTask.start();
-					NetMgr.getInstance().send("Alg|And|"+RobotConstants.Command.ENDFAST);
-					break;
-				}
-			}
+			
 			return 1;
 		}
 	}
@@ -796,6 +797,8 @@ public class Simulator extends Application {
 			if (steps == 0)
 				steps = 5;
 			
+			int moves =0;
+			Command prev = Command.START_FAST;
 			for (Command c : commands) {
 				if (sim) {
 					try {
@@ -805,11 +808,25 @@ public class Simulator extends Application {
 					}
 
 				}
-				robot.move(c, RobotConstants.MOVE_STEPS, exploredMap);
+				System.out.println("prev: "+prev+" c:"+c+" Condition:"+(prev==c && (c==Command.FORWARD|| c == Command.BACKWARD)));
+				if(prev==c && (c==Command.FORWARD|| c == Command.BACKWARD))
+				{
+					//System.out.println("moves "+moves);
+					moves++;
+				}else
+				{
+					System.out.println("moves "+moves);
+					if(moves>0)
+						robot.move(prev, moves, exploredMap);
+					robot.move(c, RobotConstants.MOVE_STEPS, exploredMap);
+					moves = 0;
+				}
+				prev = c;
 				exploredMap.draw(true);
 				robot.draw();
 			}
-			NetMgr.getInstance().send("Alg|And|" + RobotConstants.Command.ENDEXP);
+			if(!sim)
+				NetMgr.getInstance().send("Alg|And|" + RobotConstants.Command.ENDEXP);
 			return 1;
 		}
 	}
