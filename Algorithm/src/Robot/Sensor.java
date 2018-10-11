@@ -15,6 +15,8 @@ public class Sensor {
 	private String id;
 	private int minRange;
     private int maxRange;
+    private double prevData;
+    private double prevRawData;
 
     // Sensor's position on the map
     private Point pos;
@@ -27,6 +29,8 @@ public class Sensor {
         this.maxRange = maxRange;
         this.pos = new Point(sensorPosCol, sensorPosRow);
         this.sensorDir = sensorDirection;
+        this.prevData = 9;
+        this.prevRawData = 99;
     }
 
 	public String getId() {
@@ -112,12 +116,20 @@ public class Sensor {
 		}
 		return -1;
 	}
-	
-	//Detect method using the real sensor data
-	//KIV what is the sensor data when 
-	public int detect(int sensorData) {
-		
-		
-		return -1;
+
+	public double getPrevData() {
+		return prevData;
+	}
+
+	public void setPrevData(double prevData) {
+		this.prevData = prevData;
+	}
+
+	public double getPrevRawData() {
+		return prevRawData;
+	}
+
+	public void setPrevRawData(double prevRawData) {
+		this.prevRawData = prevRawData;
 	}
 }

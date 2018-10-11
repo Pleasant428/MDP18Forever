@@ -12,17 +12,21 @@ public class RobotConstants {
 	public static final int MOVE_COST = 1;
 	public static final int TURN_COST = 5;
 	public static final double INFINITE_COST = 10000000;
+//	public static final int CALIBRATE_AFTER = 3; //Calibrate After number of moves
 	
 	public static final int MOVE_STEPS = 1;
-	public static final int MOVE_SPEED = 200;	//Delays before movement (Lower = faster) in milliseconds
+	public static final int MOVE_SPEED = 1000;	//Delays before movement (Lower = faster) in milliseconds
+	public static final long WAIT_TIME = 5000;	//Time waiting before retransmitting in milliseconds
 
 	// Sensors default range (In grids)
 	public static final int SHORT_MIN = 1;
 	public static final int SHORT_MAX = 2;
 
 	public static final int LONG_MIN = 1;
-	public static final int LONG_MAX = 4;
+	public static final int LONG_MAX = 5;
 	
+	public static final double RIGHT_THRES = 0.5; //Threshold value or right sensor will calibrate once exceeded
+	public static final double RIGHT_DIS_THRES = 2.5;
 	//Constants to render Robot
 	public static final Color ROBOT_BODY = Color.rgb(139, 0, 0, 0.8);
 	public static final Color ROBOT_OUTLINE = Color.BLACK;
@@ -50,8 +54,6 @@ public class RobotConstants {
 	
 	
 	public static enum Command{
-		FORWARD, TURN_LEFT, TURN_RIGHT, BACKWARD, ERROR, fly;
+		FORWARD, TURN_LEFT, TURN_RIGHT, BACKWARD, ALIGN_FRONT, ALIGN_RIGHT, SEND_SENSORS, ERROR, ENDEXP, ENDFAST, ROBOT_POS, START_EXP, START_FAST;
 	}
-	
-	
 }

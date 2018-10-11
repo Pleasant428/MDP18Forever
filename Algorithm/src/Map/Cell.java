@@ -80,6 +80,7 @@ public class Cell {
 	@Override
 	public String toString() {
 		return "Cell [pos=" + pos + ", explored=" + explored + ", obstacle=" + obstacle + ", virtualWall=" + virtualWall
-				+ ", isWayPoint=" + isWayPoint + "]";
+				+ ", isWayPoint=" + isWayPoint + ", path=" + path + "]";
 	}
+	
 }

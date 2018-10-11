@@ -41,7 +41,6 @@ public class Map {
 		grid = new Cell[MapConstants.MAP_HEIGHT][MapConstants.MAP_WIDTH];
 
 		initMap();
-
 	}
 	
 	
@@ -56,6 +55,15 @@ public class Map {
 					grid[row][col].setVirtualWall(true);
 				}
 
+			}
+		}
+	}
+	
+	//Set all cells as explored based on boolean true is all explord false is all unexplored
+	public void setAllExplored(boolean explored) {
+		for (int row = 0; row < MapConstants.MAP_HEIGHT; row++) {
+			for (int col = 0; col < MapConstants.MAP_WIDTH; col++) {
+				grid[row][col].setExplored(explored);
 			}
 		}
 	}
@@ -90,7 +98,7 @@ public class Map {
 	}
 	
 	//Returns the nearest explored cell to the loc
-	public Cell nearestExp(Point loc) {
+	public Cell nearestExp(Point loc, Point botLoc) {
 		Cell cell, nearest = null;
 		double distance = 1000;
 		
@@ -98,10 +106,13 @@ public class Map {
 		for (int row = 0; row < MapConstants.MAP_HEIGHT; row++) {
 			for (int col = 0; col < MapConstants.MAP_WIDTH; col++) {
 				cell = grid[row][col];
-				if(cell.isExplored() && distance > loc.distance(cell.getPos()))
+				if(checkValidMove(row,col))
 				{
-					nearest = cell;
-					distance = loc.distance(cell.getPos());
+					if((distance > loc.distance(cell.getPos())) || 
+							(distance == loc.distance(cell.getPos()) && cell.getPos().distance(botLoc) < nearest.getPos().distance(botLoc))){
+						nearest = cell;
+						distance = loc.distance(cell.getPos());
+					}
 				}
 			}
 		}
@@ -115,7 +126,7 @@ public class Map {
 
 	// Check if valid to move there cannot move to virtual wall
 	public boolean checkValidMove(int row, int col) {
-		return checkValidCell(row, col) && !getCell(row, col).isVirtualWall() && !getCell(row, col).isObstacle();
+		return checkValidCell(row, col) && !getCell(row, col).isVirtualWall() && !getCell(row, col).isObstacle() && getCell(row,col).isExplored();
 	}
 
 	// Reset Map
@@ -141,25 +152,34 @@ public class Map {
 		ArrayList<Cell> neighbours = new ArrayList<Cell>();
 
 		// UP
-		if (checkValidCell(c.getPos().x, c.getPos().y + 1) && checkValidMove(c.getPos().x, c.getPos().y + 1)) {
+		if (checkValidMove(c.getPos().y + 1, c.getPos().x)) {
 			neighbours.add(getCell(c.getPos().y + 1, c.getPos().x));
 		}
 		// DOWN
-		if (checkValidCell(c.getPos().x, c.getPos().y - 1) && checkValidMove(c.getPos().x, c.getPos().y - 1)) {
+		if (checkValidMove( c.getPos().y - 1, c.getPos().x)) {
 			neighbours.add(getCell(c.getPos().y - 1, c.getPos().x));
 		}
 
 		// RIGHT
-		if (checkValidCell(c.getPos().x + 1, c.getPos().y) && checkValidMove(c.getPos().x + 1, c.getPos().y)) {
-			neighbours.add(getCell(c.getPos().y + 1, c.getPos().x));
+		if (checkValidMove(c.getPos().y, c.getPos().x + 1)) {
+			neighbours.add(getCell(c.getPos().y, c.getPos().x + 1));
 		}
 
 		// LEFT
-		if (checkValidCell(c.getPos().x - 1, c.getPos().y) && checkValidMove(c.getPos().x - 1, c.getPos().y)) {
-			neighbours.add(getCell(c.getPos().y + 1, c.getPos().x));
+		if (checkValidMove( c.getPos().y, c.getPos().x - 1)) {
+			neighbours.add(getCell(c.getPos().y, c.getPos().x - 1));
 		}
 
 		return neighbours;
+	}
+	
+	//Remove existing cells with path
+	public void removePaths() {
+		for(int r=0; r<MapConstants.MAP_HEIGHT; r++) {
+			for(int c=0; c<MapConstants.MAP_WIDTH; c++) {
+				grid[r][c].setPath(false);
+			}
+		}
 	}
 
 	// Draw the Map Graphics Cells
@@ -173,7 +193,9 @@ public class Map {
 
 			for (int col = 0; col < MapConstants.MAP_WIDTH; col++) {
 				// Select Color of the Cells
-				if (row <= MapConstants.STARTZONE_ROW + 1 && col <= MapConstants.STARTZONE_COL + 1)
+				if(grid[row][col].isPath())
+					gc.setFill(MapConstants.PH_COLOR);
+				else if (row <= MapConstants.STARTZONE_ROW + 1 && col <= MapConstants.STARTZONE_COL + 1)
 					gc.setFill(MapConstants.SZ_COLOR);
 				else if (row >= MapConstants.GOALZONE_ROW - 1 && col >= MapConstants.GOALZONE_COL - 1)
 					gc.setFill(MapConstants.GZ_COLOR);

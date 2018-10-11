@@ -57,7 +57,7 @@ class Pc_Wf(object):
 
         def pc_write(self, data):
                 try:
-                        self.pc_sock.sendto(data, self.address)
+                        self.pc_sock.sendall(data, self.address)
                 except socket.error, e:
                         print "Socket Error"
                 except IOError, e:
