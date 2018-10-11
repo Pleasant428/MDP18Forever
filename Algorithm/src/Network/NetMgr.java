@@ -20,6 +20,8 @@ public class NetMgr {
 	private int msgCounter = 0;
 	
 	private static NetMgr netMgr = null;
+	private String prevMsg = null;
+	private Timer wait = new Timer();
 	
 	public NetMgr() {
 		this.ipAddr = "192.168.18.18";
@@ -95,10 +97,11 @@ public class NetMgr {
 		try {
 			// KIV determine format for message traversal
 			System.out.println("Sending Message...");
-			out.write(msg);
+			out.write(msg+"\n");
 			out.flush();
 			msgCounter++;
-			System.out.println(msgCounter+" Message: "+msg+" sent!");
+			System.out.println(msgCounter+" Message Sent: "+msg);
+			prevMsg = msg;
 			
 		}
 		catch (IOException e) {
@@ -130,7 +133,7 @@ public class NetMgr {
 			System.out.println("Receiving Message...");
 			// KIV determine format for message traversal
 			String receivedMsg = in.readLine();
-			
+			System.out.println(receivedMsg);
 			if(receivedMsg!=null&&receivedMsg.length()>0) {
 				System.out.println("Received Message: "+receivedMsg);
 				return receivedMsg;
@@ -138,16 +141,16 @@ public class NetMgr {
 			
 		} catch (IOException e) {
 			System.out.println("Recieving Message Failed (IOException)!");
-			if(socket.isConnected())
-				System.out.println("Connection still Established!");
-			else {
-				while(true)
-				{
-					System.out.println("Connection disrupted! Trying to Reconnect!");
-					if(netMgr.startConn())
-						break;
-				}
-			}
+//			if(socket.isConnected())
+//				System.out.println("Connection still Established!");
+//			else {
+//				while(true)
+//				{
+//					System.out.println("Connection disrupted! Trying to Reconnect!");
+//					if(netMgr.startConn())
+//						break;
+//				}
+//			}
 			return receive();
 		} catch (Exception e) {
 			System.out.println("Receiving Message Failed!");
@@ -158,21 +161,21 @@ public class NetMgr {
 	}
 	
 	// Receive Message Repeat non waiting receive
-	public String receive(String msg) {
+	public String receiveNoWait() {
 		try {
 			
 			//Set timer to resend specified msg if nothing received
-			Timer wait = new Timer();
 			TimerTask retransmit = new TimerTask() {
 				public void run() {
-					netMgr.send(msg);
+					System.out.println("Resending previous msg!");
+					netMgr.send(prevMsg);
 				}
 			};
 			wait.schedule(retransmit, RobotConstants.WAIT_TIME, RobotConstants.WAIT_TIME);
-			System.out.println("Receiving Message");
+			System.out.println("Receiving No Wait Message");
 			// KIV determine format for message traversal
 			String recievedMsg = in.readLine();
-			wait.cancel();
+			//wait.cancel();
 			wait.purge();
 			if (recievedMsg != null && recievedMsg.length() > 0) {
 				System.out.println("Received Message: " + recievedMsg);
@@ -181,17 +184,17 @@ public class NetMgr {
 
 		} catch (IOException e) {
 			System.out.println("Recieving Message Failed (IOException)!");
-			if(socket.isConnected())
-				System.out.println("Connection still Established!");
-			else {
-				while(true)
-				{
-					System.out.println("Connection disrupted! Trying to Reconnect!");
-					if(netMgr.startConn())
-						break;
-				}
-			}
-			return receive(msg);
+//			if(socket.isConnected())
+//				System.out.println("Connection still Established!");
+//			else {
+//				while(true)
+//				{
+//					System.out.println("Connection disrupted! Trying to Reconnect!");
+//					if(netMgr.startConn())
+//						break;
+//				}
+//			}
+			return receiveNoWait();
 		} catch (Exception e) {
 			System.out.println("Receiving Message Failed!");
 			e.printStackTrace();
@@ -199,4 +202,13 @@ public class NetMgr {
 
 		return null;
 	}
+	
+	public boolean isConnected() {
+		
+		if(socket==null)
+			return false;
+		else
+			return true;
+	}
+	
 }

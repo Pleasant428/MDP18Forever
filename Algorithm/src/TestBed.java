@@ -11,17 +11,14 @@ public class TestBed {
 		// TODO Auto-generated method stub
 		System.out.println(Command.FORWARD.ordinal());
 		net = NetMgr.getInstance();
-		//Keep trying to connect if fail to connect
-		
+		net.startConn();
+		//while(true) {
+			net.send("Alg|Ard|0|1");
+			net.send("Alg|And|0|1");
+		//}
 			
-		System.out.println("Starting");
-		Scanner sc = new Scanner(System.in);
-		String msg = "";
-		while(true) {
-			System.out.print("Sending: Alg|Ard|S|0");
-			net.send(sc.nextLine());
-			System.out.println(net.receive());
-		}
+//		net.send("Alg|Ard|0|1\n");
+		//Keep trying to connect if fail to connec
 		
 	}
 }
