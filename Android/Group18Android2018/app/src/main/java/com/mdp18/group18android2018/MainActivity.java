@@ -480,6 +480,119 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                             Log.d(TAG, "Switch Case default! String command not recognised.");
                             break;
                     }
+
+                    if (filteredMsg.length >= 5){
+
+                        Log.d(TAG, "Incoming Message 2: " + filteredMsg[4] + "|" + filteredMsg[5] + "|" + filteredMsg[6] + "|" + filteredMsg[7]);
+
+                        if (filteredMsg[5].equals("and")) {
+
+                            Log.d(TAG, "Incoming Message 2 FOR ANDROID (went past IF2): " + filteredMsg[5]);
+
+                            Log.d(TAG, "Incoming Message 2 filtered: " + filteredMsg[6]);
+
+                            switch (filteredMsg[6]) {
+
+                                // Action: FORWARD
+                                case "0":
+                                    for (int counter = Integer.parseInt(filteredMsg[7]); counter >= 1; counter--) {
+                                        mPGV.moveForward();
+                                        tv_mystringcmd.append("Move Forward\n");
+                                        tv_mystatus.append("Moving\n");
+                                    }
+                                    break;
+
+
+                                // Action: TURN_LEFT
+                                case "1":
+
+                                    for (int counter = Integer.parseInt(filteredMsg[7]); counter >= 1; counter--) {
+                                        mPGV.rotateLeft();
+                                        tv_mystringcmd.append("Turn Left\n");
+                                        tv_mystatus.append("Moving\n");
+                                    }
+                                    break;
+
+
+                                // Action: TURN_RIGHT
+                                case "2":
+                                    for (int counter = Integer.parseInt(filteredMsg[7]); counter >= 1; counter--) {
+                                        mPGV.rotateRight();
+                                        tv_mystringcmd.append("Turn Right\n");
+                                        tv_mystatus.append("Moving\n");
+                                    }
+                                    break;
+
+
+                                // Action: BACKWARDS
+                                case "3":
+                                    for (int counter = Integer.parseInt(filteredMsg[7]); counter >= 1; counter--) {
+                                        mPGV.moveBackwards();
+                                        tv_mystringcmd.append("Move Backwards\n");
+                                        tv_mystatus.append("Moving\n");
+                                    }
+                                    break;
+
+
+                                // Action: CALIBRATE : ALIGN_FRONT
+                                case "4":
+                                    tv_mystatus.append("Calibrating robot...\n");
+                                    tv_mystringcmd.append("Calibrating robot...\n");
+                                    break;
+
+
+
+                                // Action: CALIBRATE : ALIGN_RIGHT
+                                case "5":
+                                    tv_mystatus.append("Calibrating robot...\n");
+                                    tv_mystringcmd.append("Calibrating robot...\n");
+                                    break;
+
+                                // Action: ENDEXP
+                                case "8":
+                                    endExploration();
+                                    break;
+
+
+                                // Action: ENDFAST
+                                case "9":
+                                    endFastestPath();
+                                    break;
+
+                                // Action: MD1
+                                case "md1":
+                                    String mapDes1 = filteredMsg[7];
+                                    mPGV.mapDescriptorExplored(mapDes1);
+                                    break;
+
+
+                                // Action: MD2
+                                case "md2":
+                                    String mapDes2 = filteredMsg[7];
+                                    mPGV.mapDescriptorObstacle(mapDes2);
+                                    break;
+
+                                case "s":
+                                    // Sent by Arduino: robot stop
+                                    tv_mystatus.append("Stop\n");
+                                    tv_mystringcmd.append(" \n");
+                                    break;
+
+                                case "a":
+                                    // Sent by Algo: Upwards arrow on coordinate
+                                    // Format: Rpi|And|A|
+                                    tv_mystatus.append("Upwards arrow detected\n");
+                                    mPGV.setArrowImageCoord();
+                                    mPGV.refreshMap(mPGV.getAutoUpdate());
+                                    break;
+
+                                default:
+                                    Log.d(TAG, "Switch Case default! String command not recognised.");
+                                    break;
+                            }
+                    }
+
+                    }
                 }
 
                 // The following is for clearing checklist commands only.
