@@ -536,6 +536,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
                                 // Action: CALIBRATE : ALIGN_FRONT
                                 case "4":
+                                case "ALIGN_FRONT":
                                     tv_mystatus.append("Calibrating robot...\n");
                                     tv_mystringcmd.append("Calibrating robot...\n");
                                     break;
@@ -550,12 +551,14 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
                                 // Action: ENDEXP
                                 case "8":
+                                case "ENDEXP":
                                     endExploration();
                                     break;
 
 
                                 // Action: ENDFAST
                                 case "9":
+                                case "ENDFAST":
                                     endFastestPath();
                                     break;
 
@@ -590,7 +593,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                                     Log.d(TAG, "Switch Case default! String command not recognised.");
                                     break;
                             }
-                    }
+                   }
 
                     }
                 }
@@ -664,6 +667,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     public void endExploration() {
         Log.d(TAG, "Algorithm: End Exploration");
+        tb_exploration.toggle();
         tv_mystringcmd.append("End Exploration\n");
         tv_mystatus.append("Stop\n");
         Toast.makeText(MainActivity.this, "Exploration ended", Toast.LENGTH_SHORT).show();
@@ -681,6 +685,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     public void endFastestPath() {
         Log.d(TAG, "Algorithm: Fastest Path Ended.");
+        tb_fastestpath.toggle();
         tv_mystringcmd.append("End Fastest Path\n");
         tv_mystatus.append("Stop\n");
         Toast.makeText(MainActivity.this, "Fastest Path ended", Toast.LENGTH_SHORT).show();
