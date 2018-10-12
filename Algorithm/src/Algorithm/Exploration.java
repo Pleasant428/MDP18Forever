@@ -75,7 +75,7 @@ public class Exploration {
 		endTime = startTime + timeLimit;
 		double prevArea = exploredMap.exploredPercentage();
 		int moves = 1;
-		int checkingStep = 10;
+		int checkingStep = 12;
 		this.start = start;
 		
 		// Loop to explore the map
@@ -98,15 +98,16 @@ public class Exploration {
 						break outerloop;
 					areaExplored = exploredMap.exploredPercentage();
 				}
-				checkingStep = 2;
+				checkingStep = 3;
 			}
 			
 			if(moves%checkingStep==0)
 				prevArea = areaExplored;
 			
 			moves++;
+			System.out.println("areaExplored :"+areaExplored);
 		} while (areaExplored < coverageLimit && System.currentTimeMillis() < endTime);
-		
+		System.out.println("Exploration Ended Going to Start");
 		goToPoint(start);
 	}
 
@@ -118,9 +119,9 @@ public class Exploration {
 		Cell unCell = exploredMap.nearestUnexp(robot.getPosition());
 		System.out.println("Unexplored: "+unCell.toString());
 		Cell cell = exploredMap.nearestExp(unCell.getPos(), robot.getPosition());
-		//Unexplored Node cannot be reached from nearest explored cell
-		if(unCell.getPos().distance(cell.getPos())>RobotConstants.SHORT_MAX)
-			return false;
+//		//Unexplored Node cannot be reached from nearest explored cell
+//		if(unCell.getPos().distance(cell.getPos())>RobotConstants.SHORT_MAX)
+//			return false;
 		System.out.println("Explored: "+cell.toString());
 		return goToPoint(cell.getPos());
 	}
@@ -152,12 +153,14 @@ public class Exploration {
 		backToStart.displayFastestPath(path, true);
 		commands = backToStart.getPathCommands(path);
 		for (Command c : commands) {
-			if((c==Command.FORWARD) && movable(robot.getDirection())||(c==Command.BACKWARD && movable(Direction.reverse(robot.getDirection())))) {
+			if((c==Command.FORWARD) && !movable(robot.getDirection())) {
+				break;
+			}
+			else
+			{
 				robot.move(c, RobotConstants.MOVE_STEPS, exploredMap);
 				robot.sense(exploredMap, map);
 			}
-			else
-				break;
 			if(sim) {
 				try {
 					TimeUnit.MILLISECONDS.sleep(RobotConstants.MOVE_SPEED/stepPerSecond);

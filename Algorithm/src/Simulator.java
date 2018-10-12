@@ -721,10 +721,11 @@ public class Simulator extends Application {
 			explore.exploration(new Point(MapConstants.STARTZONE_COL, MapConstants.STARTZONE_COL));
 			if (!sim) {
 				netMgr.send("Alg|And|" + Command.ENDEXP + "|");
+				Command com = null;
 				do{
-					String [] msgArr = NetMgr.getInstance().receive().split("//|");
-					c = Command.values()[Integer.parseInt(msgArr[2])];
-					if(msgArr[0].equals("And") && c == Command.START_FAST)
+					String [] msgArr = NetMgr.getInstance().receive().split("\\|");
+					com = Command.values()[Integer.parseInt(msgArr[2])];
+					if(com == Command.START_FAST)
 					{
 						sim = false;
 						System.out.println("RF Here");
@@ -735,7 +736,7 @@ public class Simulator extends Application {
 						NetMgr.getInstance().send("Alg|And|"+RobotConstants.Command.ENDFAST);
 						break;
 					}
-				}while(c != Command.START_FAST);
+				}while(com != Command.START_FAST);
 			}
 			
 			return 1;
@@ -780,14 +781,14 @@ public class Simulator extends Application {
 		protected Integer call() throws Exception {
 			FastestPath fp = new FastestPath(exploredMap, robot, sim);
 			ArrayList<Cell> path;
-			if (wayPoint.distance(MapConstants.GOALZONE) != 0) {
+//			if (wayPoint.distance(MapConstants.GOALZONE) != 0) {
 				path = fp.run(new Point(robot.getPosition().x, robot.getPosition().y), wayPoint, robot.getDirection());
 
 				System.out.println("HERE");
 				path.addAll(fp.run(wayPoint, MapConstants.GOALZONE, robot.getDirection()));
-			} else
-				path = fp.run(new Point(robot.getPosition().x, robot.getPosition().y), MapConstants.GOALZONE,
-						robot.getDirection());
+//			} else
+//				path = fp.run(new Point(robot.getPosition().x, robot.getPosition().y), MapConstants.GOALZONE,
+//						robot.getDirection());
 
 			fp.displayFastestPath(path, true);
 			ArrayList<Command> commands = fp.getPathCommands(path);
