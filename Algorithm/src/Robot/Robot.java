@@ -259,7 +259,7 @@ public class Robot {
 		draw();
 		String msg = null;
 		if(!sim) {
-			msg = NetMgr.getInstance().receive(/*"Alg|Ard|S|0"*/);
+			msg = NetMgr.getInstance().receive();
 			String [] msgArr = msg.split("\\|");
 			String [] strSensor = msgArr[3].split("\\,");
 			System.out.println("Recieved "+strSensor.length+" sensor data");

@@ -667,6 +667,15 @@ public class Simulator extends Application {
 					msg = netMgr.receive();
 					String[] msgArr = msg.split("\\|");
 					c = Command.values()[Integer.parseInt(msgArr[2])];
+					if (msgArr[2].compareToIgnoreCase("Calibrate") == 0) {
+						for (int i = 0; i < 4; i++) {
+							robot.move(Command.TURN_RIGHT, RobotConstants.MOVE_STEPS, exploredMap);
+							senseAndAlign();
+						}
+						netMgr.send("Alg|Ard|"+Command.ALIGN_RIGHT.ordinal()+"|0");
+						msg = netMgr.receive();
+					}
+					
 					if (c == Command.ROBOT_POS) {
 						String[] data = msgArr[3].split("\\,");
 						int col = Integer.parseInt(data[0]);
@@ -695,7 +704,7 @@ public class Simulator extends Application {
 						exploredMap.draw(true);
 						robot.draw();
 					}
-					if (c == Command.START_EXP) {
+					else if (c == Command.START_EXP) {
 						netMgr.send("Alg|Ard|S|0");
 
 					}
@@ -740,6 +749,32 @@ public class Simulator extends Application {
 			}
 			
 			return 1;
+		}
+	}
+	//
+	public void senseAndAlign() {
+		String msg = null;
+		int frontCalSense =0;
+		double [][] sensorData = new double[6][2];
+		msg = NetMgr.getInstance().receive();
+		String[] msgArr = msg.split("\\|");
+		String[] strSensor = msgArr[3].split("\\,");
+		System.out.println("Recieved " + strSensor.length + " sensor data");
+		// Translate string to integer
+		for (int i = 0; i < strSensor.length; i++) {
+			String[] arrSensorStr = strSensor[i].split("\\:");
+			sensorData[i][0] = Double.parseDouble(arrSensorStr[1]);
+			sensorData[i][1] = Double.parseDouble(arrSensorStr[2]);
+		}
+		//Check if can frontcal
+		for(int i=0; i<3;i++) {
+			if(sensorData[i][1]==1)
+				frontCalSense++;
+		}
+		//Discrepancy detected among the sensor data received
+		if(frontCalSense>1) {
+			netMgr.send("Alg|Ard|"+Command.ALIGN_FRONT.ordinal()+"|1");
+			netMgr.receive();
 		}
 	}
 	
