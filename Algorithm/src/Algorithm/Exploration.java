@@ -68,48 +68,132 @@ public class Exploration {
 	public void setTimeLimit(int timeLimit) {
 		this.timeLimit = timeLimit;
 	}
-
-	public void exploration(Point start) {
-		areaExplored = exploredMap.exploredPercentage();
-		startTime = System.currentTimeMillis();
-		endTime = startTime + timeLimit;
-		double prevArea = exploredMap.exploredPercentage();
-		int moves = 1;
-		int checkingStep = 12;
-		this.start = start;
-		
-		// Loop to explore the map
-		outerloop:
-		do {
-			if(areaExplored >= 100)
-				break;
-			try {
-				getMove();
-			} catch (InterruptedException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
+	
+//	//Exploration 1: UnExplored After go Back to Start
+//	public void exploration(Point start) {
+//		areaExplored = exploredMap.exploredPercentage();
+//		startTime = System.currentTimeMillis();
+//		endTime = startTime + timeLimit;
+//		double prevArea = exploredMap.exploredPercentage();
+//		int moves = 1;
+//		int checkingStep = 12;
+//		this.start = start;
+//		
+//		// Loop to explore the map
+//		outerloop:
+//		do {
+//			if(areaExplored >= 100)
+//				break;
+//			try {
+//				getMove();
+//			} catch (InterruptedException e1) {
+//				// TODO Auto-generated catch block
+//				e1.printStackTrace();
+//			}
+//			areaExplored = exploredMap.exploredPercentage();
+//			//returned to start
+//			if (robot.getPosition().distance(start)==0) {
+//				while(true){
+//					if(!goToUnexplored())
+//						break outerloop;
+//				}
+//			}
+//			
+//			moves++;
+//			System.out.println("areaExplored :"+areaExplored);
+//		} while (areaExplored < coverageLimit && System.currentTimeMillis() < endTime);
+//		System.out.println("Exploration Ended Going to Start");
+//		goToPoint(start);
+//	}
+	
+//	//Exploration 2: Original with Modifications
+//	public void exploration(Point start) {
+//		areaExplored = exploredMap.exploredPercentage();
+//		startTime = System.currentTimeMillis();
+//		endTime = startTime + timeLimit;
+//		double prevArea = exploredMap.exploredPercentage();
+//		int moves = 1;
+//		int checkingStep = 15;
+//		this.start = start;
+//		
+//		// Loop to explore the map
+//		outerloop:
+//		do {
+//			if(areaExplored >= 100)
+//				break;
+//			try {
+//				getMove();
+//			} catch (InterruptedException e1) {
+//				// TODO Auto-generated catch block
+//				e1.printStackTrace();
+//			}
+//			areaExplored = exploredMap.exploredPercentage();
+//			//returned to start
+//			if (prevArea == areaExplored||robot.getPosition().distance(start)==0) {
+//				do{
+//					prevArea = areaExplored;
+//					if(!goToUnexplored())
+//						break;
+//					areaExplored = exploredMap.exploredPercentage();
+//				}while(prevArea == areaExplored);
+//				checkingStep = 3;
+//			}
+//			
+//			if(moves%checkingStep==0)
+//				prevArea = areaExplored;
+//			
+//			moves++;
+//		} while (areaExplored < coverageLimit && System.currentTimeMillis() < endTime);
+//		
+//		goToPoint(start);
+//	}
+	
+	//Exploration 3: Modification of Original
+		public void exploration(Point start) {
 			areaExplored = exploredMap.exploredPercentage();
-			//returned to start
-			if (prevArea == areaExplored||robot.getPosition().distance(start)==0) {
-				while(prevArea == areaExplored){
-					prevArea = areaExplored;
-					if(!goToUnexplored())
-						break outerloop;
-					areaExplored = exploredMap.exploredPercentage();
-				}
-				checkingStep = 3;
-			}
+			startTime = System.currentTimeMillis();
+			endTime = startTime + timeLimit;
+			double prevArea = exploredMap.exploredPercentage();
+			int moves = 1;
+			int checkingStep = 6;
+			this.start = start;
 			
-			if(moves%checkingStep==0)
+			// Loop to explore the map
+			outer:
+			do {
 				prevArea = areaExplored;
+				if(areaExplored >= 100)
+					break;
+				try {
+					getMove();
+				} catch (InterruptedException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				areaExplored = exploredMap.exploredPercentage();
+				if(prevArea==areaExplored)
+					moves++;
+				else
+					moves=1;
+				//returned to start
+				if (moves%checkingStep==0||robot.getPosition().distance(start)==0) {
+					do{
+						prevArea = areaExplored;
+						if(!goToUnexplored())
+							break outer;
+						areaExplored = exploredMap.exploredPercentage();
+					}while(prevArea == areaExplored);
+					moves=1;
+					checkingStep=3;
+				}
+			} while (areaExplored < coverageLimit && System.currentTimeMillis() < endTime);
 			
-			moves++;
-			System.out.println("areaExplored :"+areaExplored);
-		} while (areaExplored < coverageLimit && System.currentTimeMillis() < endTime);
-		System.out.println("Exploration Ended Going to Start");
-		goToPoint(start);
-	}
+			goToPoint(start);
+			endTime = System.currentTimeMillis();
+			int seconds = (int)((endTime - startTime)/1000%60);
+			int minutes = (int)((endTime - startTime)/1000/60);
+			System.out.println("Total Time: "+minutes+"mins "+seconds+"seconds");
+		}
 
 	// Locate nearest unexplored point
 	public boolean goToUnexplored() {
@@ -120,8 +204,6 @@ public class Exploration {
 		System.out.println("Unexplored: "+unCell.toString());
 		Cell cell = exploredMap.nearestExp(unCell.getPos(), robot.getPosition());
 //		//Unexplored Node cannot be reached from nearest explored cell
-//		if(unCell.getPos().distance(cell.getPos())>RobotConstants.SHORT_MAX)
-//			return false;
 		System.out.println("Explored: "+cell.toString());
 		return goToPoint(cell.getPos());
 	}
@@ -146,14 +228,16 @@ public class Exploration {
 		}
 		ArrayList<Command> commands = new ArrayList<Command>();
 		ArrayList<Cell> path = new ArrayList<Cell>();
-		FastestPath backToStart = new FastestPath(exploredMap, robot, sim);
-		path = backToStart.run(robot.getPosition(), loc, robot.getDirection());
+		FastestPath fp = new FastestPath(exploredMap, robot, sim);
+		path = fp.run(robot.getPosition(), loc, robot.getDirection());
 		if(path.isEmpty())
 			return false;
-		backToStart.displayFastestPath(path, true);
-		commands = backToStart.getPathCommands(path);
+		fp.displayFastestPath(path, true);
+		commands = fp.getPathCommands(path);
+		System.out.println(commands);
 		for (Command c : commands) {
 			if((c==Command.FORWARD) && !movable(robot.getDirection())) {
+				System.out.println("Not Executing Forward Not Movable");
 				break;
 			}
 			else

@@ -15,7 +15,7 @@ public class RobotConstants {
 //	public static final int CALIBRATE_AFTER = 3; //Calibrate After number of moves
 	
 	public static final int MOVE_STEPS = 1;
-	public static final int MOVE_SPEED = 1000;	//Delays before movement (Lower = faster) in milliseconds
+	public static final int MOVE_SPEED = 5000;	//Delays before movement (Lower = faster) in milliseconds
 	public static final long WAIT_TIME = 5000;	//Time waiting before retransmitting in milliseconds
 
 	// Sensors default range (In grids)

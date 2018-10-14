@@ -106,10 +106,9 @@ public class Map {
 		for (int row = 0; row < MapConstants.MAP_HEIGHT; row++) {
 			for (int col = 0; col < MapConstants.MAP_WIDTH; col++) {
 				cell = grid[row][col];
-				if(checkValidMove(row,col))
+				if(checkValidMove(row,col) && clearForRobot(row,col))
 				{
-					if((distance > loc.distance(cell.getPos())) || 
-							(distance == loc.distance(cell.getPos()) && cell.getPos().distance(botLoc) < nearest.getPos().distance(botLoc))){
+					if((distance > loc.distance(cell.getPos())&& cell.getPos().distance(botLoc)>0)){
 						nearest = cell;
 						distance = loc.distance(cell.getPos());
 					}
@@ -117,6 +116,18 @@ public class Map {
 			}
 		}
 		return nearest;
+	}
+	
+	public boolean clearForRobot(int row, int col) {
+		
+		for(int r=row-1; r< row+1; r++) {
+			for(int c=col-1; c<col+1; c++) {
+				if(!grid[r][c].isExplored()||grid[r][c].isObstacle())
+					return false;
+			}
+		}
+		
+		return true;
 	}
 
 	// Check if the row and col is within the map boundary

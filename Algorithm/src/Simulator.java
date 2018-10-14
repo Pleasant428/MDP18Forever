@@ -783,8 +783,6 @@ public class Simulator extends Application {
 			ArrayList<Cell> path;
 //			if (wayPoint.distance(MapConstants.GOALZONE) != 0) {
 				path = fp.run(new Point(robot.getPosition().x, robot.getPosition().y), wayPoint, robot.getDirection());
-
-				System.out.println("HERE");
 				path.addAll(fp.run(wayPoint, MapConstants.GOALZONE, robot.getDirection()));
 //			} else
 //				path = fp.run(new Point(robot.getPosition().x, robot.getPosition().y), MapConstants.GOALZONE,
@@ -798,9 +796,9 @@ public class Simulator extends Application {
 			if (steps == 0)
 				steps = 5;
 			
-			int moves =0;
-			Command prev = Command.START_FAST;
-			for (Command c : commands) {
+			int moves = 0;
+			System.out.println(commands);
+			for (int i=0; i < commands.size(); i++) {
 				if (sim) {
 					try {
 						TimeUnit.MILLISECONDS.sleep(RobotConstants.MOVE_SPEED / steps);
@@ -809,20 +807,23 @@ public class Simulator extends Application {
 					}
 
 				}
-				System.out.println("prev: "+prev+" c:"+c+" Condition:"+(prev==c && (c==Command.FORWARD|| c == Command.BACKWARD)));
-				if(prev==c && (c==Command.FORWARD|| c == Command.BACKWARD))
+				System.out.println("c:"+commands.get(i)+" Condition:"+(commands.get(i)==Command.FORWARD|| commands.get(i) == Command.BACKWARD));
+				System.out.println("index: "+i+" condition: "+(i==(commands.size()-1)));
+				if(commands.get(i)==Command.FORWARD)
 				{
 					//System.out.println("moves "+moves);
 					moves++;
+					//If last command
+					if(i==(commands.size()-1))
+						robot.move(commands.get(i), moves, exploredMap);
 				}else
 				{
 					System.out.println("moves "+moves);
 					if(moves>0)
-						robot.move(prev, moves, exploredMap);
-					robot.move(c, RobotConstants.MOVE_STEPS, exploredMap);
+						robot.move(Command.FORWARD, moves, exploredMap);
+					robot.move(commands.get(i), RobotConstants.MOVE_STEPS, exploredMap);
 					moves = 0;
 				}
-				prev = c;
 				exploredMap.draw(true);
 				robot.draw();
 			}
