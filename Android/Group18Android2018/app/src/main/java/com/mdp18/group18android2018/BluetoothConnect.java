@@ -47,15 +47,13 @@ public class BluetoothConnect extends AppCompatActivity{
     public DeviceListAdapter myDeviceListAdapter;
     public DeviceListAdapter myPairedDeviceListAdapter;
 
-//    BluetoothConnectionService myBluetoothConnection;
-
-    //Bounded Device
+    // Bounded Device
     static BluetoothDevice myBTDevice;
     BluetoothDevice myBTConnectionDevice;
 
     BluetoothAdapter myBluetoothAdapter;
 
-    //VIEWS AND BUTTONS
+    // DECLARATIONS
     ListView lvNewDevices;
     ListView lvPairedDevices;
     Button btnSend;
@@ -94,34 +92,34 @@ public class BluetoothConnect extends AppCompatActivity{
         incomingMsg = new StringBuilder();
         myBTDevice = null;
 
-        //REGISTER BROADCAST RECEIVER FOR IMCOMING MSG
+        // Register Broadcast Receiver for Bluetooth Connection
         LocalBroadcastManager.getInstance(this).registerReceiver(btConnectionReceiver, new IntentFilter("btConnectionStatus"));
 
-        //REGISTER BROADCAST RECEIVER FOR IMCOMING MSG
+        // Register Broadcast Receiver for incoming message
         LocalBroadcastManager.getInstance(this).registerReceiver(myReceiver, new IntentFilter("IncomingMsg"));
 
-        //REGISTER BROADCAST WHEN BOND STATE CHANGES (E.G PAIRING)
+        // Register broadcast when bond state changed (E.g. PAIRING)
         IntentFilter bondFilter = new IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
         registerReceiver(bondingBroadcastReceiver, bondFilter);
 
-        //REGISTER DISCOVERABILITY BROADCAST RECEIVER
+        // Register Discoverability Broadcast Receiver
         IntentFilter intentFilter = new IntentFilter(myBluetoothAdapter.ACTION_SCAN_MODE_CHANGED);
         registerReceiver(discoverabilityBroadcastReceiver, intentFilter);
 
-        //REGISTER DISCOVERED DEVICE BROADCAST RECEIVER
+        // Register Discovered Device Broadcast Receiver
         IntentFilter discoverDevicesIntent = new IntentFilter(BluetoothDevice.ACTION_FOUND);
         registerReceiver(discoveryBroadcastReceiver, discoverDevicesIntent);
 
-        //REGISTER END DISCOVERING BROADCAST RECEIVER
+        // Register End Discovering Broadcast Receiver
         IntentFilter discoverEndedIntent = new IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
         registerReceiver(discoveryEndedBroadcastReceiver, discoverEndedIntent);
 
-        //REGISTER ENABLE/DISABLE BT BROADCAST RECEIVER
+        // Register Enable/Disable Bluetooth Broadcast Receiver
         IntentFilter BTIntent = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
         registerReceiver(enableBTBroadcastReceiver, BTIntent);
 
 
-        //REGISTER START DISCOVERING BROADCAST RECEIVER
+        // Register Start Discovering Broadcast Receiver
         IntentFilter discoverStartedIntent = new IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_STARTED);
         registerReceiver(discoveryStartedBroadcastReceiver, discoverStartedIntent);
 
@@ -131,18 +129,18 @@ public class BluetoothConnect extends AppCompatActivity{
         myBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
 
-        //ONCLICK LISTENER FOR PAIRED DEVICE LIST
+        // onClick Listener for Paired Device List
         lvPairedDevices.setOnItemClickListener(
                 new AdapterView.OnItemClickListener() {
                     @Override
                     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
 
-                        //CANCEL DEVICE SEARCH DISCOVERY
+                        // Cancel device search discovery
                         myBluetoothAdapter.cancelDiscovery();
 
                         myBTDevice = myBTPairedDevicesArrayList.get(i);
 
-                        //UnSelect Search Device List
+                        //Deselect Search Device List
                         lvNewDevices.setAdapter(myDeviceListAdapter);
 
                         Log.d(TAG, "onItemClick: Paired Device = " + myBTPairedDevicesArrayList.get(i).getName());
@@ -152,13 +150,13 @@ public class BluetoothConnect extends AppCompatActivity{
                 }
         );
 
-        //ONCLICK LISTENER FOR SEARCH DEVICE LIST
+        // onClick Listener for Search Device List
         lvNewDevices.setOnItemClickListener(
                 new AdapterView.OnItemClickListener() {
                     @Override
                     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
 
-                        //CANCEL DEVICE SEARCH DISCOVERY
+                        // Cancel Device Search Discovery
                         myBluetoothAdapter.cancelDiscovery();
 
                         Log.d(TAG, "onItemClick: Item Selected");
@@ -166,21 +164,21 @@ public class BluetoothConnect extends AppCompatActivity{
                         String deviceName = myBTDevicesArrayList.get(i).getName();
                         String deviceAddress = myBTDevicesArrayList.get(i).getAddress();
 
-                        //UnSelect Paired Device List
+                        // Deselect Paired Device List
                         lvPairedDevices.setAdapter(myPairedDeviceListAdapter);
 
 
                         Log.d(TAG, "onItemClick: DeviceName = " + deviceName);
                         Log.d(TAG, "onItemClick: DeviceAddress = " + deviceAddress);
 
-                        //CREATE BOND if > JELLY BEAN
+                        // Create bond if > JELLYBEAN
                         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.JELLY_BEAN_MR2) {
                             Log.d(TAG, "Trying to pair with: " + deviceName);
 
-                            //CREATE BOUND WITH SELECTED DEVICE
+                            // Create bond with selected device
                             myBTDevicesArrayList.get(i).createBond();
 
-                            //ASSIGN SELECTED DEVICE INFO TO myBTDevice
+                            // Assign selected device info to myBTDevice
                             myBTDevice = myBTDevicesArrayList.get(i);
 
 
@@ -191,7 +189,7 @@ public class BluetoothConnect extends AppCompatActivity{
                 }
         );
 
-        //ONCLICKLISTENER FOR SEARCH BUTTON
+        // OnClick Listener for Search button
         btnSearch.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
                 Log.d(TAG, "onClick: search button");
@@ -202,7 +200,7 @@ public class BluetoothConnect extends AppCompatActivity{
             }
         });
 
-        //ONCLICKLISTENER FOR CONNECT BUTTON
+        // OnClick Listener for Connect button
         bluetoothConnect.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
 
@@ -218,14 +216,14 @@ public class BluetoothConnect extends AppCompatActivity{
                 else{
                     Log.d(TAG, "onClick: connect button");
 
-                    //START CONNECTION WITH THE BOUNDED DEVICE
+                    // Start connection with the bonded device
                     startBTConnection(myBTDevice, myUUID);
                 }
                 lvPairedDevices.setAdapter(myPairedDeviceListAdapter);
             }
         });
 
-        //ONCLICKLISTENER FOR SEND BUTTON
+        // OnClick Listener for Send button
         btnSend.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
                 byte[] bytes = sendMessage.getText().toString().getBytes(Charset.defaultCharset());
@@ -283,7 +281,7 @@ public class BluetoothConnect extends AppCompatActivity{
     }
 
 
-    //BROADCAST RECEIVER FOR BLUETOOTH CONNECTION STATUS
+    // Broadcast Receiver for Bluetooth Connection Status
     BroadcastReceiver btConnectionReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -293,18 +291,18 @@ public class BluetoothConnect extends AppCompatActivity{
             String connectionStatus = intent.getStringExtra("ConnectionStatus");
             myBTConnectionDevice = intent.getParcelableExtra("Device");
 
-            //DISCONNECTED FROM BLUETOOTH CHAT
+            // Disconnected from Bluetooth
             if(connectionStatus.equals("disconnect")){
 
                 Log.d("ConnectAcitvity:","Device Disconnected");
 
-                //CHECK FOR NOT NULL
+                // Check for not null
                 if(connectIntent != null) {
                     //Stop Bluetooth Connection Service
                     stopService(connectIntent);
                 }
 
-                //RECONNECT DIALOG MSG
+                // Reconnect Bluetooth
                 AlertDialog alertDialog = new AlertDialog.Builder(BluetoothConnect.this).create();
                 alertDialog.setTitle("BLUETOOTH DISCONNECTED");
                 alertDialog.setMessage("Connection with device: '"+myBTConnectionDevice.getName()+"' has ended. Do you want to reconnect?");
@@ -324,7 +322,7 @@ public class BluetoothConnect extends AppCompatActivity{
                 alertDialog.show();
             }
 
-            //SUCCESSFULLY CONNECTED TO BLUETOOTH DEVICE
+            // Connected to Bluetooth Device
             else if(connectionStatus.equals("connect")){
 
 
@@ -333,7 +331,7 @@ public class BluetoothConnect extends AppCompatActivity{
                         Toast.LENGTH_SHORT).show();
             }
 
-            //BLUETOOTH CONNECTION FAILED
+            // Bluetooth Connection failed
             else if(connectionStatus.equals("connectionFail")) {
                 Toast.makeText(BluetoothConnect.this, "Connection Failed: "+ myBTConnectionDevice.getName(),
                         Toast.LENGTH_SHORT).show();
@@ -343,7 +341,7 @@ public class BluetoothConnect extends AppCompatActivity{
     };
 
     /*
-        Create a BroadcastReceiver for ACTION_FOUND (EnableBT).
+        Create a BroadcastReceiver for ACTION_FOUND (EnableBT)
     */
     private final BroadcastReceiver enableBTBroadcastReceiver = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
@@ -379,7 +377,7 @@ public class BluetoothConnect extends AppCompatActivity{
 
 
     /*
-        Create a BroadcastReceiver for ACTION_FOUND (Enable Discoverability).
+        Create a BroadcastReceiver for ACTION_FOUND (Enable Discoverability)
     */
     private final BroadcastReceiver discoverabilityBroadcastReceiver = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
@@ -429,7 +427,7 @@ public class BluetoothConnect extends AppCompatActivity{
 
 
     /*
-      Create a BroadcastReceiver for ACTION_FOUND (Get Discovered Devices Info).
+      Create a BroadcastReceiver for ACTION_FOUND (Get Discovered Devices Info)
   */
     private final BroadcastReceiver discoveryBroadcastReceiver = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
@@ -450,7 +448,7 @@ public class BluetoothConnect extends AppCompatActivity{
 
 
     /*
-      Create a BroadcastReceiver for ACTION_DISCOVERY_STARTED  (Start Discovering Devices).
+      Create a BroadcastReceiver for ACTION_DISCOVERY_STARTED  (Start Discovering Devices)
   */
     private final BroadcastReceiver discoveryStartedBroadcastReceiver = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
@@ -468,7 +466,7 @@ public class BluetoothConnect extends AppCompatActivity{
 
 
     /*
-      Create a BroadcastReceiver for ACTION_DISCOVERY_FINISHED  (End Discovering Devices).
+      Create a BroadcastReceiver for ACTION_DISCOVERY_FINISHED  (End Discovering Devices)
   */
     private final BroadcastReceiver discoveryEndedBroadcastReceiver = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
@@ -486,7 +484,7 @@ public class BluetoothConnect extends AppCompatActivity{
 
 
     /*
-        Create a BroadcastReceiver for ACTION_FOUND (Pairing Devices).
+        Create a BroadcastReceiver for ACTION_FOUND (Pairing Devices)
     */
     private final BroadcastReceiver bondingBroadcastReceiver = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {

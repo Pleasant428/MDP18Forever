@@ -20,6 +20,7 @@ import static android.content.ContentValues.TAG;
 
 public class PixelGridView extends View {
 
+    // VARIABLE DECLARATIONS
     private int numColumns, numRows;
     private int cellWidth, cellHeight;
     private int frontStartPos, backStartPos, leftStartPos, rightStartPos;
@@ -29,7 +30,6 @@ public class PixelGridView extends View {
     private ArrayList<int[]> arrowImageCoords = new ArrayList<>();
     private boolean autoUpdate;
     private int[] curCoord = new int[2];
-//    private ArrayList<int[]> wayPoints = new ArrayList<int[]>();
     private int[] wayPoint;
     private boolean selectStartPosition = false, selectWayPoint = false;
     private Paint blackPaint = new Paint();
@@ -62,6 +62,7 @@ public class PixelGridView extends View {
 
     }
 
+    // Initialise Map
     public void initializeMap() {
         this.setNumColumns(15);
         this.setNumRows(20);
@@ -75,36 +76,44 @@ public class PixelGridView extends View {
 
     }
 
+    // Set obstacle
     public void setObstacle(int i, int j, boolean obstacle) {
         this.obstacles[i][j] = obstacle;
     }
 
+    // Set cell as Explored
     public void setCellExplored(int column, int row, boolean explored){
             this.cellExplored[column][row] = explored;
     }
 
+    // Get cell Explored
     public boolean[][] getCellExplored(){
         return this.cellExplored;
     }
 
+    // Set number of columns
     public void setNumColumns(int numColumns) {
         this.numColumns = numColumns;
         calculateDimensions();
     }
 
+    // Get number of columns
     public int getNumColumns() {
         return numColumns;
     }
 
+    // Set number of rows
     public void setNumRows(int numRows) {
         this.numRows = numRows;
         calculateDimensions();
     }
 
+    // Get number of rows
     public int getNumRows() {
         return numRows;
     }
 
+    // Set Start Position
     public void setStartPos(int frontStartPos, int leftStartPos, int backStartPos, int rightStartPos) {
         this.frontStartPos = frontStartPos;
         this.leftStartPos = leftStartPos;
@@ -116,6 +125,7 @@ public class PixelGridView extends View {
         this.rightCurPos = rightStartPos;
     }
 
+    // Set Start Point Coordinates
     public void setStartCoord(int row, int column) {
         this.startCoord[0] = column;
         this.startCoord[1] = row;
@@ -135,19 +145,22 @@ public class PixelGridView extends View {
 
     }
 
+    // Get Start Point coordinates
     public int[] getStartCoord() {
         return this.startCoord;
     }
 
-
+    // Get current position coordinates
     public int[] getCurCoord() {
         return this.curCoord;
     }
 
+    // Move current position coordinates
     public void moveCurCoord(int xInc, int yInc) {
         this.setCurPos(this.getCurCoord()[1] + yInc, this.getCurCoord()[0] + xInc);
     }
 
+    // Set Start Position
     public void setStartPos(int row, int column) {
         this.setStartCoord(row, column);
         int[] startEdges = convertRobotPosToEdge(row, column);
@@ -160,6 +173,7 @@ public class PixelGridView extends View {
         }
     }
 
+    // Get Start Position
     public int[] getStartPos() {
         int[] startPos = new int[4];
         startPos[0] = this.frontStartPos;
@@ -169,6 +183,7 @@ public class PixelGridView extends View {
         return startPos;
     }
 
+    // Set current position (integers)
     public void setCurPos(int row, int column) {
         int[] edges = convertRobotPosToEdge(row, column);
         this.frontCurPos = edges[0];
@@ -181,7 +196,7 @@ public class PixelGridView extends View {
         this.refreshMap(this.getAutoUpdate());
     }
 
-
+    // Set current position (integer array)
     public void setCurPos(int[] pos) {
         this.frontCurPos = pos[0];
         this.leftCurPos = pos[1];
@@ -191,6 +206,7 @@ public class PixelGridView extends View {
         this.refreshMap(this.getAutoUpdate());
     }
 
+    // Get current position
     public int[] getCurPos() {
         int[] pos = new int[4];
         pos[0] = this.frontCurPos;
@@ -201,24 +217,29 @@ public class PixelGridView extends View {
         return pos;
     }
 
+    // Set Auto update
     public void setAutoUpdate(boolean auto){
         this.autoUpdate = auto;
     }
 
+    // Get Auto update
     public boolean getAutoUpdate(){
         return this.autoUpdate;
     }
 
+    // Set Robot Direction
     public void setRobotDirection(int direction) {
         this.robotDirection = direction;
 
         this.refreshMap(this.getAutoUpdate());
     }
 
+    // Get Robot Direction
     public int getRobotDirection() {
         return this.robotDirection;
     }
 
+    // Set Arrow coordinates
     public void setArrowImageCoord() {
         int[] arrowImageCoord = new int[3];
         int[] robotPos = this.getCurCoord();
@@ -260,30 +281,17 @@ public class PixelGridView extends View {
         this.refreshMap(this.getAutoUpdate());
     }
 
+    // Get Arrow coordinates
     public ArrayList<int[]> getArrowImageCoords(){
         return this.arrowImageCoords;
     }
 
-    public int convertRobotDirectionForAlgo(int originalDir) {
-        // If getRobotDirection == DOWN
-        if (originalDir == 2)
-            return 3;
-
-        // If getRobotDirection == RIGHT
-        else if (originalDir == 3)
-            return 2;
-
-        else return originalDir;
-    }
-
-//    public ArrayList<int[]> getWayPoints() {
-//        return this.wayPoints;
-//    }
-
+    // Get Waypoint
     public int[] getWayPoint(){
         return this.wayPoint;
     }
 
+    // Get obstacle
     public boolean[][] getObstacles () {
         return this.obstacles;
     }
@@ -295,6 +303,7 @@ public class PixelGridView extends View {
         calculateDimensions();
     }
 
+    // Calculate dimensions
     private void calculateDimensions () {
         if (numColumns < 1 || numRows < 1) {
             return;
@@ -384,6 +393,7 @@ public class PixelGridView extends View {
         return true;
     }
 
+    // Set Waypoint
     public void setWayPoint ( int row, int column){
         int[] wayPoint = new int[2];
         wayPoint[0] = column;
@@ -392,6 +402,7 @@ public class PixelGridView extends View {
         this.wayPoint = wayPoint;
     }
 
+    // Check Start Point
     private boolean checkStartPoint ( int row, int column){
         if (row < 1 || row >= 19 || column < 1 || column >= 14) {
             return false;
@@ -399,6 +410,7 @@ public class PixelGridView extends View {
         return true;
     }
 
+    // Explored Map
     public void setExploredMapping (Canvas canvas, Paint exploredColor){
         boolean[][] exploredCell = this.getCellExplored();
 
@@ -422,6 +434,7 @@ public class PixelGridView extends View {
         }
     }
 
+    // Set Start Point Color
     public void setStartPointColor (Canvas canvas, Paint colorStart){
 
         int[] startPointEdges = this.getStartPos();
@@ -433,6 +446,8 @@ public class PixelGridView extends View {
             }
         }
     }
+
+    // Set End Point Color
     public void setEndPointColor (Canvas canvas,int row, int column, Paint colorEnd){
         int[] endPointEdges = convertRobotPosToEdge(row, column);
         for (int i = endPointEdges[1]; i <= endPointEdges[3]; i++) {
@@ -444,23 +459,8 @@ public class PixelGridView extends View {
         }
     }
 
+    // Set Waypoint Color
     private void setWayPointColor (Canvas canvas, Paint wayPointPaint){
-//        ArrayList<int[]> wayPoints = this.getWayPoints();
-//        ArrayList<int[]> wayPointsEdges = new ArrayList<int[]>();
-
-//        for (int i[] : wayPoints) {
-//            wayPointsEdges.add(convertTileToEdge(i[0], i[1]));
-//        }
-
-//        for (int i[] : wayPointsEdges) {
-//            for (int j = i[1]; j < i[3]; j++) {
-//                for (int k = i[0]; k < i[2]; k++) {
-//                    canvas.drawRect(j * cellWidth, k * cellHeight,
-//                            (j + 1) * cellWidth, (k + 1) * cellHeight,
-//                            wayPointPaint);
-//                }
-//            }
-//        }
 
         int[] wayPoint = this.getWayPoint();
         int[] wayPointEdges = this.convertTileToEdge(wayPoint[1], wayPoint[0]);
@@ -475,6 +475,7 @@ public class PixelGridView extends View {
 
     }
 
+    // Map Robot Position
     public void robotPosMapping (Canvas canvas,int[] pos, int robotDirection){
 
         for (int i = Math.min(pos[1], pos[3]); i <= Math.max(pos[1], pos[3]); i++) {
@@ -515,6 +516,8 @@ public class PixelGridView extends View {
                     bluePaint);
         }
     }
+
+    // Map obstacles
     public void obstacleMapping (Canvas canvas){
         boolean obstacle[][] = this.getObstacles();
         for (int i = 0; i < this.getNumColumns(); i++) {
@@ -528,6 +531,7 @@ public class PixelGridView extends View {
         }
     }
 
+    // Map Arrows
     public void arrowMapping (Canvas canvas){
         ArrayList<int[]> arrowImageCoords = this.getArrowImageCoords();
         if(arrowImageCoords.size() == 0) return;
@@ -572,6 +576,7 @@ public class PixelGridView extends View {
         }
     }
 
+    // Check if robot has reached wall
     public boolean checkReachedWall ( int[] pos, int direction){
 
             int[] boundaries = new int[4];
@@ -587,6 +592,8 @@ public class PixelGridView extends View {
             return false;
         }
 
+
+    // Move forward
     public void moveForward () {
         int[] pos = this.getCurPos();
         int[] prev = this.getCurPos();
@@ -625,6 +632,7 @@ public class PixelGridView extends View {
         return;
     }
 
+    // Turn Left
     public void rotateLeft () {
         int dir = this.getRobotDirection();
 
@@ -632,6 +640,7 @@ public class PixelGridView extends View {
         this.setRobotDirection(dir);
     }
 
+    // Turn Right
     public void rotateRight () {
         int dir = this.getRobotDirection();
 
@@ -639,6 +648,7 @@ public class PixelGridView extends View {
         this.setRobotDirection(dir);
     }
 
+    // Move backwards
     public void moveBackwards () {
         int[] pos = this.getCurPos();
         int dir = this.getRobotDirection();
@@ -671,6 +681,7 @@ public class PixelGridView extends View {
         this.exploredTile();
     }
 
+    // Check if robot reached obstacle
     public boolean checkReachedObstacle ( int[] pos, int dir){
         boolean[][] obstacle = this.getObstacles();
         if (dir == 0) {
@@ -699,12 +710,14 @@ public class PixelGridView extends View {
 
     }
 
+    // Select Waypoint
     public void selectWayPoint () {
         Log.d(TAG, "Setting Waypoint...");
         selectWayPoint = true;
 
     }
 
+    // Select Start Point
     public void selectStartPoint () {
         Log.d(TAG, "Setting Start Point...");
         selectStartPosition = true;
@@ -717,6 +730,7 @@ public class PixelGridView extends View {
         return (19 - rowNum);
     }
 
+    // Convert Robot Position to Edge
     public int[] convertRobotPosToEdge ( int row, int column){
         int rowFormatConvert = inverseRowCoord(row);
         int topEdge, leftEdge, bottomEdge, rightEdge;
@@ -732,6 +746,7 @@ public class PixelGridView extends View {
         return edges;
     }
 
+    // Convert tile to edge
     public int[] convertTileToEdge ( int row, int column){
         int rowFormatConvert = inverseRowCoord(row);
         int topEdge, leftEdge, bottomEdge, rightEdge;
@@ -754,7 +769,7 @@ public class PixelGridView extends View {
         }
     }
 
-    // Check whether the tile has been explored or not
+    // Check whether the tile has been explored
     public void exploredTile (){
         for (int i = this.getCurCoord()[1] - 1; i <= this.getCurCoord()[1] + 1; i++){
             for (int j = this.getCurCoord()[0] - 1; j <= this.getCurCoord()[0] + 1; j++){
@@ -764,12 +779,10 @@ public class PixelGridView extends View {
         this.refreshMap(this.getAutoUpdate());
     }
 
-    // to be done
+    // Part 1 of Map Descriptor
     public void mapDescriptorExplored (String hexMap) {
         BigInteger hexBigInteger = new BigInteger(hexMap, 16);
         String binMap = hexBigInteger.toString(2);
-//        String binMapWithLeadingZeros = String.format("%304s", binMap).replace(" ", "0");
-        //        String binMap = Integer.toBinaryString(parseHex);
         String binMapExtracted = binMap.substring(2,302);
         char cur;
         Integer[] binMapArray = new Integer[binMapExtracted.length()];
@@ -792,16 +805,12 @@ public class PixelGridView extends View {
         this.refreshMap(this.getAutoUpdate());
     }
 
-    // to be done
+    // Part 2 of Map Descriptor
     public void mapDescriptorObstacle(String hexMap){
 
         String hexMapTemp = "1".concat(hexMap);
         BigInteger hexBigInteger = new BigInteger(hexMapTemp, 16);
         String binMap = hexBigInteger.toString(2);
-//        String binMapTemp = "1".concat(binMap);
-//        String binMapWithLeadingZeros = String.format("%304s", binMap).replace(" ", "0");
-//        String binMap = Integer.toBinaryString(parseHex);
-//        String binMapExtracted = binMap.substring(2,302);
         char cur;
         int length = binMap.length();
         Integer[] binMapArray = new Integer[binMap.length() - 1];
@@ -826,12 +835,11 @@ public class PixelGridView extends View {
         this.refreshMap(this.getAutoUpdate());
     }
 
+    // Map Descriptor for Checklist only
     public void mapDescriptorChecklist(String hexMap){
-//        char[] hexMapChar = hexMap.toCharArray();
         BigInteger hexBigInteger = new BigInteger(hexMap, 16);
         String binMap = hexBigInteger.toString(2);
         String binMapWithLeadingZeros = String.format("%300s", binMap).replace(" ", "0");
-        //        String binMap = Integer.toBinaryString(parseHex);
         char cur;
         Integer[] binMapArray = new Integer[binMapWithLeadingZeros.length()];
         for (int i = 0; i < binMapWithLeadingZeros.length(); i++){

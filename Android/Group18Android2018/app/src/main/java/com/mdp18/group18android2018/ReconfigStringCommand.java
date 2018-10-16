@@ -28,11 +28,12 @@ public class ReconfigStringCommand extends AppCompatActivity{
 
     private static final String TAG = "ReconfigStringCommand";
 
+    // Variable declaration
     Button btn_save, btn_reset, btn_retrieve, btn_f1, btn_f2;
     EditText et_f1, et_f2;
-
     SharedPreferences myPrefs;
 
+    // Strings declaration
     public static final String mypreference="mypref";
     public static final String F1="f1";
     public static final String F2="f2";
@@ -42,7 +43,6 @@ public class ReconfigStringCommand extends AppCompatActivity{
     BluetoothDevice myBTConnectionDevice;
     static String connectedDevice;
     boolean connectedState;
-    TextView connectionStatusBox;
     boolean currentActivity;
 
     @Override
@@ -51,15 +51,17 @@ public class ReconfigStringCommand extends AppCompatActivity{
         setTitle("Reconfigurable String Commands");
         setContentView(R.layout.activity_reconfig);
 
-        //REGISTER BROADCAST RECEIVER FOR IMCOMING MSG
+        //Register Broadcast Receiver for incoming bluetooth message
         LocalBroadcastManager.getInstance(this).registerReceiver(btConnectionReceiver, new IntentFilter("btConnectionStatus"));
 
+        // GUI Buttons
         btn_save = (Button) findViewById(R.id.btn_save);
         btn_reset = (Button) findViewById(R.id.btn_reset);
         btn_retrieve = (Button) findViewById(R.id.btn_retrieve);
         btn_f1 = (Button) findViewById(R.id.btn_f1);
         btn_f2 = (Button) findViewById(R.id.btn_f2);
 
+        // Use Shared Preferences to save string commands
         myPrefs=getSharedPreferences(mypreference, Context.MODE_PRIVATE);
 
         init();
@@ -68,11 +70,13 @@ public class ReconfigStringCommand extends AppCompatActivity{
 
     }
 
+    // On initialisation
     private void init() {
         et_f1 = (EditText) findViewById(R.id.et_f1);
         et_f2 = (EditText) findViewById(R.id.et_f2);
     }
 
+    // Save string commands using Shared Preferences Editor
     public void Save(View view) {
         SharedPreferences.Editor editor = myPrefs.edit();
         editor.putString(F1, et_f1.getText().toString());
@@ -82,6 +86,7 @@ public class ReconfigStringCommand extends AppCompatActivity{
         Toast.makeText(this, "Commands saved!", Toast.LENGTH_SHORT).show();
     }
 
+    // Reset saved string commands using Shared Preferences Editor
     public void Reset(View view) {
         SharedPreferences.Editor editor = myPrefs.edit();
         et_f1.setText("");
@@ -92,6 +97,7 @@ public class ReconfigStringCommand extends AppCompatActivity{
         Toast.makeText(this, "Commands reset!", Toast.LENGTH_SHORT).show();
     }
 
+    // Retrieve and display previously saved string commands using Shared Preferences
     public void Retrieve (View view) {
         String str_f1 = myPrefs.getString(F1, "");
         et_f1.setText(str_f1);
@@ -105,6 +111,7 @@ public class ReconfigStringCommand extends AppCompatActivity{
         }
     }
 
+    // Outgoing message for string command F1
     public void onClickF1(){
 
         btn_f1.setOnClickListener(new View.OnClickListener() {
@@ -123,6 +130,7 @@ public class ReconfigStringCommand extends AppCompatActivity{
 
     }
 
+    // Outgoing message for string command F2
     public void onClickF2() {
 
         btn_f2.setOnClickListener(new View.OnClickListener() {
@@ -140,6 +148,9 @@ public class ReconfigStringCommand extends AppCompatActivity{
         });
 
     }
+
+
+    /* MENU FOR RECONFIGURABLE STRING COMMANDS*/
 
     @Override
     public boolean onCreateOptionsMenu (Menu menu) {
@@ -165,6 +176,7 @@ public class ReconfigStringCommand extends AppCompatActivity{
 
     }
 
+    // Return to main screen after back button is selected.
     @Override
     public void onBackPressed() {
         Intent intent = new Intent(ReconfigStringCommand.this, MainActivity.class);
@@ -173,7 +185,7 @@ public class ReconfigStringCommand extends AppCompatActivity{
     }
 
 
-    //BROADCAST RECEIVER FOR BLUETOOTH CONNECTION STATUS
+    //Broadcast Receiver for Bluetooth Connection Status (Robust BT Connection)
     BroadcastReceiver btConnectionReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -183,23 +195,22 @@ public class ReconfigStringCommand extends AppCompatActivity{
             String connectionStatus = intent.getStringExtra("ConnectionStatus");
             myBTConnectionDevice = intent.getParcelableExtra("Device");
 
-            //DISCONNECTED FROM BLUETOOTH CHAT
+            // IF disconnected from Bluetooth
             if(connectionStatus.equals("disconnect")){
 
                 Log.d("ConnectAcitvity:","Device Disconnected");
 
                 //Stop Bluetooth Connection Service
-                //stopService(connectIntent);
 
-                //RECONNECT DIALOG MSG
+                // Reconnect Bluetooth
                 AlertDialog alertDialog = new AlertDialog.Builder(ReconfigStringCommand.this).create();
                 alertDialog.setTitle("BLUETOOTH DISCONNECTED");
                 alertDialog.setMessage("Connection with device: '"+myBTConnectionDevice.getName()+"' has ended. Do you want to reconnect?");
                 alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "Yes",
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int which) {
-                                //startBTConnection(myBTConnectionDevice, myUUID);
-                                //START BT CONNECTION SERVICE
+
+                                // Start Bluetooth Connection Service
                                 Intent connectIntent = new Intent(ReconfigStringCommand.this, BluetoothConnectionService.class);
                                 connectIntent.putExtra("serviceType", "connect");
                                 connectIntent.putExtra("device", myBTConnectionDevice);
@@ -215,12 +226,12 @@ public class ReconfigStringCommand extends AppCompatActivity{
                             }
                         });
 
-                if(!isFinishing()){ //here activity means your activity class
+                if(!isFinishing()){
                     alertDialog.show();
                 }
             }
 
-            //SUCCESSFULLY CONNECTED TO BLUETOOTH DEVICE
+            // Connected to Bluetooth
             else if(connectionStatus.equals("connect")){
 
 
@@ -229,7 +240,7 @@ public class ReconfigStringCommand extends AppCompatActivity{
                         Toast.LENGTH_LONG).show();
             }
 
-            //BLUETOOTH CONNECTION FAILED
+            // Connection to Bluetooth failed
             else if(connectionStatus.equals("connectionFail")) {
                 Toast.makeText(ReconfigStringCommand.this, "Connection Failed: "+ myBTConnectionDevice.getName(),
                         Toast.LENGTH_LONG).show();

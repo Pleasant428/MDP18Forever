@@ -17,17 +17,18 @@ import java.nio.charset.Charset;
 public class BluetoothChat extends Thread {
 
     private static final String TAG = "BluetoothChat";
-    // private ConnectedThread myConnectedThread;
-    private static Context myContext;
 
+
+    // VARIABLE DECLARATIONS
+    private static Context myContext;
     private static BluetoothSocket mySocket;
     private static InputStream myInputStream;
     private static OutputStream myOutPutStream;
     private static BluetoothDevice myBluetoothConnectionDevice;
 
     /*
-           RESPONSIBLE FOR MAINTAINING THE BLUETOOTH CONNECTION, SENDING THE
-           DATA, AND RECEIVING INCOMING DATA THROUGH INPUT/OUTPUT STREAMS RESPECTIVELY
+           To maintain the bluetooth connection, sending the data, and receiving incoming messages
+           through input/output streams.
    */
 
 
@@ -35,6 +36,7 @@ public class BluetoothChat extends Thread {
         return myBluetoothConnectionDevice;
     }
 
+    // Start Bluetooth Chat
     public static void startChat(BluetoothSocket socket) {
 
         Log.d(TAG, "ConnectedThread: Starting");
@@ -68,7 +70,7 @@ public class BluetoothChat extends Thread {
                 Log.d(TAG, "InputStream: " + incomingMessage);
 
 
-                //BROADCAST INCOMING MSG
+                // Broadcast Incoming Message
                 Intent incomingMsgIntent = new Intent("IncomingMsg");
                 incomingMsgIntent.putExtra("receivingMsg", incomingMessage);
                 LocalBroadcastManager.getInstance(myContext).sendBroadcast(incomingMsgIntent);
@@ -76,7 +78,7 @@ public class BluetoothChat extends Thread {
 
             } catch (IOException e) {
 
-                //BROADCAST CONNECTION MSG
+                // Broadcast Connection Message
                 Intent connectionStatusIntent = new Intent("btConnectionStatus");
                 connectionStatusIntent.putExtra("ConnectionStatus", "disconnect");
                 connectionStatusIntent.putExtra("Device",myBluetoothConnectionDevice);
@@ -96,7 +98,7 @@ public class BluetoothChat extends Thread {
     }
 
     /*
-    //CALL THIS FROM MAIN ACTIVITY TO SEND DATA TO REMOTE DEVICE (ROBOT)//
+        To write outgoing bluetooth messages
     */
     public static void write(byte[] bytes) {
 
@@ -111,7 +113,7 @@ public class BluetoothChat extends Thread {
     }
 
 
-    //CALL THIS TO SHUTDOWN CONNECTION
+    // To shut down bluetooth connection
     public void cancel() {
         try {
             mySocket.close();
@@ -122,7 +124,7 @@ public class BluetoothChat extends Thread {
 
 
 
-    //METHOD TO START CHAT SERVICE
+    // To start Chat Service
      static void connected(BluetoothSocket mySocket, BluetoothDevice myDevice, Context context) {
         Log.d(TAG, "Connected: Starting");
 
@@ -136,16 +138,11 @@ public class BluetoothChat extends Thread {
     }
 
     /*
-    //WRITE TO CONNECTEDTHREAD IN AN UNSYNCHRONIZED MANNER
+        Write to ConnectedThread in an unsynchronised manner
     */
     public static void writeMsg(byte[] out) {
 
-        // Create temporary object
-        // ConnectedThread temp;
-
-        // Synchronize a copy of the Connected
         Log.d(TAG, "write: Write Called.");
-        //perform the write
         write(out);
 
     }

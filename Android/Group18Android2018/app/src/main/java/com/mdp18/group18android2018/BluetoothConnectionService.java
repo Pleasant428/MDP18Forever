@@ -22,18 +22,14 @@ public class BluetoothConnectionService extends IntentService {
     private static final String TAG = "BTConnectionAService";
     private static final String appName = "Group 18 Remote Controller";
 
-    //UUID
+    // UUID
     private static final UUID myUUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
 
     private BluetoothAdapter myBluetoothAdapter;
-
     private AcceptThread myAcceptThread;
     private ConnectThread myConnectThread;
-
     public  BluetoothDevice myDevice;
     private UUID deviceUUID;
-    private Handler mHandler;
-    ProgressDialog myProgressDialog;
     Context myContext;
 
 
