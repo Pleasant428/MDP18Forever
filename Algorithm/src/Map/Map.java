@@ -144,6 +144,24 @@ public class Map {
 	public void resetMap() {
 		initMap();
 	}
+	
+	// Reinit virtual walls around obstacle
+	public void reinitVirtualWall() {
+		for (int row = 0; row < MapConstants.MAP_HEIGHT; row++) {
+			for (int col = 0; col < MapConstants.MAP_WIDTH; col++) {
+				// Init Virtual wall
+				if (row == 0 || col == 0 || row == MapConstants.MAP_HEIGHT - 1 || col == MapConstants.MAP_WIDTH - 1) {
+					grid[row][col].setVirtualWall(true);
+				}
+				if (grid[row][col].isObstacle()) {
+					for (int r = row - 1; r <= row + 1; r++)
+						for (int c = col - 1; c <= col + 1; c++)
+							if (checkValidCell(r, c))
+								grid[row][col].setVirtualWall(true);
+				}
+			}
+		}
+	}
 
 	// Returns the Percentage Explored
 	public double exploredPercentage() {

@@ -315,8 +315,11 @@ public class Simulator extends Application {
 			public void handle(KeyEvent e) {
 				sim = false;
 				robot.setSim(sim);
+				System.out.println("System movement");
 				if (!netMgr.isConnected()) {
 					netMgr.startConn();
+					netMgr.send("Alg|Ard|S|0");
+					robot.sense(exploredMap, map);
 				}
 				switch (e.getCode()) {
 				case W:
@@ -338,7 +341,6 @@ public class Simulator extends Application {
 				default:
 					break;
 				}
-				robot.sense(exploredMap, map);
 				System.out.println("Robot Direction AFTER:" + robot.getDirection());
 			}
 		});
@@ -666,14 +668,19 @@ public class Simulator extends Application {
 				do {
 					msg = netMgr.receive();
 					String[] msgArr = msg.split("\\|");
-					c = Command.values()[Integer.parseInt(msgArr[2])];
-					if (msgArr[2].compareToIgnoreCase("Calibrate") == 0) {
+					System.out.println("Calibrating: "+msgArr[2]);
+					c = Command.ERROR;
+					if (msgArr[2].compareToIgnoreCase("C") == 0) {
+						System.out.println("Calibrating");
 						for (int i = 0; i < 4; i++) {
 							robot.move(Command.TURN_RIGHT, RobotConstants.MOVE_STEPS, exploredMap);
 							senseAndAlign();
 						}
 						netMgr.send("Alg|Ard|"+Command.ALIGN_RIGHT.ordinal()+"|0");
 						msg = netMgr.receive();
+						System.out.println("Done Calibrating");
+					}else {
+						c = Command.values()[Integer.parseInt(msgArr[2])];
 					}
 					
 					if (c == Command.ROBOT_POS) {
@@ -706,7 +713,6 @@ public class Simulator extends Application {
 					}
 					else if (c == Command.START_EXP) {
 						netMgr.send("Alg|Ard|S|0");
-
 					}
 				} while (c != Command.START_EXP);
 			}
@@ -754,7 +760,6 @@ public class Simulator extends Application {
 	//
 	public void senseAndAlign() {
 		String msg = null;
-		int frontCalSense =0;
 		double [][] sensorData = new double[6][2];
 		msg = NetMgr.getInstance().receive();
 		String[] msgArr = msg.split("\\|");
@@ -766,13 +771,9 @@ public class Simulator extends Application {
 			sensorData[i][0] = Double.parseDouble(arrSensorStr[1]);
 			sensorData[i][1] = Double.parseDouble(arrSensorStr[2]);
 		}
-		//Check if can frontcal
-		for(int i=0; i<3;i++) {
-			if(sensorData[i][1]==1)
-				frontCalSense++;
-		}
+		
 		//Discrepancy detected among the sensor data received
-		if(frontCalSense>1) {
+		if(sensorData[0][1]==1 && sensorData[2][1]==1) {
 			netMgr.send("Alg|Ard|"+Command.ALIGN_FRONT.ordinal()+"|1");
 			netMgr.receive();
 		}
