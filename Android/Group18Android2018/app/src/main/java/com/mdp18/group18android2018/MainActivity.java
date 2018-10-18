@@ -11,6 +11,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.os.AsyncTask;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -390,7 +391,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         public void onReceive(Context context, Intent intent) {
 
             String incomingMsg = intent.getStringExtra("receivingMsg");
-
             Log.d(TAG, "Receiving incoming message: " + incomingMsg);
             tv_mystringcmd.append(incomingMsg + "\n");
 
@@ -630,45 +630,45 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 // The following is for clearing checklist commands only.
 
                 // For receiving AMD robotPosition and grid
-                if (incomingMsg.substring(0, 1).equals("{")) {
-                    Log.d(TAG, "Incoming Message from AMD: " + incomingMsg);
-                    String[] filteredMsg = msgDelimiter(incomingMsg.replaceAll(" ", "").replaceAll(",", "\\|").replaceAll("\\{", "").replaceAll("\\}", "").replaceAll("\\:", "\\|").replaceAll("\"", "").replaceAll("\\[", "").replaceAll("\\]", "").trim(), "\\|");
-                    Log.d(TAG, "filteredMsg: " + filteredMsg);
-
-                    // AMD Robot Position
-                    if (filteredMsg[0].equals("robotposition")) {
-                        int robotPosCol = Integer.parseInt(filteredMsg[1]) + 1;
-                        int robotPosRow = 19 - (Integer.parseInt(filteredMsg[2]) + 1);
-                        int robotPosDeg = Integer.parseInt(filteredMsg[3]);
-                        int robotPosDir = 0;
-                        // Up
-                        if (robotPosDeg == 0)
-                            robotPosDir = 0;
-                        //Right
-                        else if (robotPosDeg == 90)
-                            robotPosDir = 3;
-                        //Down
-                        else if (robotPosDeg == 180)
-                            robotPosDir = 2;
-                        // Left
-                        else if (robotPosDeg == 270)
-                            robotPosDir = 1;
-                        // For setting robot start position from AMD
-                        mPGV.setCurPos(robotPosRow, robotPosCol);
-                        mPGV.setRobotDirection(robotPosDir);
-                    }
-
-                    // AMD Map Descriptor
-                    else if (filteredMsg[0].equals("grid")) {
-                        String mdAMD = filteredMsg[1];
-                        mPGV.mapDescriptorChecklist(mdAMD);
-                        mPGV.refreshMap(mPGV.getAutoUpdate());
-                        Log.d(TAG, "mdAMD: " + mdAMD);
-
-                        // For setting up map from received AMD MDF String, use mdAMD
-                        Log.d(TAG, "Processing mdAMD...");
-                    }
-                }
+//                if (incomingMsg.substring(0, 1).equals("{")) {
+//                    Log.d(TAG, "Incoming Message from AMD: " + incomingMsg);
+//                    String[] filteredMsg = msgDelimiter(incomingMsg.replaceAll(" ", "").replaceAll(",", "\\|").replaceAll("\\{", "").replaceAll("\\}", "").replaceAll("\\:", "\\|").replaceAll("\"", "").replaceAll("\\[", "").replaceAll("\\]", "").trim(), "\\|");
+//                    Log.d(TAG, "filteredMsg: " + filteredMsg);
+//
+//                    // AMD Robot Position
+//                    if (filteredMsg[0].equals("robotposition")) {
+//                        int robotPosCol = Integer.parseInt(filteredMsg[1]) + 1;
+//                        int robotPosRow = 19 - (Integer.parseInt(filteredMsg[2]) + 1);
+//                        int robotPosDeg = Integer.parseInt(filteredMsg[3]);
+//                        int robotPosDir = 0;
+//                        // Up
+//                        if (robotPosDeg == 0)
+//                            robotPosDir = 0;
+//                        //Right
+//                        else if (robotPosDeg == 90)
+//                            robotPosDir = 3;
+//                        //Down
+//                        else if (robotPosDeg == 180)
+//                            robotPosDir = 2;
+//                        // Left
+//                        else if (robotPosDeg == 270)
+//                            robotPosDir = 1;
+//                        // For setting robot start position from AMD
+//                        mPGV.setCurPos(robotPosRow, robotPosCol);
+//                        mPGV.setRobotDirection(robotPosDir);
+//                    }
+//
+//                    // AMD Map Descriptor
+//                    else if (filteredMsg[0].equals("grid")) {
+//                        String mdAMD = filteredMsg[1];
+//                        mPGV.mapDescriptorChecklist(mdAMD);
+//                        mPGV.refreshMap(mPGV.getAutoUpdate());
+//                        Log.d(TAG, "mdAMD: " + mdAMD);
+//
+//                        // For setting up map from received AMD MDF String, use mdAMD
+//                        Log.d(TAG, "Processing mdAMD...");
+//                    }
+//                }
             }
 
         }
