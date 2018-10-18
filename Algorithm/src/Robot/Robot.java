@@ -195,6 +195,9 @@ public class Robot {
 		if(exploredMap.checkValidMove(pos.y+rowInc*steps, pos.x+ colInc*steps))
 		{
 			setPosition(pos.x+ colInc*steps, pos.y+rowInc*steps);
+			for(int i=0; i<steps; i++) {
+				exploredMap.passThru(pos.y-rowInc*i, pos.x-colInc*i);
+			}
 		}
 	}
 	
@@ -301,44 +304,43 @@ public class Robot {
 				colInc = 0;
 				break;
 			}
-			
-			int existingObsBlock = -1;
-			
-			// Check Map for existing obstacle location
-			for (int j = sensorList.get(i).getMinRange(); j <= sensorList.get(i).getMaxRange(); j++) {
-				if (exploredMap.checkValidCell(sensorList.get(i).getRow() + rowInc * j, sensorList.get(i).getCol() + colInc * j) && exploredMap.getCell(sensorList.get(i).getRow() + rowInc * j, sensorList.get(i).getCol() + colInc * j).isExplored()) {
-					existingObsBlock = 0;
-					if(exploredMap.getCell(sensorList.get(i).getRow() + rowInc * j, sensorList.get(i).getCol() + colInc * j).isObstacle())
-						existingObsBlock = j;
+			if(!sim) {
+				int existingObsBlock = -1;
+				// Check Map for existing obstacle location
+				for (int j = sensorList.get(i).getMinRange(); j <= sensorList.get(i).getMaxRange(); j++) {
+					if (exploredMap.checkValidCell(sensorList.get(i).getRow() + rowInc * j, sensorList.get(i).getCol() + colInc * j) && !exploredMap.getCell(sensorList.get(i).getRow() + rowInc * j, sensorList.get(i).getCol() + colInc * j).isExplored()) {
+						existingObsBlock = 0;
+						if(exploredMap.getCell(sensorList.get(i).getRow() + rowInc * j, sensorList.get(i).getCol() + colInc * j).isObstacle())
+							existingObsBlock = j;
+							break;
+					}
+					else
 						break;
 				}
-				else
-					break;
-			}
-			
-			System.out.println(sensorList.get(i).getId()+" exisiting:"+existingObsBlock+" obsBlock:"+obsBlock);
-			//Discrepancy between explored map and sensor reading request sensor reading again
-			if(existingObsBlock != -1 && existingObsBlock != obsBlock && obsBlock != 9 && existingObsBlock != 0)
-			{
-				System.out.println("Possible Phantom block conflict with existing block---------------------------------");
-				System.out.println("SenseCount: "+senseCount);
-				//Second Reading reset existing block
-				if(senseCount>1) {
-					senseCount = 0;
-					System.out.println("Discarding existing block");
-					exploredMap.getCell(sensorList.get(i).getRow() + rowInc * existingObsBlock, sensorList.get(i).getCol() + colInc * existingObsBlock).setObstacle(false);
+				
+				System.out.println(sensorList.get(i).getId()+" exisiting:"+existingObsBlock+" obsBlock:"+obsBlock);
+				//Discrepancy between explored map and sensor reading request sensor reading again
+				if(existingObsBlock != -1 && existingObsBlock != obsBlock && obsBlock != 9 && existingObsBlock != 0)
+				{
+					System.out.println("Possible Phantom block conflict with existing block---------------------------------");
+					System.out.println("SenseCount: "+senseCount);
+					//Second Reading reset existing block
+					if(senseCount>1) {
+						senseCount = 0;
+						System.out.println("Discarding existing block");
+						exploredMap.getCell(sensorList.get(i).getRow() + rowInc * existingObsBlock, sensorList.get(i).getCol() + colInc * existingObsBlock).setObstacle(false);
+					}
+					else {
+						System.out.println("Error Possible Phantom Block Detected! Resensing");
+						NetMgr.getInstance().send("Alg|Ard|S|0");
+						senseCount++;
+						sense(exploredMap, map);
+						return;
+					}
 				}
-				else {
-					System.out.println("Error Possible Phantom Block Detected! Resensing");
-					NetMgr.getInstance().send("Alg|Ard|S|0");
-					senseCount++;
-					sense(exploredMap, map);
-					return;
-				}
+				sensorList.get(i).setPrevData(obsBlock);
+				sensorList.get(i).setPrevRawData(sensorData[i][0]);
 			}
-			sensorList.get(i).setPrevData(obsBlock);
-			sensorList.get(i).setPrevRawData(sensorData[i][0]);
-
 			// Discover each of the blocks infront of the sensor if possible
 			for (int j = sensorList.get(i).getMinRange(); j <= sensorList.get(i).getMaxRange(); j++) {
 
@@ -346,7 +348,7 @@ public class Robot {
 				if (exploredMap.checkValidCell(sensorList.get(i).getRow() + rowInc * j, sensorList.get(i).getCol() + colInc * j)) {
 					// Change the cell to explored first
 					exploredMap.getCell(sensorList.get(i).getRow() + rowInc * j, sensorList.get(i).getCol() + colInc * j).setExplored(true);
-					if (j == obsBlock) {
+					if (j == obsBlock && !exploredMap.getCell(sensorList.get(i).getRow() + rowInc * j, sensorList.get(i).getCol() + colInc * j).isMoveThru()) {
 						exploredMap.getCell(sensorList.get(i).getRow() + rowInc * j, sensorList.get(i).getCol() + colInc * j).setExplored(true);
 						exploredMap.getCell(sensorList.get(i).getRow() + rowInc * j,
 								sensorList.get(i).getCol() + colInc * j).setObstacle(true);
@@ -417,11 +419,13 @@ public class Robot {
 			//if(!rightDistAlign && Math.abs(curRightAvg-prevRightAvg) >= RobotConstants.RIGHT_DIS_THRES && sensorData[3][1]==1 && sensorData[4][1]==1){
 			boolean distAlign = true;
 			for(int i=3;i<5;i++)
-				if(sensorData[3][0] < RobotConstants.RIGHT_DIS_THRES_CLOSE || sensorData[3][0] > RobotConstants.RIGHT_DIS_THRES_FAR)
+				if((sensorData[i][0] < RobotConstants.RIGHT_DIS_THRES_CLOSE || sensorData[i][0] > RobotConstants.RIGHT_DIS_THRES_FAR)&& sensorData[i][1] == 1)
 					distAlign = false;
 			
-				
-			if(!rightDistAlign && !distAlign && sensorData[3][1]==1 && sensorData[4][1]==1) {	
+			System.out.println("distAlign "+!distAlign);
+			System.out.println("rightDistAlign "+!rightDistAlign);
+			System.out.println("R1 or R2 "+(sensorData[3][1]==1 || sensorData[4][1]==1));
+			if(!rightDistAlign && !distAlign && (sensorData[3][1]==1 || sensorData[4][1]==1)) {	
 				System.out.println("Right Distance Alignment-------------------------------");
 				NetMgr.getInstance().send("Alg|And|"+Command.ALIGN_FRONT+"|1");
 				NetMgr.getInstance().send("Alg|Ard|"+Command.TURN_RIGHT.ordinal()+"|1");
@@ -429,8 +433,12 @@ public class Robot {
 				NetMgr.getInstance().send("Alg|Ard|"+Command.ALIGN_FRONT.ordinal()+"|1");
 				msg = NetMgr.getInstance().receive();
 				NetMgr.getInstance().send("Alg|Ard|"+Command.TURN_LEFT.ordinal()+"|1");
-				msg = NetMgr.getInstance().receive();
-				NetMgr.getInstance().send("Alg|Ard|"+Command.ALIGN_RIGHT.ordinal()+"|1");
+				
+				if(sensorData[3][1]==1 && sensorData[4][1]==1)
+				{
+					msg = NetMgr.getInstance().receive();
+					NetMgr.getInstance().send("Alg|Ard|"+Command.ALIGN_RIGHT.ordinal()+"|1");
+				}
 				rightDistAlign = true;
 				sense(exploredMap, map);
 				
@@ -460,9 +468,18 @@ public class Robot {
 						}
 					}
 				}
+				boolean cal = false;
+				for(int i=0; i<3; i++) {
+					if(sensorData[i][1]==1 && (sensorData[i][0] < RobotConstants.RIGHT_DIS_THRES_CLOSE || sensorData[i][0] > RobotConstants.RIGHT_DIS_THRES_FAR))
+					{
+						cal = true;
+						break;
+					}
+					
+				}
 				
 				//Discrepancy detected among the sensor data recieved
-				if(sensorData[0][1]==1 && sensorData[2][1]==1) {
+				if(cal) {
 					NetMgr.getInstance().send("Alg|Ard|"+Command.ALIGN_FRONT.ordinal()+"|1");
 					NetMgr.getInstance().send("Alg|And|"+Command.ALIGN_FRONT.ordinal()+"|1");
 					NetMgr.getInstance().receive();

@@ -145,6 +145,15 @@ public class Map {
 		initMap();
 	}
 	
+	//Set the area under the robot as passed thru
+	public void passThru(int row,int col) {
+		for(int r= row-1; r<=row+1; r++) {
+			for(int c= col-1; c<=col+1; c++) {
+				grid[r][c].setMoveThru(true);
+			}
+		}
+	}
+	
 	// Reinit virtual walls around obstacle
 	public void reinitVirtualWall() {
 		for (int row = 0; row < MapConstants.MAP_HEIGHT; row++) {
@@ -232,6 +241,8 @@ public class Map {
 					if (explored) {
 						if (grid[row][col].isObstacle())
 							gc.setFill(MapConstants.OB_COLOR);
+						else if(grid[row][col].isMoveThru())
+							gc.setFill(MapConstants.THRU_COLOR);
 						else if (grid[row][col].isExplored())
 							gc.setFill(MapConstants.EX_COLOR);
 						else

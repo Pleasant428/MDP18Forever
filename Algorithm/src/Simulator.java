@@ -606,9 +606,12 @@ public class Simulator extends Application {
 				netMgr.startConn();
 				sim = false;
 				robot.setSim(false);
-				expTask = new Thread(new ExplorationNoAndTask());
-				expTask.start();
-				break;
+				System.out.println("SF Here");
+				exploredMap.removePaths();
+				exploredMap.draw(true);
+				robot.draw();
+				fastTask = new Thread(new FastTask());
+				fastTask.start();
 
 			case REAL_EXP:
 				netMgr.startConn();
@@ -668,7 +671,7 @@ public class Simulator extends Application {
 				do {
 					msg = netMgr.receive();
 					String[] msgArr = msg.split("\\|");
-					System.out.println("Calibrating: "+msgArr[2]);
+					System.out.println("Calibrating: " + msgArr[2]);
 					c = Command.ERROR;
 					if (msgArr[2].compareToIgnoreCase("C") == 0) {
 						System.out.println("Calibrating");
@@ -676,13 +679,13 @@ public class Simulator extends Application {
 							robot.move(Command.TURN_RIGHT, RobotConstants.MOVE_STEPS, exploredMap);
 							senseAndAlign();
 						}
-						netMgr.send("Alg|Ard|"+Command.ALIGN_RIGHT.ordinal()+"|0");
+						netMgr.send("Alg|Ard|" + Command.ALIGN_RIGHT.ordinal() + "|0");
 						msg = netMgr.receive();
 						System.out.println("Done Calibrating");
-					}else {
+					} else {
 						c = Command.values()[Integer.parseInt(msgArr[2])];
 					}
-					
+
 					if (c == Command.ROBOT_POS) {
 						String[] data = msgArr[3].split("\\,");
 						int col = Integer.parseInt(data[0]);
@@ -710,8 +713,7 @@ public class Simulator extends Application {
 						exploredMap.setWayPoint(wayPoint);
 						exploredMap.draw(true);
 						robot.draw();
-					}
-					else if (c == Command.START_EXP) {
+					} else if (c == Command.START_EXP) {
 						netMgr.send("Alg|Ard|S|0");
 					}
 				} while (c != Command.START_EXP);
@@ -737,30 +739,30 @@ public class Simulator extends Application {
 			if (!sim) {
 				netMgr.send("Alg|And|" + Command.ENDEXP + "|");
 				Command com = null;
-				do{
-					String [] msgArr = NetMgr.getInstance().receive().split("\\|");
+				do {
+					String[] msgArr = NetMgr.getInstance().receive().split("\\|");
 					com = Command.values()[Integer.parseInt(msgArr[2])];
-					if(com == Command.START_FAST)
-					{
+					System.out.println("Fastest path msg :" + msgArr[2]);
+					if (com == Command.START_FAST) {
 						sim = false;
 						System.out.println("RF Here");
 						exploredMap.draw(true);
 						robot.draw();
 						fastTask = new Thread(new FastTask());
 						fastTask.start();
-						NetMgr.getInstance().send("Alg|And|"+RobotConstants.Command.ENDFAST);
 						break;
 					}
-				}while(com != Command.START_FAST);
+				} while (com != Command.START_FAST);
 			}
-			
+
 			return 1;
 		}
 	}
-	//
+
+	//Normal
 	public void senseAndAlign() {
 		String msg = null;
-		double [][] sensorData = new double[6][2];
+		double[][] sensorData = new double[6][2];
 		msg = NetMgr.getInstance().receive();
 		String[] msgArr = msg.split("\\|");
 		String[] strSensor = msgArr[3].split("\\,");
@@ -771,55 +773,25 @@ public class Simulator extends Application {
 			sensorData[i][0] = Double.parseDouble(arrSensorStr[1]);
 			sensorData[i][1] = Double.parseDouble(arrSensorStr[2]);
 		}
-		
-		//Discrepancy detected among the sensor data received
-		if(sensorData[0][1]==1 && sensorData[2][1]==1) {
-			netMgr.send("Alg|Ard|"+Command.ALIGN_FRONT.ordinal()+"|1");
+
+		// Discrepancy detected among the sensor data received
+		if (sensorData[0][1] == 1 || sensorData[2][1] == 1) {
+			netMgr.send("Alg|Ard|" + Command.ALIGN_FRONT.ordinal() + "|1");
 			netMgr.receive();
 		}
 	}
 	
-	class ExplorationNoAndTask extends Task<Integer> {
-		@Override
-		protected Integer call() throws Exception {
-			
-			netMgr.send("Alg|Ard|S|0");
-			robot.sense(exploredMap, map);
-			exploredMap.draw(true);
-			robot.draw();
-			System.out.println("coverage: " + coverageLimitSB.getValue());
-			System.out.println("time: " + timeLimitSB.getValue());
-			double coverageLimit = (int) (coverageLimitSB.getValue());
-			int timeLimit = (int) (timeLimitSB.getValue() * 1000);
-			int steps = (int) (stepsSB.getValue());
-			// Limits not set
-			if (coverageLimit == 0)
-				coverageLimit = 100;
-			if (timeLimit == 0)
-				timeLimit = 240000;
-			if (steps == 0)
-				steps = 5;
-
-			Exploration explore = new Exploration(exploredMap, map, robot, coverageLimit, timeLimit, steps, sim);
-			explore.exploration(new Point(MapConstants.STARTZONE_COL, MapConstants.STARTZONE_COL));
-			if (!sim) {
-				netMgr.send("Alg|And|" + Command.ENDEXP + "|");
-				while (true) {
-
-				}
-			}
-			return 1;
-		}
-	}
 
 	class FastTask extends Task<Integer> {
 		@Override
 		protected Integer call() throws Exception {
+			double startT = System.currentTimeMillis();
+			double endT = 0;
 			FastestPath fp = new FastestPath(exploredMap, robot, sim);
 			ArrayList<Cell> path;
 //			if (wayPoint.distance(MapConstants.GOALZONE) != 0) {
-				path = fp.run(new Point(robot.getPosition().x, robot.getPosition().y), wayPoint, robot.getDirection());
-				path.addAll(fp.run(wayPoint, MapConstants.GOALZONE, robot.getDirection()));
+			path = fp.run(new Point(robot.getPosition().x, robot.getPosition().y), wayPoint, robot.getDirection());
+			path.addAll(fp.run(wayPoint, MapConstants.GOALZONE, robot.getDirection()));
 //			} else
 //				path = fp.run(new Point(robot.getPosition().x, robot.getPosition().y), MapConstants.GOALZONE,
 //						robot.getDirection());
@@ -831,10 +803,12 @@ public class Simulator extends Application {
 			// Limits not set
 			if (steps == 0)
 				steps = 5;
-			
+
 			int moves = 0;
 			System.out.println(commands);
-			for (int i=0; i < commands.size(); i++) {
+			Command c = null;
+			for (int i = 0; i < commands.size(); i++) {
+				c = commands.get(i);
 				if (sim) {
 					try {
 						TimeUnit.MILLISECONDS.sleep(RobotConstants.MOVE_SPEED / steps);
@@ -843,28 +817,36 @@ public class Simulator extends Application {
 					}
 
 				}
-				System.out.println("c:"+commands.get(i)+" Condition:"+(commands.get(i)==Command.FORWARD|| commands.get(i) == Command.BACKWARD));
-				System.out.println("index: "+i+" condition: "+(i==(commands.size()-1)));
-				if(commands.get(i)==Command.FORWARD)
-				{
-					//System.out.println("moves "+moves);
+				System.out.println("Inside Fastest Command For Loop "+ c);
+//				System.out.println("c:"+commands.get(i)+" Condition:"+(commands.get(i)==Command.FORWARD|| commands.get(i) == Command.BACKWARD));
+//				System.out.println("index: "+i+" condition: "+(i==(commands.size()-1)));
+				if (c == Command.FORWARD) {
+					// System.out.println("moves "+moves);
 					moves++;
-					//If last command
-					if(i==(commands.size()-1))
-						robot.move(commands.get(i), moves, exploredMap);
-				}else
-				{
-					System.out.println("moves "+moves);
-					if(moves>0)
+					// If last command
+					if (i == (commands.size() - 1)) {
+						robot.move(c, moves, exploredMap);
+						robot.sense(exploredMap, map);
+					}
+				} else {
+					System.out.println("moves " + moves);
+					if (moves > 0) {
 						robot.move(Command.FORWARD, moves, exploredMap);
-					robot.move(commands.get(i), RobotConstants.MOVE_STEPS, exploredMap);
+						robot.sense(exploredMap, map);
+					}
+					robot.move(c, RobotConstants.MOVE_STEPS, exploredMap);
+					robot.sense(exploredMap, map);
 					moves = 0;
 				}
-				exploredMap.draw(true);
-				robot.draw();
 			}
-			if(!sim)
-				NetMgr.getInstance().send("Alg|And|" + RobotConstants.Command.ENDEXP);
+			netMgr.send("Alg|Ard|"+RobotConstants.Command.ALIGN_FRONT.ordinal()+"|");
+			if (!sim)
+				NetMgr.getInstance().send("Alg|And|" + RobotConstants.Command.ENDFAST);
+			
+			endT = System.currentTimeMillis();
+			int seconds = (int)((endT - startT)/1000%60);
+			int minutes = (int)((endT - startT)/1000/60);
+			System.out.println("Total Time: "+minutes+"mins "+seconds+"seconds");
 			return 1;
 		}
 	}
@@ -885,5 +867,4 @@ public class Simulator extends Application {
 			robot.draw();
 		}
 	};
-
 }

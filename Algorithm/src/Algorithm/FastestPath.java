@@ -235,6 +235,7 @@ public class FastestPath {
 				if(calibratePoint(cell, tempRobot.getDirection())/*||calibrateCount == RobotConstants.CALIBRATE_AFTER*/)
 				{
 //					calibrateCount = 0;
+					//Found a Calibration Point
 					moves.add(Command.ALIGN_RIGHT);
 					moves.add(Command.ALIGN_FRONT);
 				}
