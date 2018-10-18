@@ -315,8 +315,11 @@ public class Simulator extends Application {
 			public void handle(KeyEvent e) {
 				sim = false;
 				robot.setSim(sim);
+				System.out.println("System movement");
 				if (!netMgr.isConnected()) {
 					netMgr.startConn();
+					netMgr.send("Alg|Ard|S|0");
+					robot.sense(exploredMap, map);
 				}
 				switch (e.getCode()) {
 				case W:
@@ -338,7 +341,6 @@ public class Simulator extends Application {
 				default:
 					break;
 				}
-				robot.sense(exploredMap, map);
 				System.out.println("Robot Direction AFTER:" + robot.getDirection());
 			}
 		});
@@ -666,7 +668,21 @@ public class Simulator extends Application {
 				do {
 					msg = netMgr.receive();
 					String[] msgArr = msg.split("\\|");
-					c = Command.values()[Integer.parseInt(msgArr[2])];
+					System.out.println("Calibrating: "+msgArr[2]);
+					c = Command.ERROR;
+					if (msgArr[2].compareToIgnoreCase("C") == 0) {
+						System.out.println("Calibrating");
+						for (int i = 0; i < 4; i++) {
+							robot.move(Command.TURN_RIGHT, RobotConstants.MOVE_STEPS, exploredMap);
+							senseAndAlign();
+						}
+						netMgr.send("Alg|Ard|"+Command.ALIGN_RIGHT.ordinal()+"|0");
+						msg = netMgr.receive();
+						System.out.println("Done Calibrating");
+					}else {
+						c = Command.values()[Integer.parseInt(msgArr[2])];
+					}
+					
 					if (c == Command.ROBOT_POS) {
 						String[] data = msgArr[3].split("\\,");
 						int col = Integer.parseInt(data[0]);
@@ -695,9 +711,8 @@ public class Simulator extends Application {
 						exploredMap.draw(true);
 						robot.draw();
 					}
-					if (c == Command.START_EXP) {
+					else if (c == Command.START_EXP) {
 						netMgr.send("Alg|Ard|S|0");
-
 					}
 				} while (c != Command.START_EXP);
 			}
@@ -742,6 +757,27 @@ public class Simulator extends Application {
 			return 1;
 		}
 	}
+	//
+	public void senseAndAlign() {
+		String msg = null;
+		double [][] sensorData = new double[6][2];
+		msg = NetMgr.getInstance().receive();
+		String[] msgArr = msg.split("\\|");
+		String[] strSensor = msgArr[3].split("\\,");
+		System.out.println("Recieved " + strSensor.length + " sensor data");
+		// Translate string to integer
+		for (int i = 0; i < strSensor.length; i++) {
+			String[] arrSensorStr = strSensor[i].split("\\:");
+			sensorData[i][0] = Double.parseDouble(arrSensorStr[1]);
+			sensorData[i][1] = Double.parseDouble(arrSensorStr[2]);
+		}
+		
+		//Discrepancy detected among the sensor data received
+		if(sensorData[0][1]==1 && sensorData[2][1]==1) {
+			netMgr.send("Alg|Ard|"+Command.ALIGN_FRONT.ordinal()+"|1");
+			netMgr.receive();
+		}
+	}
 	
 	class ExplorationNoAndTask extends Task<Integer> {
 		@Override
@@ -783,8 +819,6 @@ public class Simulator extends Application {
 			ArrayList<Cell> path;
 //			if (wayPoint.distance(MapConstants.GOALZONE) != 0) {
 				path = fp.run(new Point(robot.getPosition().x, robot.getPosition().y), wayPoint, robot.getDirection());
-
-				System.out.println("HERE");
 				path.addAll(fp.run(wayPoint, MapConstants.GOALZONE, robot.getDirection()));
 //			} else
 //				path = fp.run(new Point(robot.getPosition().x, robot.getPosition().y), MapConstants.GOALZONE,
@@ -798,9 +832,9 @@ public class Simulator extends Application {
 			if (steps == 0)
 				steps = 5;
 			
-			int moves =0;
-			Command prev = Command.START_FAST;
-			for (Command c : commands) {
+			int moves = 0;
+			System.out.println(commands);
+			for (int i=0; i < commands.size(); i++) {
 				if (sim) {
 					try {
 						TimeUnit.MILLISECONDS.sleep(RobotConstants.MOVE_SPEED / steps);
@@ -809,20 +843,23 @@ public class Simulator extends Application {
 					}
 
 				}
-				System.out.println("prev: "+prev+" c:"+c+" Condition:"+(prev==c && (c==Command.FORWARD|| c == Command.BACKWARD)));
-				if(prev==c && (c==Command.FORWARD|| c == Command.BACKWARD))
+				System.out.println("c:"+commands.get(i)+" Condition:"+(commands.get(i)==Command.FORWARD|| commands.get(i) == Command.BACKWARD));
+				System.out.println("index: "+i+" condition: "+(i==(commands.size()-1)));
+				if(commands.get(i)==Command.FORWARD)
 				{
 					//System.out.println("moves "+moves);
 					moves++;
+					//If last command
+					if(i==(commands.size()-1))
+						robot.move(commands.get(i), moves, exploredMap);
 				}else
 				{
 					System.out.println("moves "+moves);
 					if(moves>0)
-						robot.move(prev, moves, exploredMap);
-					robot.move(c, RobotConstants.MOVE_STEPS, exploredMap);
+						robot.move(Command.FORWARD, moves, exploredMap);
+					robot.move(commands.get(i), RobotConstants.MOVE_STEPS, exploredMap);
 					moves = 0;
 				}
-				prev = c;
 				exploredMap.draw(true);
 				robot.draw();
 			}
