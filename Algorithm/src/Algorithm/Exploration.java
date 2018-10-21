@@ -239,13 +239,20 @@ public class Exploration {
 		fp.displayFastestPath(path, true);
 		commands = fp.getPathCommands(path);
 		System.out.println("Exploration Fastest Commands: "+commands);
+		
+		//Not moving back to start single moves 
 		if (!loc.equals(start)) {
-			System.out.println("LOC != Start");
 			for (Command c : commands) {
+				if(c == Command.TURN_LEFT)
+					System.out.println("Command "+c+" Left: "+Direction.getNext(robot.getDirection())+" Right: "+Direction.getPrevious(robot.getDirection()));
+				
 				if ((c == Command.FORWARD) && !movable(robot.getDirection())) {
 					System.out.println("Not Executing Forward Not Movable");
 					break;
-				} else {
+				} else{
+					if((c == Command.TURN_LEFT && !movable(Direction.getNext(robot.getDirection())))||
+						(c == Command.TURN_RIGHT && !movable(Direction.getPrevious(robot.getDirection()))))
+						continue;
 					robot.move(c, RobotConstants.MOVE_STEPS, exploredMap);
 					robot.sense(exploredMap, map);
 				}
@@ -257,13 +264,65 @@ public class Exploration {
 					}
 				}
 			}
-		} else {
-			System.out.println("LOC == Start");
+	
+			//If Robot Gets Losts When Moving to unexplored area Move it Back to a wall
+			if(movable(Direction.getPrevious(robot.getDirection())) && movable(Direction.getNext(robot.getDirection()))  && movable(Direction.reverse(robot.getDirection()))  && movable(robot.getDirection()) && exploredMap.exploredPercentage()<100) {
+				System.out.println("Not Near a Wal");
+				Direction dir = Direction.RIGHT;
+				//If nearer to left wall
+				System.out.println("robot x:"+robot.getPosition().getX());
+				if(robot.getPosition().getX()<MapConstants.MAP_WIDTH/2)
+					dir =  Direction.LEFT;
+				
+				//Turn Towards the Wall
+				if(robot.getDirection()!=dir)
+				{
+					//Turn Right if Nearer to Right Wall
+					if(dir== Direction.RIGHT)
+						robot.move(Command.TURN_RIGHT, RobotConstants.MOVE_STEPS, exploredMap);
+					//Turn Left if Nearer to Left Wall
+					else
+						robot.move(Command.TURN_LEFT, RobotConstants.MOVE_STEPS, exploredMap);
+					if (sim) {
+						try {
+							TimeUnit.MILLISECONDS.sleep(RobotConstants.MOVE_SPEED / stepPerSecond);
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						}
+					}
+					robot.sense(exploredMap, map);
+				}
+				
+				//Move Towards the wall till unable to move
+				while(movable(robot.getDirection())) {
+					robot.move(Command.FORWARD, RobotConstants.MOVE_STEPS, exploredMap);
+					if (sim) {
+						try {
+							TimeUnit.MILLISECONDS.sleep(RobotConstants.MOVE_SPEED / stepPerSecond);
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						}
+					}
+					robot.sense(exploredMap, map);
+				}
+				robot.move(Command.TURN_LEFT, RobotConstants.MOVE_STEPS, exploredMap);
+				if (sim) {
+					try {
+						TimeUnit.MILLISECONDS.sleep(RobotConstants.MOVE_SPEED / stepPerSecond);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				}
+				robot.sense(exploredMap, map);
+			}
+		
+		} 
+		//Moving back to Start multiple moves
+		else {
 			int moves = 0;
 			Command c = null;
 			for (int i = 0; i < commands.size(); i++) {
 				c = commands.get(i);
-				System.out.println("Inside Commands Loop Command:"+c);
 				if (sim) {
 					try {
 						TimeUnit.MILLISECONDS.sleep(RobotConstants.MOVE_SPEED / stepPerSecond);
@@ -272,8 +331,7 @@ public class Exploration {
 					}
 
 				}
-//			System.out.println("c:"+commands.get(i)+" Condition:"+(commands.get(i)==Command.FORWARD|| commands.get(i) == Command.BACKWARD));
-				System.out.println("if Condition: "+((c == Command.FORWARD) && !movable(robot.getDirection())));
+				
 				if ((c == Command.FORWARD) && !movable(robot.getDirection())) {
 					// System.out.println("moves "+moves);
 					System.out.println("Not Executing Forward Not Movable");
@@ -282,8 +340,6 @@ public class Exploration {
 				else {
 					System.out.println("c = froward "+(c == Command.FORWARD));
 					if(c == Command.FORWARD) {
-						// System.out.println("moves "+moves);
-						System.out.println("Inside c=forward");
 						moves++;
 						// If last command
 						if (i == (commands.size() - 1)) {
@@ -386,7 +442,7 @@ public class Exploration {
 				robot.move(Command.TURN_LEFT, RobotConstants.MOVE_STEPS, exploredMap);
 				robot.sense(exploredMap, map);
 				if (movable(robot.getDirection())) {
-					// System.out.println("Left Direction then forrwad "+robot.getDirection());
+					// System.out.println("Left Direction then forward "+robot.getDirection());
 					if (sim)
 						TimeUnit.MILLISECONDS.sleep(RobotConstants.MOVE_SPEED / stepPerSecond);
 					robot.move(Command.FORWARD, RobotConstants.MOVE_STEPS, exploredMap);
@@ -430,10 +486,10 @@ public class Exploration {
 			colInc = 0;
 			break;
 		}
-		// System.out.println("Checking Cell: "+(robot.getPosition().y + rowInc)+",
-		// "+(robot.getPosition().x + colInc)+" validMove:
-		// "+exploredMap.checkValidMove(robot.getPosition().y + rowInc,
-		// robot.getPosition().x + colInc));
+		System.out.println("Checking Cell: "+(robot.getPosition().y + rowInc)+
+		","+(robot.getPosition().x + colInc)+" validMove:"
+				+exploredMap.checkValidMove(robot.getPosition().y + rowInc,
+		robot.getPosition().x + colInc));
 		return exploredMap.checkValidMove(robot.getPosition().y + rowInc, robot.getPosition().x + colInc);
 
 	}

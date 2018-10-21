@@ -25,7 +25,16 @@ public class Robot {
 	private Direction direction;
 	private Command prevMove;
 	private int senseCount = 0;
-	private boolean rightDistAlign = false;	
+	private boolean rightDistAlign = false;
+	private boolean fastSense = false;
+	public boolean isFastSense() {
+		return fastSense;
+	}
+
+	public void setFastSense(boolean fastSense) {
+		this.fastSense = fastSense;
+	}
+
 	private GraphicsContext gc;
 
 	public GraphicsContext getGc() {
@@ -195,8 +204,10 @@ public class Robot {
 		if(exploredMap.checkValidMove(pos.y+rowInc*steps, pos.x+ colInc*steps))
 		{
 			setPosition(pos.x+ colInc*steps, pos.y+rowInc*steps);
-			for(int i=0; i<steps; i++) {
-				exploredMap.passThru(pos.y-rowInc*i, pos.x-colInc*i);
+			if(!fastSense) {
+				for(int i=0; i<steps; i++) {
+					exploredMap.passThru(pos.y-rowInc*i, pos.x-colInc*i);
+				}
 			}
 		}
 	}
@@ -235,8 +246,11 @@ public class Robot {
 		setPosition(col,row);
 		exploredMap.setAllExplored(false);
 		for(int r=row-1; r <= row+1; r++) {
-			for(int c=col-1; c<= col+1; c++)
+			for(int c=col-1; c<= col+1; c++) {
 				exploredMap.getCell(r, c).setExplored(true);
+				exploredMap.getCell(r, c).setMoveThru(true);
+			}
+				
 		}
 	}
 	
@@ -486,7 +500,8 @@ public class Robot {
 				}
 					 
 			}
-			sendMapDescriptor(exploredMap);
+			if(!fastSense)
+				sendMapDescriptor(exploredMap);
 		}
 			
 		exploredMap.draw(true);
@@ -550,7 +565,6 @@ public class Robot {
 		String data = MapDescriptor.generateMDFStringPart1(exploredMap);
 		NetMgr.getInstance().send("Alg|And|MD1|"+data+"|");
 		data = MapDescriptor.generateMDFStringPart2(exploredMap);
-		System.out.println(data);
 		NetMgr.getInstance().send("Alg|And|MD2|"+data+"|");
 	}
 }

@@ -669,6 +669,7 @@ public class Simulator extends Application {
 			// Wait for Start Command
 			if (!sim) {
 				do {
+					robot.setFastSense(true);
 					msg = netMgr.receive();
 					String[] msgArr = msg.split("\\|");
 					System.out.println("Calibrating: " + msgArr[2]);

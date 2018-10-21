@@ -106,7 +106,8 @@ public class Map {
 		for (int row = 0; row < MapConstants.MAP_HEIGHT; row++) {
 			for (int col = 0; col < MapConstants.MAP_WIDTH; col++) {
 				cell = grid[row][col];
-				if(checkValidMove(row,col) && clearForRobot(row,col))
+				if(checkValidMove(row,col) && clearForRobot(row,col) && !cell.isMoveThru())
+//				if(checkValidMove(row,col) && clearForRobot(row,col) && moveThru(row,col))
 				{
 					if((distance > loc.distance(cell.getPos())&& cell.getPos().distance(botLoc)>0)){
 						nearest = cell;
@@ -118,16 +119,26 @@ public class Map {
 		return nearest;
 	}
 	
+	//Make sure the robot can move to the row, and col
 	public boolean clearForRobot(int row, int col) {
-		
-		for(int r=row-1; r< row+1; r++) {
-			for(int c=col-1; c<col+1; c++) {
+		for(int r=row-1; r<= row+1; r++) {
+			for(int c=col-1; c<=col+1; c++) {
 				if(!grid[r][c].isExplored()||grid[r][c].isObstacle())
 					return false;
 			}
 		}
-		
 		return true;
+	}
+	
+	//See if cell has unmoved place that is not completely moved thru
+	public boolean moveThru(int row, int col) {
+		for(int r=row-1; r<= row+1; r++) {
+			for(int c=col-1; c<=col+1; c++) {
+				if(!grid[r][c].isMoveThru())
+					return true;
+			}
+		}
+		return false;
 	}
 
 	// Check if the row and col is within the map boundary
