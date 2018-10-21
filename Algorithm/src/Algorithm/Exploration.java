@@ -156,7 +156,7 @@ public class Exploration {
 			endTime = startTime + timeLimit;
 			double prevArea = exploredMap.exploredPercentage();
 			int moves = 1;
-			int checkingStep = 10;
+			int checkingStep = 5;
 			this.start = start;
 			
 			// Loop to explore the map
