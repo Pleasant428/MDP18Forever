@@ -42,6 +42,7 @@ public class Simulator extends Application {
 	private Point wayPoint = new Point(MapConstants.GOALZONE);
 	private Robot robot;
 	private boolean sim = true;
+	private boolean expMapDraw = true;
 
 	private boolean setObstacle = false;
 	private boolean setWaypoint = false;
@@ -103,12 +104,15 @@ public class Simulator extends Application {
 		mapGrid = new Canvas(MapConstants.MAP_CELL_SZ * MapConstants.MAP_WIDTH + 1 + MapConstants.MAP_OFFSET,
 				MapConstants.MAP_CELL_SZ * MapConstants.MAP_HEIGHT + 1 + MapConstants.MAP_OFFSET);
 		gc = mapGrid.getGraphicsContext2D();
-		drawMap(!setObstacle);
-		robot.setGc(gc);
-		map.setGc(gc);
-		exploredMap.setGc(gc);
-		exploredMap.draw(true);
-		robot.draw();
+		expMapDraw = !setObstacle;
+		expMapDraw = true;
+		
+		new Timer().scheduleAtFixedRate(new TimerTask() {
+			public void run() {
+				drawMap(expMapDraw);
+				drawRobot();
+			}
+		},100,100);
 
 		// Canvas MouseEvent
 		mapGrid.setOnMouseClicked(MapClick);
@@ -183,6 +187,10 @@ public class Simulator extends Application {
 		setWaypointBtn.setOnMouseClicked(new EventHandler<MouseEvent>() {
 			public void handle(MouseEvent e) {
 				setWaypoint = !setWaypoint;
+				if(setWaypoint)
+					setWaypointBtn.setText("Confirm Waypoint");
+				else
+					setWaypointBtn.setText("Set Waypoint");
 				setObstacle = false;
 				setRobot = false;
 			}
@@ -199,11 +207,9 @@ public class Simulator extends Application {
 					loadMapBtn.setText("Load Map");
 					saveMapBtn.setText("Save Map");
 				}
-
 				setRobot = false;
 				setWaypoint = false;
-				drawMap(!setObstacle);
-				robot.draw();
+				expMapDraw = !setObstacle;
 			}
 		});
 		loadMapBtn.setOnMouseClicked(new EventHandler<MouseEvent>() {
@@ -214,16 +220,14 @@ public class Simulator extends Application {
 					if (file != null) {
 						MapDescriptor.loadMapFromDisk(map, file.getAbsolutePath());
 					}
-					map.draw(false);
-					robot.draw();
+					expMapDraw = false;
 				} else {
 					fileChooser.setTitle("Choose file to load ExploredMap to");
 					File file = fileChooser.showOpenDialog(primaryStage);
 					if (file != null) {
 						MapDescriptor.loadMapFromDisk(exploredMap, file.getAbsolutePath());
 					}
-					exploredMap.draw(true);
-					robot.draw();
+					expMapDraw = true;
 				}
 
 			}
@@ -293,13 +297,13 @@ public class Simulator extends Application {
 		controlGrid.add(setObstacleBtn, 2, 9, 4, 1);
 
 		GridPane.setFillWidth(modeCB, true);
-		// controlGrid.setFillWidth(startBtn, true);
-		// controlGrid.setFillWidth(loadMapBtn, true);
-		// controlGrid.setFillWidth(saveMapBtn, true);
-		// controlGrid.setFillWidth(resetMapBtn, true);
-		// controlGrid.setFillWidth(setWaypointBtn, true);
-		// controlGrid.setFillWidth(setRobotBtn, true);
-		// controlGrid.setFillWidth(setObstacleBtn, true);
+//		controlGrid.setFillWidth(startBtn, true);
+//		controlGrid.setFillWidth(loadMapBtn, true);
+//		controlGrid.setFillWidth(saveMapBtn, true);
+//		controlGrid.setFillWidth(resetMapBtn, true);
+//		controlGrid.setFillWidth(setWaypointBtn, true);
+//		controlGrid.setFillWidth(setRobotBtn, true);
+//		controlGrid.setFillWidth(setObstacleBtn, true);
 		// Button Init
 
 		// Choosing where to place components on the Grid
@@ -315,8 +319,11 @@ public class Simulator extends Application {
 			public void handle(KeyEvent e) {
 				sim = false;
 				robot.setSim(sim);
+				System.out.println("System movement");
 				if (!netMgr.isConnected()) {
 					netMgr.startConn();
+					netMgr.send("Alg|Ard|S|0");
+					robot.sense(exploredMap, map);
 				}
 				switch (e.getCode()) {
 				case W:
@@ -338,7 +345,6 @@ public class Simulator extends Application {
 				default:
 					break;
 				}
-				robot.sense(exploredMap, map);
 				System.out.println("Robot Direction AFTER:" + robot.getDirection());
 			}
 		});
@@ -346,65 +352,6 @@ public class Simulator extends Application {
 		primaryStage.show();
 
 	}
-
-	// Draw Robot
-	// private void drawRobot() {
-	// gc.setStroke(RobotConstants.ROBOT_OUTLINE);
-	// gc.setLineWidth(2);
-	//
-	// gc.setFill(RobotConstants.ROBOT_BODY);
-	//
-	// int col = robot.getPosition().x - 1;
-	// int row = robot.getPosition().y + 1;
-	// int dirCol = 0, dirRow = 0;
-	//
-	// gc.strokeOval(col * MapConstants.MAP_CELL_SZ + MapConstants.MAP_OFFSET / 2,
-	// (MapConstants.MAP_CELL_SZ - 1) * MapConstants.MAP_HEIGHT - row *
-	// MapConstants.MAP_CELL_SZ
-	// + MapConstants.MAP_OFFSET / 2,
-	// 3 * MapConstants.MAP_CELL_SZ, 3 * MapConstants.MAP_CELL_SZ);
-	// gc.fillOval(col * MapConstants.MAP_CELL_SZ + MapConstants.MAP_OFFSET / 2,
-	// (MapConstants.MAP_CELL_SZ - 1) * MapConstants.MAP_HEIGHT - row *
-	// MapConstants.MAP_CELL_SZ
-	// + MapConstants.MAP_OFFSET / 2,
-	// 3 * MapConstants.MAP_CELL_SZ, 3 * MapConstants.MAP_CELL_SZ);
-	//
-	// gc.setFill(RobotConstants.ROBOT_DIRECTION);
-	// switch (robot.getDirection()) {
-	// case UP:
-	// dirCol = robot.getPosition().x;
-	// dirRow = robot.getPosition().y + 1;
-	// break;
-	// case DOWN:
-	// dirCol = robot.getPosition().x;
-	// dirRow = robot.getPosition().y - 1;
-	// break;
-	// case LEFT:
-	// dirCol = robot.getPosition().x - 1;
-	// dirRow = robot.getPosition().y;
-	// break;
-	// case RIGHT:
-	// dirCol = robot.getPosition().x + 1;
-	// dirRow = robot.getPosition().y;
-	// break;
-	// }
-	// System.out.print("col: " + dirCol + " row:" + dirRow);
-	// gc.fillOval(dirCol * MapConstants.MAP_CELL_SZ + MapConstants.MAP_OFFSET / 2,
-	// (MapConstants.MAP_CELL_SZ - 1) * MapConstants.MAP_HEIGHT - dirRow *
-	// MapConstants.MAP_CELL_SZ
-	// + MapConstants.MAP_OFFSET / 2,
-	// MapConstants.MAP_CELL_SZ, MapConstants.MAP_CELL_SZ);
-	//
-	// gc.setFill(Color.BLACK);
-	// for (Sensor s : robot.getSensorList()) {
-	// gc.fillText(s.getId(), s.getCol() * MapConstants.MAP_CELL_SZ +
-	// MapConstants.MAP_OFFSET / 2,
-	// (MapConstants.MAP_CELL_SZ) * MapConstants.MAP_HEIGHT - s.getRow() *
-	// MapConstants.MAP_CELL_SZ
-	// + MapConstants.MAP_OFFSET / 2);
-	// }
-	//
-	// }
 
 	// Draw the Map Graphics Cells
 	private void drawMap(boolean explored) {
@@ -424,6 +371,10 @@ public class Simulator extends Application {
 					if (explored) {
 						if (exploredMap.getCell(row, col).isObstacle())
 							gc.setFill(MapConstants.OB_COLOR);
+						else if (exploredMap.getCell(row, col).isPath())
+							gc.setFill(MapConstants.PH_COLOR);
+						else if (exploredMap.getCell(row, col).isMoveThru())
+							gc.setFill(MapConstants.THRU_COLOR);
 						else if (exploredMap.getCell(row, col).isExplored())
 							gc.setFill(MapConstants.EX_COLOR);
 						else
@@ -482,11 +433,11 @@ public class Simulator extends Application {
 			System.out.println(exploredMap.getCell(selectedRow, selectedCol).toString() + " validMove:"
 					+ exploredMap.checkValidMove(selectedRow, selectedCol));
 
-			if (setWaypoint)
+			if (setWaypoint) {
 				System.out.println(setWayPoint(selectedRow, selectedCol)
 						? "New WayPoint set at row: " + selectedRow + " col: " + selectedCol
 						: "Unable to put waypoint at obstacle or virtual wall!");
-
+			}
 			if (setRobot)
 				System.out.println(setRobotLocation(selectedRow, selectedCol) ? "Robot Position has changed"
 						: "Unable to put Robot at obstacle or virtual wall!");
@@ -503,10 +454,9 @@ public class Simulator extends Application {
 
 			}
 			if (setObstacle)
-				map.draw(false);
+				expMapDraw = false;
 			else
-				exploredMap.draw(true);
-			robot.draw();
+				expMapDraw = true;
 		}
 
 	};
@@ -562,14 +512,13 @@ public class Simulator extends Application {
 
 	// Set the waypoint
 	private boolean setWayPoint(int row, int col) {
-		if (exploredMap.checkValidMove(row, col)) {
+		if (exploredMap.wayPointClear(row, col)) {
 			if (wayPoint != null)
-				map.getCell(wayPoint).setWayPoint(false);
+				exploredMap.getCell(wayPoint).setWayPoint(false);
 
 			wayPoint = new Point(col, row);
-			exploredMap.setWayPoint(wayPoint);
 			if (!setObstacle)
-				exploredMap.draw(true);
+				expMapDraw = false;
 			return true;
 		} else
 			return false;
@@ -600,18 +549,20 @@ public class Simulator extends Application {
 			String selectedMode = modeCB.getSelectionModel().getSelectedItem();
 			switch (selectedMode) {
 			case REAL_FAST:
-				// sim = false;
-				// System.out.println("RF Here");
-				// exploredMap.draw(true);
-				// robot.draw();
-				// fastTask = new Thread(new FastTask());
-				// fastTask.start();
+//				sim = false;
+//				System.out.println("RF Here");
+//				exploredMap.draw(true);
+//				robot.draw();
+//				fastTask = new Thread(new FastTask());
+//				fastTask.start();
 				netMgr.startConn();
 				sim = false;
 				robot.setSim(false);
-				expTask = new Thread(new ExplorationNoAndTask());
-				expTask.start();
-				break;
+				System.out.println("SF Here");
+				exploredMap.removePaths();
+				expMapDraw = true;
+				fastTask = new Thread(new FastTask());
+				fastTask.start();
 
 			case REAL_EXP:
 				netMgr.startConn();
@@ -620,30 +571,13 @@ public class Simulator extends Application {
 				expTask = new Thread(new ExplorationTask());
 				expTask.start();
 
-				// while(true) {
-				// String [] msgArr = NetMgr.getInstance().receive().split("//|");
-				// if(msgArr[0].equals("And") && Command.values()[Integer.parseInt(msgArr[2])]
-				// == Command.START_FAST)
-				// {
-				// sim = false;
-				// System.out.println("RF Here");
-				// exploredMap.draw(true);
-				// robot.draw();
-				// fastTask = new Thread(new FastTask());
-				// fastTask.start();
-				// NetMgr.getInstance().send("Alg|And|"+RobotConstants.Command.ENDFAST);
-				// break;
-				// }
-				// }
-
 				break;
 
 			case SIM_FAST:
 				sim = true;
+				expMapDraw = true;
 				System.out.println("SF Here");
 				exploredMap.removePaths();
-				exploredMap.draw(true);
-				robot.draw();
 				fastTask = new Thread(new FastTask());
 				fastTask.start();
 				break;
@@ -652,8 +586,7 @@ public class Simulator extends Application {
 				sim = true;
 				System.out.println("SE Here");
 				robot.sense(exploredMap, map);
-				exploredMap.draw(true);
-				robot.draw();
+				expMapDraw = true;
 				expTask = new Thread(new ExplorationTask());
 				expTask.start();
 				break;
@@ -665,14 +598,29 @@ public class Simulator extends Application {
 	class ExplorationTask extends Task<Integer> {
 		@Override
 		protected Integer call() throws Exception {
+			String msg = null;
+			Command c;
+			// Wait for Start Command
 			if (!sim) {
-				String msg = null;
-				Command c;
-				// Wait for Start Command
 				do {
+					robot.setFastSense(true);
 					msg = netMgr.receive();
 					String[] msgArr = msg.split("\\|");
-					c = Command.values()[Integer.parseInt(msgArr[2])];
+					System.out.println("Calibrating: " + msgArr[2]);
+					c = Command.ERROR;
+					if (msgArr[2].compareToIgnoreCase("C") == 0) {
+						System.out.println("Calibrating");
+						for (int i = 0; i < 4; i++) {
+							robot.move(Command.TURN_RIGHT, RobotConstants.MOVE_STEPS, exploredMap);
+							senseAndAlign();
+						}
+						netMgr.send("Alg|Ard|" + Command.ALIGN_RIGHT.ordinal() + "|0");
+						msg = netMgr.receive();
+						System.out.println("Done Calibrating");
+					} else {
+						c = Command.values()[Integer.parseInt(msgArr[2])];
+					}
+
 					if (c == Command.ROBOT_POS) {
 						String[] data = msgArr[3].split("\\,");
 						int col = Integer.parseInt(data[0]);
@@ -697,19 +645,12 @@ public class Simulator extends Application {
 							break;
 						}
 						wayPoint = new Point(wayCol, wayRow);
-						exploredMap.setWayPoint(wayPoint);
-						exploredMap.draw(true);
-						robot.draw();
-					}
-					if (c == Command.START_EXP) {
+					} else if (c == Command.START_EXP) {
 						netMgr.send("Alg|Ard|S|0");
-						robot.sense(exploredMap, map);
-						exploredMap.draw(true);
-						robot.draw();
 					}
 				} while (c != Command.START_EXP);
 			}
-
+			robot.sense(exploredMap, map);
 			System.out.println("coverage: " + coverageLimitSB.getValue());
 			System.out.println("time: " + timeLimitSB.getValue());
 			double coverageLimit = (int) (coverageLimitSB.getValue());
@@ -727,70 +668,61 @@ public class Simulator extends Application {
 			explore.exploration(new Point(MapConstants.STARTZONE_COL, MapConstants.STARTZONE_COL));
 			if (!sim) {
 				netMgr.send("Alg|And|" + Command.ENDEXP + "|");
-				while (true) {
-					String[] msgArr = NetMgr.getInstance().receive().split("//|");
-					if (msgArr[0].equals("And") && Command.values()[Integer.parseInt(msgArr[2])] == Command.START_FAST) {
+				Command com = null;
+				do {
+					String[] msgArr = NetMgr.getInstance().receive().split("\\|");
+					com = Command.values()[Integer.parseInt(msgArr[2])];
+					System.out.println("Fastest path msg :" + msgArr[2]);
+					if (com == Command.START_FAST) {
 						sim = false;
 						System.out.println("RF Here");
-						exploredMap.draw(true);
-						robot.draw();
 						fastTask = new Thread(new FastTask());
 						fastTask.start();
-						NetMgr.getInstance().send("Alg|And|" + RobotConstants.Command.ENDFAST);
 						break;
 					}
-				}
+				} while (com != Command.START_FAST);
 			}
+
 			return 1;
 		}
 	}
 
-	class ExplorationNoAndTask extends Task<Integer> {
-		@Override
-		protected Integer call() throws Exception {
+	//Normal
+	public void senseAndAlign() {
+		String msg = null;
+		double[][] sensorData = new double[6][2];
+		msg = NetMgr.getInstance().receive();
+		String[] msgArr = msg.split("\\|");
+		String[] strSensor = msgArr[3].split("\\,");
+		System.out.println("Recieved " + strSensor.length + " sensor data");
+		// Translate string to integer
+		for (int i = 0; i < strSensor.length; i++) {
+			String[] arrSensorStr = strSensor[i].split("\\:");
+			sensorData[i][0] = Double.parseDouble(arrSensorStr[1]);
+			sensorData[i][1] = Double.parseDouble(arrSensorStr[2]);
+		}
 
-			netMgr.send("Alg|Ard|S|0");
-			robot.sense(exploredMap, map);
-			exploredMap.draw(true);
-			robot.draw();
-			System.out.println("coverage: " + coverageLimitSB.getValue());
-			System.out.println("time: " + timeLimitSB.getValue());
-			double coverageLimit = (int) (coverageLimitSB.getValue());
-			int timeLimit = (int) (timeLimitSB.getValue() * 1000);
-			int steps = (int) (stepsSB.getValue());
-			// Limits not set
-			if (coverageLimit == 0)
-				coverageLimit = 100;
-			if (timeLimit == 0)
-				timeLimit = 240000;
-			if (steps == 0)
-				steps = 5;
-
-			Exploration explore = new Exploration(exploredMap, map, robot, coverageLimit, timeLimit, steps, sim);
-			explore.exploration(new Point(MapConstants.STARTZONE_COL, MapConstants.STARTZONE_COL));
-			if (!sim) {
-				netMgr.send("Alg|And|" + Command.ENDEXP + "|");
-				while (true) {
-
-				}
-			}
-			return 1;
+		// Discrepancy detected among the sensor data received
+		if (sensorData[0][1] == 1 || sensorData[2][1] == 1) {
+			netMgr.send("Alg|Ard|" + Command.ALIGN_FRONT.ordinal() + "|1");
+			netMgr.receive();
 		}
 	}
+	
 
 	class FastTask extends Task<Integer> {
 		@Override
 		protected Integer call() throws Exception {
+			double startT = System.currentTimeMillis();
+			double endT = 0;
 			FastestPath fp = new FastestPath(exploredMap, robot, sim);
 			ArrayList<Cell> path;
-			if (wayPoint.distance(MapConstants.GOALZONE) != 0) {
-				path = fp.run(new Point(robot.getPosition().x, robot.getPosition().y), wayPoint, robot.getDirection());
-
-				System.out.println("HERE");
-				path.addAll(fp.run(wayPoint, MapConstants.GOALZONE, robot.getDirection()));
-			} else
-				path = fp.run(new Point(robot.getPosition().x, robot.getPosition().y), MapConstants.GOALZONE,
-						robot.getDirection());
+//			if (wayPoint.distance(MapConstants.GOALZONE) != 0) {
+			path = fp.run(new Point(robot.getPosition().x, robot.getPosition().y), wayPoint, robot.getDirection());
+			path.addAll(fp.run(wayPoint, MapConstants.GOALZONE, robot.getDirection()));
+//			} else
+//				path = fp.run(new Point(robot.getPosition().x, robot.getPosition().y), MapConstants.GOALZONE,
+//						robot.getDirection());
 
 			fp.displayFastestPath(path, true);
 			ArrayList<Command> commands = fp.getPathCommands(path);
@@ -800,7 +732,11 @@ public class Simulator extends Application {
 			if (steps == 0)
 				steps = 5;
 
-			for (Command c : commands) {
+			int moves = 0;
+			System.out.println(commands);
+			Command c = null;
+			for (int i = 0; i < commands.size(); i++) {
+				c = commands.get(i);
 				if (sim) {
 					try {
 						TimeUnit.MILLISECONDS.sleep(RobotConstants.MOVE_SPEED / steps);
@@ -809,11 +745,38 @@ public class Simulator extends Application {
 					}
 
 				}
-				robot.move(c, RobotConstants.MOVE_STEPS, exploredMap);
-				exploredMap.draw(true);
-				robot.draw();
+				System.out.println("Inside Fastest Command For Loop "+ c);
+//				System.out.println("c:"+commands.get(i)+" Condition:"+(commands.get(i)==Command.FORWARD|| commands.get(i) == Command.BACKWARD));
+//				System.out.println("index: "+i+" condition: "+(i==(commands.size()-1)));
+				if (c == Command.FORWARD) {
+					// System.out.println("moves "+moves);
+					moves++;
+					// If last command
+					if (i == (commands.size() - 1)) {
+						robot.move(c, moves, exploredMap);
+						robot.sense(exploredMap, map);
+					}
+				} else {
+					System.out.println("moves " + moves);
+					if (moves > 0) {
+						robot.move(Command.FORWARD, moves, exploredMap);
+						robot.sense(exploredMap, map);
+					}
+					robot.move(c, RobotConstants.MOVE_STEPS, exploredMap);
+					robot.sense(exploredMap, map);
+					moves = 0;
+				}
 			}
-			NetMgr.getInstance().send("Alg|And|" + RobotConstants.Command.ENDEXP);
+			
+			if (!sim) {
+				netMgr.send("Alg|Ard|"+RobotConstants.Command.ALIGN_FRONT.ordinal()+"|");
+				netMgr.send("Alg|And|" + RobotConstants.Command.ENDFAST+"|");
+			}
+			
+			endT = System.currentTimeMillis();
+			int seconds = (int)((endT - startT)/1000%60);
+			int minutes = (int)((endT - startT)/1000/60);
+			System.out.println("Total Time: "+minutes+"mins "+seconds+"seconds");
 			return 1;
 		}
 	}
@@ -824,15 +787,64 @@ public class Simulator extends Application {
 			if (setObstacle) {
 				map.resetMap();
 				map.setAllExplored(true);
-				map.draw(false);
 			} else {
 				exploredMap.resetMap();
 				exploredMap.setAllExplored(false);
-				exploredMap.draw(true);
 			}
 			robot.setStartPos(robot.getPosition().x, robot.getPosition().y, exploredMap);
-			robot.draw();
 		}
 	};
+	
+	// Draw Method for Robot
+	public void drawRobot() {
+		gc.setStroke(RobotConstants.ROBOT_OUTLINE);
+		gc.setLineWidth(2);
 
+		gc.setFill(RobotConstants.ROBOT_BODY);
+
+		int col = robot.getPosition().x - 1;
+		int row = robot.getPosition().y + 1;
+		int dirCol = 0, dirRow = 0;
+
+		gc.strokeOval(col * MapConstants.MAP_CELL_SZ + MapConstants.MAP_OFFSET / 2,
+				(MapConstants.MAP_CELL_SZ - 1) * MapConstants.MAP_HEIGHT - row * MapConstants.MAP_CELL_SZ
+						+ MapConstants.MAP_OFFSET / 2,
+				3 * MapConstants.MAP_CELL_SZ, 3 * MapConstants.MAP_CELL_SZ);
+		gc.fillOval(col * MapConstants.MAP_CELL_SZ + MapConstants.MAP_OFFSET / 2,
+				(MapConstants.MAP_CELL_SZ - 1) * MapConstants.MAP_HEIGHT - row * MapConstants.MAP_CELL_SZ
+						+ MapConstants.MAP_OFFSET / 2,
+				3 * MapConstants.MAP_CELL_SZ, 3 * MapConstants.MAP_CELL_SZ);
+
+		gc.setFill(RobotConstants.ROBOT_DIRECTION);
+		switch (robot.getDirection()) {
+		case UP:
+			dirCol = robot.getPosition().x;
+			dirRow = robot.getPosition().y + 1;
+			break;
+		case DOWN:
+			dirCol = robot.getPosition().x;
+			dirRow = robot.getPosition().y - 1;
+			break;
+		case LEFT:
+			dirCol = robot.getPosition().x - 1;
+			dirRow = robot.getPosition().y;
+			break;
+		case RIGHT:
+			dirCol = robot.getPosition().x + 1;
+			dirRow = robot.getPosition().y;
+			break;
+		}
+		gc.fillOval(dirCol * MapConstants.MAP_CELL_SZ + MapConstants.MAP_OFFSET / 2,
+				(MapConstants.MAP_CELL_SZ - 1) * MapConstants.MAP_HEIGHT - dirRow * MapConstants.MAP_CELL_SZ
+						+ MapConstants.MAP_OFFSET / 2,
+				MapConstants.MAP_CELL_SZ, MapConstants.MAP_CELL_SZ);
+
+		gc.setFill(Color.BLACK);
+		for (Sensor s : robot.getSensorList()) {
+			gc.fillText(s.getId(), s.getCol() * MapConstants.MAP_CELL_SZ + MapConstants.MAP_OFFSET / 2,
+					(MapConstants.MAP_CELL_SZ) * MapConstants.MAP_HEIGHT - s.getRow() * MapConstants.MAP_CELL_SZ
+							+ MapConstants.MAP_OFFSET / 2);
+		}
+
+	}
 }

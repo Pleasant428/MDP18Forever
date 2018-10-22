@@ -19,6 +19,7 @@ public class Cell {
 	private boolean obstacle;
 	private boolean virtualWall;
 	private boolean isWayPoint;
+	private boolean moveThru;
 	private boolean path;
 	
 	public boolean isPath() {
@@ -80,7 +81,15 @@ public class Cell {
 	@Override
 	public String toString() {
 		return "Cell [pos=" + pos + ", explored=" + explored + ", obstacle=" + obstacle + ", virtualWall=" + virtualWall
-				+ ", isWayPoint=" + isWayPoint + ", path=" + path + "]";
+				+ ", isWayPoint=" + isWayPoint + ", moveThru=" + moveThru + ", path=" + path + "]";
+	}
+
+	public boolean isMoveThru() {
+		return moveThru;
+	}
+
+	public void setMoveThru(boolean moveThru) {
+		this.moveThru = moveThru;
 	}
 	
 }

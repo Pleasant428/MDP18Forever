@@ -7,7 +7,6 @@ public class TestBed {
 	private static NetMgr net;
 
 	public static void main(String[] args) {
-		
 		// TODO Auto-generated method stub
 		System.out.println(Command.FORWARD.ordinal());
 		net = NetMgr.getInstance();
@@ -16,6 +15,8 @@ public class TestBed {
 			net.send("Alg|Ard|0|1");
 			net.send("Alg|And|0|1");
 		//}
+			
+			
 			
 //		net.send("Alg|Ard|0|1\n");
 		//Keep trying to connect if fail to connec

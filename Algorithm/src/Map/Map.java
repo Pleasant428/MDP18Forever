@@ -2,12 +2,6 @@ package Map;
 
 import java.awt.Point;
 import java.util.ArrayList;
-/**
- * 
- */
-
-import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.paint.Color;
 
 /**
  * @author Saklani Pankaj
@@ -17,25 +11,7 @@ import javafx.scene.paint.Color;
 public class Map {
 
 	private final Cell[][] grid;
-	private GraphicsContext gc;
-	private Point wayPoint;
-
-	public Point getWayPoint() {
-		return wayPoint;
-	}
-
-	public void setWayPoint(Point wayPoint) {
-		this.wayPoint = wayPoint;
-	}
-
-	public GraphicsContext getGc() {
-		return gc;
-	}
-
-	public void setGc(GraphicsContext gc) {
-		this.gc = gc;
-	}
-
+	
 	// KIV add Robot once Created
 	public Map() {
 		grid = new Cell[MapConstants.MAP_HEIGHT][MapConstants.MAP_WIDTH];
@@ -64,6 +40,15 @@ public class Map {
 		for (int row = 0; row < MapConstants.MAP_HEIGHT; row++) {
 			for (int col = 0; col < MapConstants.MAP_WIDTH; col++) {
 				grid[row][col].setExplored(explored);
+			}
+		}
+	}
+	
+	//Set all cells as explored based on boolean true is all explord false is all unexplored
+	public void setAllMoveThru(boolean moveThru) {
+		for (int row = 0; row < MapConstants.MAP_HEIGHT; row++) {
+			for (int col = 0; col < MapConstants.MAP_WIDTH; col++) {
+				grid[row][col].setMoveThru(moveThru);
 			}
 		}
 	}
@@ -106,10 +91,10 @@ public class Map {
 		for (int row = 0; row < MapConstants.MAP_HEIGHT; row++) {
 			for (int col = 0; col < MapConstants.MAP_WIDTH; col++) {
 				cell = grid[row][col];
-				if(checkValidMove(row,col))
+				if(checkValidMove(row,col) && clearForRobot(row,col) && !cell.isMoveThru())
+//				if(checkValidMove(row,col) && clearForRobot(row,col) && moveThru(row,col))
 				{
-					if((distance > loc.distance(cell.getPos())) || 
-							(distance == loc.distance(cell.getPos()) && cell.getPos().distance(botLoc) < nearest.getPos().distance(botLoc))){
+					if((distance > loc.distance(cell.getPos())&& cell.getPos().distance(botLoc)>0)){
 						nearest = cell;
 						distance = loc.distance(cell.getPos());
 					}
@@ -117,6 +102,28 @@ public class Map {
 			}
 		}
 		return nearest;
+	}
+	
+	//Make sure the robot can move to the row, and col
+	public boolean clearForRobot(int row, int col) {
+		for(int r=row-1; r<= row+1; r++) {
+			for(int c=col-1; c<=col+1; c++) {
+				if(!grid[r][c].isExplored()||grid[r][c].isObstacle())
+					return false;
+			}
+		}
+		return true;
+	}
+	
+	//See if cell has unmoved place that is not completely moved thru
+	public boolean moveThru(int row, int col) {
+		for(int r=row-1; r<= row+1; r++) {
+			for(int c=col-1; c<=col+1; c++) {
+				if(!grid[r][c].isMoveThru())
+					return true;
+			}
+		}
+		return false;
 	}
 
 	// Check if the row and col is within the map boundary
@@ -128,10 +135,42 @@ public class Map {
 	public boolean checkValidMove(int row, int col) {
 		return checkValidCell(row, col) && !getCell(row, col).isVirtualWall() && !getCell(row, col).isObstacle() && getCell(row,col).isExplored();
 	}
+	
+	// Check if valid to move there cannot move to virtual wall
+	public boolean wayPointClear(int row, int col) {
+		return checkValidCell(row, col) && !getCell(row, col).isVirtualWall() && !getCell(row, col).isObstacle();
+	}
 
 	// Reset Map
 	public void resetMap() {
 		initMap();
+	}
+	
+	//Set the area under the robot as passed thru
+	public void passThru(int row,int col) {
+		for(int r= row-1; r<=row+1; r++) {
+			for(int c= col-1; c<=col+1; c++) {
+				grid[r][c].setMoveThru(true);
+			}
+		}
+	}
+	
+	// Reinit virtual walls around obstacle
+	public void reinitVirtualWall() {
+		for (int row = 0; row < MapConstants.MAP_HEIGHT; row++) {
+			for (int col = 0; col < MapConstants.MAP_WIDTH; col++) {
+				// Init Virtual wall
+				if (row == 0 || col == 0 || row == MapConstants.MAP_HEIGHT - 1 || col == MapConstants.MAP_WIDTH - 1) {
+					grid[row][col].setVirtualWall(true);
+				}
+				if (grid[row][col].isObstacle()) {
+					for (int r = row - 1; r <= row + 1; r++)
+						for (int c = col - 1; c <= col + 1; c++)
+							if (checkValidCell(r, c))
+								grid[row][col].setVirtualWall(true);
+				}
+			}
+		}
 	}
 
 	// Returns the Percentage Explored
@@ -180,68 +219,5 @@ public class Map {
 				grid[r][c].setPath(false);
 			}
 		}
-	}
-
-	// Draw the Map Graphics Cells
-	public void draw(boolean explored) {
-		// Basic Init for the Cells
-		gc.setStroke(MapConstants.CW_COLOR);
-		gc.setLineWidth(2);
-
-		// Draw the Cells on the Map Canvas
-		for (int row = 0; row < MapConstants.MAP_HEIGHT; row++) {
-
-			for (int col = 0; col < MapConstants.MAP_WIDTH; col++) {
-				// Select Color of the Cells
-				if(grid[row][col].isPath())
-					gc.setFill(MapConstants.PH_COLOR);
-				else if (row <= MapConstants.STARTZONE_ROW + 1 && col <= MapConstants.STARTZONE_COL + 1)
-					gc.setFill(MapConstants.SZ_COLOR);
-				else if (row >= MapConstants.GOALZONE_ROW - 1 && col >= MapConstants.GOALZONE_COL - 1)
-					gc.setFill(MapConstants.GZ_COLOR);
-				else {
-					if (explored) {
-						if (grid[row][col].isObstacle())
-							gc.setFill(MapConstants.OB_COLOR);
-						else if (grid[row][col].isExplored())
-							gc.setFill(MapConstants.EX_COLOR);
-						else
-							gc.setFill(MapConstants.UE_COLOR);
-					} else {
-						if (grid[row][col].isObstacle())
-							gc.setFill(MapConstants.OB_COLOR);
-						else
-							gc.setFill(MapConstants.EX_COLOR);
-					}
-				}
-
-				// Draw the Cell on the Map based on the Position Indicated
-				gc.strokeRect(col * MapConstants.MAP_CELL_SZ + MapConstants.MAP_OFFSET / 2,
-						(MapConstants.MAP_CELL_SZ - 1) * MapConstants.MAP_HEIGHT - row * MapConstants.MAP_CELL_SZ
-								+ MapConstants.MAP_OFFSET / 2,
-						MapConstants.MAP_CELL_SZ, MapConstants.MAP_CELL_SZ);
-				gc.fillRect(col * MapConstants.MAP_CELL_SZ + MapConstants.MAP_OFFSET / 2,
-						(MapConstants.MAP_CELL_SZ - 1) * MapConstants.MAP_HEIGHT - row * MapConstants.MAP_CELL_SZ
-								+ MapConstants.MAP_OFFSET / 2,
-						MapConstants.MAP_CELL_SZ, MapConstants.MAP_CELL_SZ);
-			}
-
-			// Draw waypoint on the Map
-			if (wayPoint != null) {
-				gc.setFill(MapConstants.WP_COLOR);
-				gc.fillRect(wayPoint.getX() * MapConstants.MAP_CELL_SZ + MapConstants.MAP_OFFSET / 2,
-						(MapConstants.MAP_CELL_SZ - 1) * MapConstants.MAP_HEIGHT
-								- wayPoint.getY() * MapConstants.MAP_CELL_SZ + MapConstants.MAP_OFFSET / 2,
-						MapConstants.MAP_CELL_SZ, MapConstants.MAP_CELL_SZ);
-				gc.setFill(Color.BLACK);
-				gc.fillText("W",
-						wayPoint.getX() * MapConstants.MAP_CELL_SZ + MapConstants.MAP_OFFSET / 2
-								+ MapConstants.CELL_CM / 2,
-						(MapConstants.MAP_CELL_SZ - 1) * MapConstants.MAP_HEIGHT
-								- (wayPoint.getY() - 1) * MapConstants.MAP_CELL_SZ + MapConstants.MAP_OFFSET / 2
-								- MapConstants.CELL_CM / 2);
-			}
-		}
-
 	}
 }

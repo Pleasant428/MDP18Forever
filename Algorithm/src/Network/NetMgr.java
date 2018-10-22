@@ -161,49 +161,6 @@ public class NetMgr {
 		return null;
 	}
 	
-	// Receive Message Repeat non waiting receive
-	public String receiveNoWait() {
-		try {
-			
-			//Set timer to resend specified msg if nothing received
-			TimerTask retransmit = new TimerTask() {
-				public void run() {
-					System.out.println("Resending previous msg!");
-					netMgr.send(prevMsg);
-				}
-			};
-			wait.schedule(retransmit, RobotConstants.WAIT_TIME, RobotConstants.WAIT_TIME);
-			System.out.println("Receiving No Wait Message");
-			// KIV determine format for message traversal
-			String recievedMsg = in.readLine();
-			//wait.cancel();
-			wait.purge();
-			if (recievedMsg != null && recievedMsg.length() > 0) {
-				System.out.println("Received Message: " + recievedMsg);
-				return recievedMsg;
-			}
-
-		} catch (IOException e) {
-			System.out.println("Recieving Message Failed (IOException)!");
-//			if(socket.isConnected())
-//				System.out.println("Connection still Established!");
-//			else {
-//				while(true)
-//				{
-//					System.out.println("Connection disrupted! Trying to Reconnect!");
-//					if(netMgr.startConn())
-//						break;
-//				}
-//			}
-			return receiveNoWait();
-		} catch (Exception e) {
-			System.out.println("Receiving Message Failed!");
-			e.printStackTrace();
-		}
-
-		return null;
-	}
-	
 	public boolean isConnected() {
 		
 		if(socket==null)

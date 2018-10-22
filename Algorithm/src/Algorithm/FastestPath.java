@@ -208,14 +208,13 @@ public class FastestPath {
 			else
 				System.out.print("(" + temp.getPos().y + ", " + temp.getPos().x + ")");
 		}
-		exploredMap.draw(true);
-
 		System.out.println("\n");
 	}
 	
 	//Returns the movements required to execute the path
 	public ArrayList<Command> getPathCommands(ArrayList<Cell> path) {
 		Robot tempRobot = new Robot(true, robot.getDirection(), robot.getPosition().y,robot.getPosition().x);
+		tempRobot.setFastSense(true);
 		ArrayList<Command> moves = new ArrayList<Command>();
 		
 		Command move;
@@ -228,6 +227,7 @@ public class FastestPath {
 		
 		//Iterate through the path
 		for(int i=0; i< path.size(); i++) {
+			move = Command.ERROR;
 			newCell = path.get(i);
 			cellDir = getCellDirection(cell.getPos(),newCell.getPos());
 			
@@ -235,6 +235,7 @@ public class FastestPath {
 				if(calibratePoint(cell, tempRobot.getDirection())/*||calibrateCount == RobotConstants.CALIBRATE_AFTER*/)
 				{
 //					calibrateCount = 0;
+					//Found a Calibration Point
 					moves.add(Command.ALIGN_RIGHT);
 					moves.add(Command.ALIGN_FRONT);
 				}
@@ -242,10 +243,26 @@ public class FastestPath {
 //					calibrateCount++;
 			}
 			
-			while(tempRobot.getDirection()!=cellDir) {
-				move = getTurnMovement(tempRobot.getDirection(), cellDir);
-				tempRobot.move(move, RobotConstants.MOVE_STEPS, exploredMap);
-				moves.add(move);
+//			while(tempRobot.getDirection()!=cellDir) {
+//				move = getTurnMovement(tempRobot.getDirection(), cellDir);
+//				tempRobot.move(move, RobotConstants.MOVE_STEPS, exploredMap);
+//				moves.add(move);
+//			}
+			//If the TempRobot and cell direction not the same
+			if(tempRobot.getDirection()!=cellDir) {
+				if(Direction.reverse(tempRobot.getDirection()) == cellDir) {
+					move = Command.BACKWARD;
+					tempRobot.move(move, RobotConstants.MOVE_STEPS, exploredMap);
+					moves.add(move);
+					cell = newCell;
+					continue;
+				}
+				else {
+					move = getTurnMovement(tempRobot.getDirection(), cellDir);
+					tempRobot.move(move, RobotConstants.MOVE_STEPS, exploredMap);
+					moves.add(move);
+					
+				}
 			}
 			//Keep Moving Forward in the Path
 			move = Command.FORWARD;
