@@ -202,8 +202,6 @@ public class Exploration {
 		// it
 		Cell unCell = exploredMap.nearestUnexp(robot.getPosition());
 		System.out.println("Unexplored: " + unCell.toString());
-		if (unCell == null)
-			return false;
 		Cell cell = exploredMap.nearestExp(unCell.getPos(), robot.getPosition());
 		if (cell == null)
 			return false;
@@ -243,8 +241,6 @@ public class Exploration {
 		//Not moving back to start single moves 
 		if (!loc.equals(start)) {
 			for (Command c : commands) {
-				if(c == Command.TURN_LEFT)
-					System.out.println("Command "+c+" Left: "+Direction.getNext(robot.getDirection())+" Right: "+Direction.getPrevious(robot.getDirection()));
 				
 				if ((c == Command.FORWARD) && !movable(robot.getDirection())) {
 					System.out.println("Not Executing Forward Not Movable");
@@ -270,7 +266,6 @@ public class Exploration {
 				System.out.println("Not Near a Wal");
 				Direction dir = Direction.RIGHT;
 				//If nearer to left wall
-				System.out.println("robot x:"+robot.getPosition().getX());
 				if(robot.getPosition().getX()<MapConstants.MAP_WIDTH/2)
 					dir =  Direction.LEFT;
 				
@@ -338,12 +333,10 @@ public class Exploration {
 					break;
 				} 
 				else {
-					System.out.println("c = froward "+(c == Command.FORWARD));
 					if(c == Command.FORWARD) {
 						moves++;
 						// If last command
 						if (i == (commands.size() - 1)) {
-							System.out.println("inside last Forward");
 							robot.move(c, moves, exploredMap);
 							robot.sense(exploredMap, map);
 						}
@@ -486,10 +479,6 @@ public class Exploration {
 			colInc = 0;
 			break;
 		}
-		System.out.println("Checking Cell: "+(robot.getPosition().y + rowInc)+
-		","+(robot.getPosition().x + colInc)+" validMove:"
-				+exploredMap.checkValidMove(robot.getPosition().y + rowInc,
-		robot.getPosition().x + colInc));
 		return exploredMap.checkValidMove(robot.getPosition().y + rowInc, robot.getPosition().x + colInc);
 
 	}

@@ -208,8 +208,6 @@ public class FastestPath {
 			else
 				System.out.print("(" + temp.getPos().y + ", " + temp.getPos().x + ")");
 		}
-		exploredMap.draw(true);
-
 		System.out.println("\n");
 	}
 	

@@ -42,6 +42,7 @@ public class Simulator extends Application {
 	private Point wayPoint = new Point(MapConstants.GOALZONE);
 	private Robot robot;
 	private boolean sim = true;
+	private boolean expMapDraw = true;
 
 	private boolean setObstacle = false;
 	private boolean setWaypoint = false;
@@ -103,12 +104,15 @@ public class Simulator extends Application {
 		mapGrid = new Canvas(MapConstants.MAP_CELL_SZ * MapConstants.MAP_WIDTH + 1 + MapConstants.MAP_OFFSET,
 				MapConstants.MAP_CELL_SZ * MapConstants.MAP_HEIGHT + 1 + MapConstants.MAP_OFFSET);
 		gc = mapGrid.getGraphicsContext2D();
-		drawMap(!setObstacle);
-		robot.setGc(gc);
-		map.setGc(gc);
-		exploredMap.setGc(gc);
-		exploredMap.draw(true);
-		robot.draw();
+		expMapDraw = !setObstacle;
+		expMapDraw = true;
+		
+		new Timer().scheduleAtFixedRate(new TimerTask() {
+			public void run() {
+				drawMap(expMapDraw);
+				drawRobot();
+			}
+		},100,100);
 
 		// Canvas MouseEvent
 		mapGrid.setOnMouseClicked(MapClick);
@@ -199,11 +203,9 @@ public class Simulator extends Application {
 					loadMapBtn.setText("Load Map");
 					saveMapBtn.setText("Save Map");
 				}
-
 				setRobot = false;
 				setWaypoint = false;
-				drawMap(!setObstacle);
-				robot.draw();
+				expMapDraw = !setObstacle;
 			}
 		});
 		loadMapBtn.setOnMouseClicked(new EventHandler<MouseEvent>() {
@@ -214,16 +216,14 @@ public class Simulator extends Application {
 					if (file != null) {
 						MapDescriptor.loadMapFromDisk(map, file.getAbsolutePath());
 					}
-					map.draw(false);
-					robot.draw();
+					expMapDraw = false;
 				} else {
 					fileChooser.setTitle("Choose file to load ExploredMap to");
 					File file = fileChooser.showOpenDialog(primaryStage);
 					if (file != null) {
 						MapDescriptor.loadMapFromDisk(exploredMap, file.getAbsolutePath());
 					}
-					exploredMap.draw(true);
-					robot.draw();
+					expMapDraw = true;
 				}
 
 			}
@@ -421,6 +421,8 @@ public class Simulator extends Application {
 					if (explored) {
 						if (exploredMap.getCell(row, col).isObstacle())
 							gc.setFill(MapConstants.OB_COLOR);
+						else if (exploredMap.getCell(row, col).isMoveThru())
+							gc.setFill(MapConstants.THRU_COLOR);
 						else if (exploredMap.getCell(row, col).isExplored())
 							gc.setFill(MapConstants.EX_COLOR);
 						else
@@ -500,10 +502,9 @@ public class Simulator extends Application {
 
 			}
 			if (setObstacle)
-				map.draw(false);
+				expMapDraw = false;
 			else
-				exploredMap.draw(true);
-			robot.draw();
+				expMapDraw = true;
 		}
 
 	};
@@ -566,7 +567,7 @@ public class Simulator extends Application {
 			wayPoint = new Point(col, row);
 			exploredMap.setWayPoint(wayPoint);
 			if (!setObstacle)
-				exploredMap.draw(true);
+				expMapDraw = true;
 			return true;
 		} else
 			return false;
@@ -608,8 +609,7 @@ public class Simulator extends Application {
 				robot.setSim(false);
 				System.out.println("SF Here");
 				exploredMap.removePaths();
-				exploredMap.draw(true);
-				robot.draw();
+				expMapDraw = true;
 				fastTask = new Thread(new FastTask());
 				fastTask.start();
 
@@ -620,29 +620,13 @@ public class Simulator extends Application {
 				expTask = new Thread(new ExplorationTask());
 				expTask.start();
 
-//				while(true) {
-//					String [] msgArr = NetMgr.getInstance().receive().split("//|");
-//					if(msgArr[0].equals("And") && Command.values()[Integer.parseInt(msgArr[2])] == Command.START_FAST)
-//					{
-//						sim = false;
-//						System.out.println("RF Here");
-//						exploredMap.draw(true);
-//						robot.draw();
-//						fastTask = new Thread(new FastTask());
-//						fastTask.start();
-//						NetMgr.getInstance().send("Alg|And|"+RobotConstants.Command.ENDFAST);
-//						break;
-//					}
-//				}
-
 				break;
 
 			case SIM_FAST:
 				sim = true;
+				expMapDraw = true;
 				System.out.println("SF Here");
 				exploredMap.removePaths();
-				exploredMap.draw(true);
-				robot.draw();
 				fastTask = new Thread(new FastTask());
 				fastTask.start();
 				break;
@@ -651,8 +635,7 @@ public class Simulator extends Application {
 				sim = true;
 				System.out.println("SE Here");
 				robot.sense(exploredMap, map);
-				exploredMap.draw(true);
-				robot.draw();
+				expMapDraw = true;
 				expTask = new Thread(new ExplorationTask());
 				expTask.start();
 				break;
@@ -712,16 +695,12 @@ public class Simulator extends Application {
 						}
 						wayPoint = new Point(wayCol, wayRow);
 						exploredMap.setWayPoint(wayPoint);
-						exploredMap.draw(true);
-						robot.draw();
 					} else if (c == Command.START_EXP) {
 						netMgr.send("Alg|Ard|S|0");
 					}
 				} while (c != Command.START_EXP);
 			}
 			robot.sense(exploredMap, map);
-			exploredMap.draw(true);
-			robot.draw();
 			System.out.println("coverage: " + coverageLimitSB.getValue());
 			System.out.println("time: " + timeLimitSB.getValue());
 			double coverageLimit = (int) (coverageLimitSB.getValue());
@@ -747,8 +726,6 @@ public class Simulator extends Application {
 					if (com == Command.START_FAST) {
 						sim = false;
 						System.out.println("RF Here");
-						exploredMap.draw(true);
-						robot.draw();
 						fastTask = new Thread(new FastTask());
 						fastTask.start();
 						break;
@@ -858,14 +835,64 @@ public class Simulator extends Application {
 			if (setObstacle) {
 				map.resetMap();
 				map.setAllExplored(true);
-				map.draw(false);
 			} else {
 				exploredMap.resetMap();
 				exploredMap.setAllExplored(false);
-				exploredMap.draw(true);
 			}
 			robot.setStartPos(robot.getPosition().x, robot.getPosition().y, exploredMap);
-			robot.draw();
 		}
 	};
+	
+	// Draw Method for Robot
+	public void drawRobot() {
+		gc.setStroke(RobotConstants.ROBOT_OUTLINE);
+		gc.setLineWidth(2);
+
+		gc.setFill(RobotConstants.ROBOT_BODY);
+
+		int col = robot.getPosition().x - 1;
+		int row = robot.getPosition().y + 1;
+		int dirCol = 0, dirRow = 0;
+
+		gc.strokeOval(col * MapConstants.MAP_CELL_SZ + MapConstants.MAP_OFFSET / 2,
+				(MapConstants.MAP_CELL_SZ - 1) * MapConstants.MAP_HEIGHT - row * MapConstants.MAP_CELL_SZ
+						+ MapConstants.MAP_OFFSET / 2,
+				3 * MapConstants.MAP_CELL_SZ, 3 * MapConstants.MAP_CELL_SZ);
+		gc.fillOval(col * MapConstants.MAP_CELL_SZ + MapConstants.MAP_OFFSET / 2,
+				(MapConstants.MAP_CELL_SZ - 1) * MapConstants.MAP_HEIGHT - row * MapConstants.MAP_CELL_SZ
+						+ MapConstants.MAP_OFFSET / 2,
+				3 * MapConstants.MAP_CELL_SZ, 3 * MapConstants.MAP_CELL_SZ);
+
+		gc.setFill(RobotConstants.ROBOT_DIRECTION);
+		switch (robot.getDirection()) {
+		case UP:
+			dirCol = robot.getPosition().x;
+			dirRow = robot.getPosition().y + 1;
+			break;
+		case DOWN:
+			dirCol = robot.getPosition().x;
+			dirRow = robot.getPosition().y - 1;
+			break;
+		case LEFT:
+			dirCol = robot.getPosition().x - 1;
+			dirRow = robot.getPosition().y;
+			break;
+		case RIGHT:
+			dirCol = robot.getPosition().x + 1;
+			dirRow = robot.getPosition().y;
+			break;
+		}
+		gc.fillOval(dirCol * MapConstants.MAP_CELL_SZ + MapConstants.MAP_OFFSET / 2,
+				(MapConstants.MAP_CELL_SZ - 1) * MapConstants.MAP_HEIGHT - dirRow * MapConstants.MAP_CELL_SZ
+						+ MapConstants.MAP_OFFSET / 2,
+				MapConstants.MAP_CELL_SZ, MapConstants.MAP_CELL_SZ);
+
+		gc.setFill(Color.BLACK);
+		for (Sensor s : robot.getSensorList()) {
+			gc.fillText(s.getId(), s.getCol() * MapConstants.MAP_CELL_SZ + MapConstants.MAP_OFFSET / 2,
+					(MapConstants.MAP_CELL_SZ) * MapConstants.MAP_HEIGHT - s.getRow() * MapConstants.MAP_CELL_SZ
+							+ MapConstants.MAP_OFFSET / 2);
+		}
+
+	}
 }
