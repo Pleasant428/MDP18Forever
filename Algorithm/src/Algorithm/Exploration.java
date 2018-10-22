@@ -185,6 +185,7 @@ public class Exploration {
 						areaExplored = exploredMap.exploredPercentage();
 					}while(prevArea == areaExplored);
 					moves=1;
+					checkingStep = 3;
 				}
 			} while (areaExplored < coverageLimit && System.currentTimeMillis() < endTime);
 			

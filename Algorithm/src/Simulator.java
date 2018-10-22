@@ -349,60 +349,6 @@ public class Simulator extends Application {
 
 	}
 
-	// Draw Robot
-//	private void drawRobot() {
-//		gc.setStroke(RobotConstants.ROBOT_OUTLINE);
-//		gc.setLineWidth(2);
-//
-//		gc.setFill(RobotConstants.ROBOT_BODY);
-//
-//		int col = robot.getPosition().x - 1;
-//		int row = robot.getPosition().y + 1;
-//		int dirCol = 0, dirRow = 0;
-//
-//		gc.strokeOval(col * MapConstants.MAP_CELL_SZ + MapConstants.MAP_OFFSET / 2,
-//				(MapConstants.MAP_CELL_SZ - 1) * MapConstants.MAP_HEIGHT - row * MapConstants.MAP_CELL_SZ
-//						+ MapConstants.MAP_OFFSET / 2,
-//				3 * MapConstants.MAP_CELL_SZ, 3 * MapConstants.MAP_CELL_SZ);
-//		gc.fillOval(col * MapConstants.MAP_CELL_SZ + MapConstants.MAP_OFFSET / 2,
-//				(MapConstants.MAP_CELL_SZ - 1) * MapConstants.MAP_HEIGHT - row * MapConstants.MAP_CELL_SZ
-//						+ MapConstants.MAP_OFFSET / 2,
-//				3 * MapConstants.MAP_CELL_SZ, 3 * MapConstants.MAP_CELL_SZ);
-//
-//		gc.setFill(RobotConstants.ROBOT_DIRECTION);
-//		switch (robot.getDirection()) {
-//		case UP:
-//			dirCol = robot.getPosition().x;
-//			dirRow = robot.getPosition().y + 1;
-//			break;
-//		case DOWN:
-//			dirCol = robot.getPosition().x;
-//			dirRow = robot.getPosition().y - 1;
-//			break;
-//		case LEFT:
-//			dirCol = robot.getPosition().x - 1;
-//			dirRow = robot.getPosition().y;
-//			break;
-//		case RIGHT:
-//			dirCol = robot.getPosition().x + 1;
-//			dirRow = robot.getPosition().y;
-//			break;
-//		}
-//		System.out.print("col: " + dirCol + " row:" + dirRow);
-//		gc.fillOval(dirCol * MapConstants.MAP_CELL_SZ + MapConstants.MAP_OFFSET / 2,
-//				(MapConstants.MAP_CELL_SZ - 1) * MapConstants.MAP_HEIGHT - dirRow * MapConstants.MAP_CELL_SZ
-//						+ MapConstants.MAP_OFFSET / 2,
-//				MapConstants.MAP_CELL_SZ, MapConstants.MAP_CELL_SZ);
-//
-//		gc.setFill(Color.BLACK);
-//		for (Sensor s : robot.getSensorList()) {
-//			gc.fillText(s.getId(), s.getCol() * MapConstants.MAP_CELL_SZ + MapConstants.MAP_OFFSET / 2,
-//					(MapConstants.MAP_CELL_SZ) * MapConstants.MAP_HEIGHT - s.getRow() * MapConstants.MAP_CELL_SZ
-//							+ MapConstants.MAP_OFFSET / 2);
-//		}
-//
-//	}
-
 	// Draw the Map Graphics Cells
 	private void drawMap(boolean explored) {
 		// Basic Init for the Cells
@@ -421,6 +367,8 @@ public class Simulator extends Application {
 					if (explored) {
 						if (exploredMap.getCell(row, col).isObstacle())
 							gc.setFill(MapConstants.OB_COLOR);
+						else if (exploredMap.getCell(row, col).isPath())
+							gc.setFill(MapConstants.PH_COLOR);
 						else if (exploredMap.getCell(row, col).isMoveThru())
 							gc.setFill(MapConstants.THRU_COLOR);
 						else if (exploredMap.getCell(row, col).isExplored())
