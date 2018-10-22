@@ -343,7 +343,6 @@ public class Exploration {
 						}
 					}
 					else{
-						System.out.println("else moves " + moves);
 						if (moves > 0) {
 							robot.move(Command.FORWARD, moves, exploredMap);
 							robot.sense(exploredMap, map);

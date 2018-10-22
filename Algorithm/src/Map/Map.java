@@ -11,15 +11,7 @@ import java.util.ArrayList;
 public class Map {
 
 	private final Cell[][] grid;
-	private Point wayPoint;
-
-	public Point getWayPoint() {
-		return wayPoint;
-	}
-
-	public void setWayPoint(Point wayPoint) {
-		this.wayPoint = wayPoint;
-	}
+	
 	// KIV add Robot once Created
 	public Map() {
 		grid = new Cell[MapConstants.MAP_HEIGHT][MapConstants.MAP_WIDTH];
@@ -48,6 +40,15 @@ public class Map {
 		for (int row = 0; row < MapConstants.MAP_HEIGHT; row++) {
 			for (int col = 0; col < MapConstants.MAP_WIDTH; col++) {
 				grid[row][col].setExplored(explored);
+			}
+		}
+	}
+	
+	//Set all cells as explored based on boolean true is all explord false is all unexplored
+	public void setAllMoveThru(boolean moveThru) {
+		for (int row = 0; row < MapConstants.MAP_HEIGHT; row++) {
+			for (int col = 0; col < MapConstants.MAP_WIDTH; col++) {
+				grid[row][col].setMoveThru(moveThru);
 			}
 		}
 	}
@@ -133,6 +134,11 @@ public class Map {
 	// Check if valid to move there cannot move to virtual wall
 	public boolean checkValidMove(int row, int col) {
 		return checkValidCell(row, col) && !getCell(row, col).isVirtualWall() && !getCell(row, col).isObstacle() && getCell(row,col).isExplored();
+	}
+	
+	// Check if valid to move there cannot move to virtual wall
+	public boolean wayPointClear(int row, int col) {
+		return checkValidCell(row, col) && !getCell(row, col).isVirtualWall() && !getCell(row, col).isObstacle();
 	}
 
 	// Reset Map

@@ -230,6 +230,7 @@ public class Robot {
 	public void setStartPos(int col, int row, Map exploredMap) {
 		setPosition(col, row);
 		exploredMap.setAllExplored(false);
+		exploredMap.setAllMoveThru(false);
 		for (int r = row - 1; r <= row + 1; r++) {
 			for (int c = col - 1; c <= col + 1; c++) {
 				exploredMap.getCell(r, c).setExplored(true);

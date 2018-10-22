@@ -187,6 +187,10 @@ public class Simulator extends Application {
 		setWaypointBtn.setOnMouseClicked(new EventHandler<MouseEvent>() {
 			public void handle(MouseEvent e) {
 				setWaypoint = !setWaypoint;
+				if(setWaypoint)
+					setWaypointBtn.setText("Confirm Waypoint");
+				else
+					setWaypointBtn.setText("Set Waypoint");
 				setObstacle = false;
 				setRobot = false;
 			}
@@ -429,11 +433,11 @@ public class Simulator extends Application {
 			System.out.println(exploredMap.getCell(selectedRow, selectedCol).toString() + " validMove:"
 					+ exploredMap.checkValidMove(selectedRow, selectedCol));
 
-			if (setWaypoint)
+			if (setWaypoint) {
 				System.out.println(setWayPoint(selectedRow, selectedCol)
 						? "New WayPoint set at row: " + selectedRow + " col: " + selectedCol
 						: "Unable to put waypoint at obstacle or virtual wall!");
-
+			}
 			if (setRobot)
 				System.out.println(setRobotLocation(selectedRow, selectedCol) ? "Robot Position has changed"
 						: "Unable to put Robot at obstacle or virtual wall!");
@@ -508,14 +512,13 @@ public class Simulator extends Application {
 
 	// Set the waypoint
 	private boolean setWayPoint(int row, int col) {
-		if (exploredMap.checkValidMove(row, col)) {
+		if (exploredMap.wayPointClear(row, col)) {
 			if (wayPoint != null)
-				map.getCell(wayPoint).setWayPoint(false);
+				exploredMap.getCell(wayPoint).setWayPoint(false);
 
 			wayPoint = new Point(col, row);
-			exploredMap.setWayPoint(wayPoint);
 			if (!setObstacle)
-				expMapDraw = true;
+				expMapDraw = false;
 			return true;
 		} else
 			return false;
@@ -642,7 +645,6 @@ public class Simulator extends Application {
 							break;
 						}
 						wayPoint = new Point(wayCol, wayRow);
-						exploredMap.setWayPoint(wayPoint);
 					} else if (c == Command.START_EXP) {
 						netMgr.send("Alg|Ard|S|0");
 					}
@@ -765,9 +767,11 @@ public class Simulator extends Application {
 					moves = 0;
 				}
 			}
-			netMgr.send("Alg|Ard|"+RobotConstants.Command.ALIGN_FRONT.ordinal()+"|");
-			if (!sim)
-				NetMgr.getInstance().send("Alg|And|" + RobotConstants.Command.ENDFAST);
+			
+			if (!sim) {
+				netMgr.send("Alg|Ard|"+RobotConstants.Command.ALIGN_FRONT.ordinal()+"|");
+				netMgr.send("Alg|And|" + RobotConstants.Command.ENDFAST+"|");
+			}
 			
 			endT = System.currentTimeMillis();
 			int seconds = (int)((endT - startT)/1000%60);
