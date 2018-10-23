@@ -11,6 +11,7 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Toast;
 
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -400,6 +401,9 @@ public class PixelGridView extends View {
         wayPoint[1] = row;
         if (this.wayPoint == null) this.wayPoint = new int[2];
         this.wayPoint = wayPoint;
+        String wayPointString = "Setting Waypoint to (" + String.valueOf(column) + "," + String.valueOf(row) + ")";
+        Toast.makeText(this.getContext(), wayPointString, Toast.LENGTH_SHORT).show();
+
     }
 
     // Check Start Point
