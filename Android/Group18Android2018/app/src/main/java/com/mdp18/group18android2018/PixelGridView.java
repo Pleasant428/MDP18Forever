@@ -251,30 +251,30 @@ public class PixelGridView extends View {
         // Camera will be on the bottom right of the robot.
 
         // If robot is facing up, arrow direction would be left.
-        // Arrow coordinates will be col+2, row-1
+        // Arrow coordinates will be col+2, row+1
         if (robotDir == 0) {
             arrowImageCoord[0] = robotColumn+2;
-            arrowImageCoord[1] = robotRow-1;
+            arrowImageCoord[1] = robotRow+1;
         }
 
         // If robot is facing left, arrow direction would be down.
-        // Arrow coordinates will be col+1, row+2
+        // Arrow coordinates will be col-1, row+2
         else if (robotDir == 1) {
-            arrowImageCoord[0] = robotColumn+1;
+            arrowImageCoord[0] = robotColumn-1;
             arrowImageCoord[1] = robotRow+2;
         }
 
         // If robot is facing down, arrow direction would be right.
-        // Arrow coordinates will be col-2, row+1
+        // Arrow coordinates will be col-2, row-1
         else if (robotDir == 2) {
             arrowImageCoord[0] = robotColumn-2;
-            arrowImageCoord[1] = robotRow+1;
+            arrowImageCoord[1] = robotRow-1;
         }
 
         // If robot is facing right, arrow direction would be up.
-        // Arrow coordinates will be col-1, row-2
+        // Arrow coordinates will be col+1, row-2
         else {
-            arrowImageCoord[0] = robotColumn-1;
+            arrowImageCoord[0] = robotColumn+1;
             arrowImageCoord[1] = robotRow-2;
         }
         arrowImageCoord[2] = robotDir;
@@ -546,31 +546,31 @@ public class PixelGridView extends View {
             rect = new RectF(arrowImageCoords.get(i)[0] * cellWidth, (19 - arrowImageCoords.get(i)[1]) * cellHeight,
                     (arrowImageCoords.get(i)[0] + 1) * cellWidth, (20 - arrowImageCoords.get(i)[1]) * cellHeight);
 
-            // Camera will be on the bottom right of the robot.
+            // Camera will be on the top right of the robot.
 
             // If robot is facing up, arrow direction would be left.
-            // Arrow coordinates will be col+2, row-1
+            // Arrow coordinates will be col+2, row+1
             if(arrowImageCoords.get(i)[2] == 0){
                 Bitmap arrowBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.arrow_up_l);
                 canvas.drawBitmap(arrowBitmap,null, rect, null);
             }
 
             // If robot is facing left, arrow direction would be down.
-            // Arrow coordinates will be col+1, row+2
+            // Arrow coordinates will be col-1, row+2
             else if(arrowImageCoords.get(i)[2] == 1){
                 Bitmap arrowBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.arrow_up_d);
                 canvas.drawBitmap(arrowBitmap,null, rect, null);
             }
 
             // If robot is facing down, arrow direction would be right.
-            // Arrow coordinates will be col-2, row+1
+            // Arrow coordinates will be col-2, row-1
             else if(arrowImageCoords.get(i)[2] == 2){
                 Bitmap arrowBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.arrow_up_r);
                 canvas.drawBitmap(arrowBitmap,null, rect, null);
             }
 
             // If robot is facing right, arrow direction would be up.
-            // Arrow coordinates will be col-1, row-2
+            // Arrow coordinates will be col+1, row-2
             else if(arrowImageCoords.get(i)[2] == 3){
                 Bitmap arrowBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.arrow_up_u);
                 canvas.drawBitmap(arrowBitmap,null, rect, null);
