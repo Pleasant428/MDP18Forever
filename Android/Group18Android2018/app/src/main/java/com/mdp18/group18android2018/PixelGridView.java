@@ -811,7 +811,6 @@ public class PixelGridView extends View {
 
     // Part 2 of Map Descriptor
     public void mapDescriptorObstacle(String hexMap){
-
         String hexMapTemp = "1".concat(hexMap);
         BigInteger hexBigInteger = new BigInteger(hexMapTemp, 16);
         String binMap = hexBigInteger.toString(2);
@@ -823,7 +822,6 @@ public class PixelGridView extends View {
             binMapArray[i - 1] = Integer.parseInt(String.valueOf(cur));
         }
         boolean[][] exploredCell = this.getCellExplored();
-
         int binMapArrayIndex = 0;
         for(int j = 0; j < this.getNumRows(); j++){
             for(int i = 0; i < this.getNumColumns(); i++) {
