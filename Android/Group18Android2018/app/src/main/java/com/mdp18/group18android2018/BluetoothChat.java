@@ -57,7 +57,7 @@ public class BluetoothChat extends Thread {
 
 
         //Buffer store for the stream
-        byte[] buffer = new byte[1024];
+        byte[] buffer = new byte[2048];
 
         //Bytes returned from the read()
         int bytes;
@@ -68,7 +68,6 @@ public class BluetoothChat extends Thread {
                 bytes = myInputStream.read(buffer);
                 String incomingMessage = new String(buffer, 0, bytes);
                 Log.d(TAG, "InputStream: " + incomingMessage);
-
 
                 // Broadcast Incoming Message
                 Intent incomingMsgIntent = new Intent("IncomingMsg");

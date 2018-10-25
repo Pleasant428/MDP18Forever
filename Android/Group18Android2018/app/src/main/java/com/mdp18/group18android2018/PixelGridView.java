@@ -248,38 +248,42 @@ public class PixelGridView extends View {
         int robotRow = robotPos[1];
         int robotDir = this.getRobotDirection();
 
-        // Camera will be on the bottom right of the robot.
+        // Camera will be on the top right of the robot.
 
         // If robot is facing up, arrow direction would be left.
         // Arrow coordinates will be col+2, row+1
-        if (robotDir == 0) {
-            arrowImageCoord[0] = robotColumn+2;
-            arrowImageCoord[1] = robotRow+1;
-        }
+        if(this.checkObstacle(robotPos)) {
+            if (robotDir == 0) {
+                arrowImageCoord[0] = robotColumn + 2;
+                arrowImageCoord[1] = robotRow + 1;
+            }
 
-        // If robot is facing left, arrow direction would be down.
-        // Arrow coordinates will be col-1, row+2
-        else if (robotDir == 1) {
-            arrowImageCoord[0] = robotColumn-1;
-            arrowImageCoord[1] = robotRow+2;
-        }
+            // If robot is facing left, arrow direction would be down.
+            // Arrow coordinates will be col-1, row+2
+            else if (robotDir == 1) {
+                arrowImageCoord[0] = robotColumn - 1;
+                arrowImageCoord[1] = robotRow + 2;
+            }
 
-        // If robot is facing down, arrow direction would be right.
-        // Arrow coordinates will be col-2, row-1
-        else if (robotDir == 2) {
-            arrowImageCoord[0] = robotColumn-2;
-            arrowImageCoord[1] = robotRow-1;
-        }
+            // If robot is facing down, arrow direction would be right.
+            // Arrow coordinates will be col-2, row-1
+            else if (robotDir == 2) {
+                arrowImageCoord[0] = robotColumn - 2;
+                arrowImageCoord[1] = robotRow - 1;
+            }
 
-        // If robot is facing right, arrow direction would be up.
-        // Arrow coordinates will be col+1, row-2
-        else {
-            arrowImageCoord[0] = robotColumn+1;
-            arrowImageCoord[1] = robotRow-2;
+            // If robot is facing right, arrow direction would be up.
+            // Arrow coordinates will be col+1, row-2
+            else {
+                arrowImageCoord[0] = robotColumn + 1;
+                arrowImageCoord[1] = robotRow - 2;
+            }
+            arrowImageCoord[2] = robotDir;
+            this.arrowImageCoords.add(arrowImageCoord);
         }
-        arrowImageCoord[2] = robotDir;
-        this.arrowImageCoords.add(arrowImageCoord);
         this.refreshMap(this.getAutoUpdate());
+
+
     }
 
     // Get Arrow coordinates
@@ -297,6 +301,10 @@ public class PixelGridView extends View {
         return this.obstacles;
     }
 
+    public boolean checkObstacle(int[] posCoord){
+        boolean[][] obstacles = this.getObstacles();
+        return obstacles[posCoord[0]][posCoord[1]];
+    }
 
     @Override
     protected void onSizeChanged ( int w, int h, int oldw, int oldh){
