@@ -57,7 +57,7 @@ public class BluetoothChat extends Thread {
 
 
         //Buffer store for the stream
-        byte[] buffer = new byte[2048];
+        byte[] buffer = new byte[4096];
 
         //Bytes returned from the read()
         int bytes;
