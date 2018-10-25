@@ -241,9 +241,9 @@ public class PixelGridView extends View {
     }
 
     // Set Arrow coordinates
-    public void setArrowImageCoord() {
+    public void setArrowImageCoord(int[] robotPos) {
         int[] arrowImageCoord = new int[3];
-        int[] robotPos = this.getCurCoord();
+//        int[] robotPos = this.getCurCoord();
         int robotColumn = robotPos[0];
         int robotRow = robotPos[1];
         int robotDir = this.getRobotDirection();
