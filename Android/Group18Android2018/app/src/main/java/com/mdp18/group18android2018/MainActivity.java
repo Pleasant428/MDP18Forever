@@ -640,251 +640,239 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         public void onReceive(Context context, Intent intent) {
 //            endTime = System.nanoTime();
             String allMsg = intent.getStringExtra("receivingMsg");
+
+            String arrowCommands = "Arrows detected: ";
+
+            // Check for incoming message about arrow to display arrow immediately
             if(allMsg.toLowerCase().contains("RPi|And|A|".toLowerCase())){
                 tv_mystatus.append("Upwards arrow detected\n");
+                // Obtain current coordinates and direction of the robot
                 int[] robotPos = mPGV.getCurCoord();
+                int robotDir = mPGV.getRobotDirection();
+
+                // Place arrow on obtained coordinates
                 mPGV.setArrowImageCoord(robotPos);
+
+                // Update map
                 mPGV.refreshMap(mPGV.getAutoUpdate());
+
+                // Display Arrow string commands
+                tv_mystringcmd.append(arrowCommands.concat(robotPos[0] + "," + robotPos[1] + "," + mPGV.robotDirectionString(robotDir) + "|") + "\n");
             }
+
             Log.d(TAG, "Receiving incoming message: " + allMsg);
+
             tv_mystringcmd.append(allMsg + "\n");
-                            commandBuffer.add(allMsg);
-                            while(!commandBuffer.isEmpty()){
-                                String incomingMsg = commandBuffer.remove(0);
-                                // Filter empty and concatenated string from receiving channel
-                                if (incomingMsg.length() > 8 && incomingMsg.length() < 345) {
 
-                                    // Check if string is for android
-                                    if (incomingMsg.substring(4, 7).equals("And")) {
+            commandBuffer.add(allMsg);
+            while(!commandBuffer.isEmpty()){
+                String incomingMsg = commandBuffer.remove(0);
+                // Filter empty and concatenated string from receiving channel
+                if (incomingMsg.length() > 8 && incomingMsg.length() < 345) {
+                    // Check if string is for android
+                    if (incomingMsg.substring(4, 7).equals("And")) {
+                        String[] filteredMsg = msgDelimiter(incomingMsg.replaceAll("\\,", "\\|").trim(), "\\|");
+                        Log.d(TAG, "Incoming Message filtered: " + filteredMsg[2]);
 
-                                        String[] filteredMsg = msgDelimiter(incomingMsg.replaceAll("\\,", "\\|").trim(), "\\|");
+                        // String commands for Android
+                        switch (filteredMsg[2]) {
 
-                                        Log.d(TAG, "Incoming Message filtered: " + filteredMsg[2]);
+                            // Command: FORWARD
+                            case "0":
+                                for (int counter = Integer.parseInt(filteredMsg[3]); counter >= 1; counter--) {
+                                    mPGV.moveForward();
+                                    tv_mystringcmd.append("Move Forward\n");
+                                    tv_mystatus.append("Moving\n");
+                                    }
+                                    break;
+                            // Command: TURN LEFT
+                            case "1":
 
-                                        // String commands for Android
-                                        switch (filteredMsg[2]) {
-
-                                            // Command: FORWARD
-                                            case "0":
-                                                for (int counter = Integer.parseInt(filteredMsg[3]); counter >= 1; counter--) {
-                                                    mPGV.moveForward();
-                                                    tv_mystringcmd.append("Move Forward\n");
-                                                    tv_mystatus.append("Moving\n");
-                                                }
-                                                break;
-
-
-                                            // Command: TURN LEFT
-                                            case "1":
-
-                                                for (int counter = Integer.parseInt(filteredMsg[3]); counter >= 1; counter--) {
-                                                    mPGV.rotateLeft();
-                                                    tv_mystringcmd.append("Turn Left\n");
-                                                    tv_mystatus.append("Moving\n");
-                                                }
-                                                break;
+                                for (int counter = Integer.parseInt(filteredMsg[3]); counter >= 1; counter--) {
+                                    mPGV.rotateLeft();
+                                    tv_mystringcmd.append("Turn Left\n");
+                                    tv_mystatus.append("Moving\n");
+                                    }
+                                    break;
 
 
-                                            // Command: TURN RIGHT
-                                            case "2":
-                                                for (int counter = Integer.parseInt(filteredMsg[3]); counter >= 1; counter--) {
-                                                    mPGV.rotateRight();
-                                                    tv_mystringcmd.append("Turn Right\n");
-                                                    tv_mystatus.append("Moving\n");
-                                                }
-                                                break;
+                            // Command: TURN RIGHT
+                            case "2":
+                                for (int counter = Integer.parseInt(filteredMsg[3]); counter >= 1; counter--) {
+                                    mPGV.rotateRight();
+                                    tv_mystringcmd.append("Turn Right\n");
+                                    tv_mystatus.append("Moving\n");
+                                    }
+                                    break;
 
 
-                                            // Command: MOVE BACKWARDS
-                                            case "3":
-                                                for (int counter = Integer.parseInt(filteredMsg[3]); counter >= 1; counter--) {
-                                                    mPGV.moveBackwards();
-                                                    tv_mystringcmd.append("Move Backwards\n");
-                                                    tv_mystatus.append("Moving\n");
-                                                }
-                                                break;
+                            // Command: MOVE BACKWARDS
+                            case "3":
+                                for (int counter = Integer.parseInt(filteredMsg[3]); counter >= 1; counter--) {
+                                    mPGV.moveBackwards();
+                                    tv_mystringcmd.append("Move Backwards\n");
+                                    tv_mystatus.append("Moving\n");
+                                    }
+                                    break;
 
 
-                                            // Command: CALIBRATE : ALIGN_FRONT
-                                            case "4":
-                                            case "ALIGN_FRONT":
-                                                tv_mystatus.append("Calibrating robot...\n");
-                                                tv_mystringcmd.append("Calibrating robot...\n");
-                                                break;
+                            // Command: CALIBRATE : ALIGN_FRONT
+                            case "4":
+                            case "ALIGN_FRONT":
+                                tv_mystatus.append("Calibrating robot...\n");
+                                tv_mystringcmd.append("Calibrating robot...\n");
+                                break;
+
+                            // Command: CALIBRATE : ALIGN_RIGHT
+                            case "5":
+                                tv_mystatus.append("Calibrating robot...\n");
+                                tv_mystringcmd.append("Calibrating robot...\n");
+                                break;
+
+                            // Command: END EXPLORATION
+                            case "8":
+                            case "ENDEXP":
+                                endExploration();
+                                tv_mystringcmd.append(arrowCommands + "\n");
+                                break;
 
 
+                            // Command: END FASTEST PATH
+                            case "9":
+                            case "ENDFAST":
+                                endFastestPath();
 
-                                            // Command: CALIBRATE : ALIGN_RIGHT
-                                            case "5":
-                                                tv_mystatus.append("Calibrating robot...\n");
-                                                tv_mystringcmd.append("Calibrating robot...\n");
-                                                break;
+                                break;
 
-                                            // Command: END EXPLORATION
-                                            case "8":
-                                            case "ENDEXP":
-                                                endExploration();
-
-                                                break;
-
-
-                                            // Command: END FASTEST PATH
-                                            case "9":
-                                            case "ENDFAST":
-                                                endFastestPath();
-
-                                                break;
-
-                                            // Command: Part 1 of MAP Descriptor
-                                            case "md1":
-                                                String mapDes1 = filteredMsg[3];
-                                                mPGV.mapDescriptorExplored(mapDes1);
-                                                break;
+                            // Command: Part 1 of MAP Descriptor
+                            case "md1":
+                                String mapDes1 = filteredMsg[3];
+                                mPGV.mapDescriptorExplored(mapDes1);
+                                break;
 
 
-                                            // Command: Part 2 of Map Descriptor
-                                            case "md2":
-                                                String mapDes2 = filteredMsg[3];
-                                                mPGV.mapDescriptorObstacle(mapDes2);
-                                                break;
+                            // Command: Part 2 of Map Descriptor
+                            case "md2":
+                                String mapDes2 = filteredMsg[3];
+                                mPGV.mapDescriptorObstacle(mapDes2);
+                                break;
 
 
-                                            // Command: Robot has stopped moving
-                                            case "s":
-                                                tv_mystatus.append("Stop\n");
-                                                tv_mystringcmd.append(" \n");
-                                                break;
+                            // Command: Robot has stopped moving
+                            case "s":
+                                tv_mystatus.append("Stop\n");
+                                tv_mystringcmd.append(" \n");
+                                break;
 
-                                            // Command: Upwards Arrow detected by RPI
-//                                            case "a":
-//                                                tv_mystatus.append("Upwards arrow detected\n");
-//                                                int[] robotPos = mPGV.getCurCoord();
-//                                                mPGV.setArrowImageCoord(robotPos);
-//                                                mPGV.refreshMap(mPGV.getAutoUpdate());
-//                                                break;
+                            // Default case; string not recognised
+                            default:
+                                Log.d(TAG, "String command not recognised.");
+                                break;
+                                }
 
-                                            // Default case; string not recognised
-                                            default:
-                                                Log.d(TAG, "Switch Case default! String command not recognised.");
-                                                break;
-                                        }
+                                // To handle concatenated string commands
+                        if (filteredMsg.length >= 5){
 
-                                        // To handle concatenated string commands
-                                        if (filteredMsg.length >= 5){
+                            // If the concatenated string command is for Android
+                            if (filteredMsg[5].equals("and")) {
 
-                                            // If the concatenated string command is for Android
-                                            if (filteredMsg[5].equals("and")) {
+                                Log.d(TAG, "Incoming Message 2 filtered: " + filteredMsg[6]);
 
-                                                Log.d(TAG, "Incoming Message 2 filtered: " + filteredMsg[6]);
+                                // Command for Android
+                                switch (filteredMsg[6]) {
 
-                                                // Command for Android
-                                                switch (filteredMsg[6]) {
-
-                                                    // Command: FORWARD
-                                                    case "0":
-                                                        for (int counter = Integer.parseInt(filteredMsg[7]); counter >= 1; counter--) {
-                                                            mPGV.moveForward();
-                                                            tv_mystringcmd.append("Move Forward\n");
-                                                            tv_mystatus.append("Moving\n");
-                                                        }
-                                                        break;
-
-
-                                                    // Command: TURN LEFT
-                                                    case "1":
-
-                                                        for (int counter = Integer.parseInt(filteredMsg[7]); counter >= 1; counter--) {
-                                                            mPGV.rotateLeft();
-                                                            tv_mystringcmd.append("Turn Left\n");
-                                                            tv_mystatus.append("Moving\n");
-                                                        }
-                                                        break;
-
-
-                                                    // Command: TURN RIGHT
-                                                    case "2":
-                                                        for (int counter = Integer.parseInt(filteredMsg[7]); counter >= 1; counter--) {
-                                                            mPGV.rotateRight();
-                                                            tv_mystringcmd.append("Turn Right\n");
-                                                            tv_mystatus.append("Moving\n");
-                                                        }
-                                                        break;
-
-
-                                                    // Command: BACKWARDS
-                                                    case "3":
-                                                        for (int counter = Integer.parseInt(filteredMsg[7]); counter >= 1; counter--) {
-                                                            mPGV.moveBackwards();
-                                                            tv_mystringcmd.append("Move Backwards\n");
-                                                            tv_mystatus.append("Moving\n");
-                                                        }
-                                                        break;
-
-
-                                                    // Command: CALIBRATE : ALIGN_FRONT
-                                                    case "4":
-                                                    case "ALIGN_FRONT":
-                                                        tv_mystatus.append("Calibrating robot...\n");
-                                                        tv_mystringcmd.append("Calibrating robot...\n");
-                                                        break;
-
-
-
-                                                    // Command: CALIBRATE : ALIGN_RIGHT
-                                                    case "5":
-                                                        tv_mystatus.append("Calibrating robot...\n");
-                                                        tv_mystringcmd.append("Calibrating robot...\n");
-                                                        break;
-
-                                                    // Command: END EXPLORATION
-                                                    case "8":
-                                                    case "ENDEXP":
-                                                        endExploration();
-                                                        break;
-
-
-                                                    // Command: END FASTEST PATH
-                                                    case "9":
-                                                    case "ENDFAST":
-                                                        endFastestPath();
-                                                        break;
-
-                                                    // Command: Part 1 of Map Descriptor
-                                                    case "md1":
-                                                        String mapDes1 = filteredMsg[7];
-                                                        mPGV.mapDescriptorExplored(mapDes1);
-                                                        break;
-
-
-                                                    // Command: Part 2 of Map Descriptor
-                                                    case "md2":
-                                                        String mapDes2 = filteredMsg[7];
-                                                        mPGV.mapDescriptorObstacle(mapDes2);
-                                                        break;
-
-                                                    // Command: Robot has stopped moving
-                                                    case "s":
-                                                        tv_mystatus.append("Stop\n");
-                                                        tv_mystringcmd.append(" \n");
-                                                        break;
-
-                                                    // Command: Upwards Arrow detected by RPI
-                                                    case "a":
-                                                        // Format: Rpi|And|A|
-                                                        tv_mystatus.append("Upwards arrow detected\n");
-                                                        int[] robotPos = mPGV.getCurCoord();
-                                                        mPGV.setArrowImageCoord(robotPos);
-                                                        mPGV.refreshMap(mPGV.getAutoUpdate());
-                                                        break;
-
-                                                    // Default case: string not recognised
-                                                    default:
-                                                        Log.d(TAG, "Switch Case default! String command not recognised.");
-                                                        break;
-                                                }
+                                    // Command: FORWARD
+                                    case "0":
+                                        for (int counter = Integer.parseInt(filteredMsg[7]); counter >= 1; counter--) {
+                                            mPGV.moveForward();
+                                            tv_mystringcmd.append("Move Forward\n");
+                                            tv_mystatus.append("Moving\n");
                                             }
-                            }
+                                            break;
 
+
+                                    // Command: TURN LEFT
+                                    case "1":
+                                        for (int counter = Integer.parseInt(filteredMsg[7]); counter >= 1; counter--) {
+                                            mPGV.rotateLeft();
+                                            tv_mystringcmd.append("Turn Left\n");
+                                            tv_mystatus.append("Moving\n");
+                                            }
+                                            break;
+
+
+                                    // Command: TURN RIGHT
+                                    case "2":
+                                        for (int counter = Integer.parseInt(filteredMsg[7]); counter >= 1; counter--) {
+                                            mPGV.rotateRight();
+                                            tv_mystringcmd.append("Turn Right\n");
+                                            tv_mystatus.append("Moving\n");
+                                            }
+                                            break;
+
+
+                                    // Command: BACKWARDS
+                                    case "3":
+                                        for (int counter = Integer.parseInt(filteredMsg[7]); counter >= 1; counter--) {
+                                            mPGV.moveBackwards();
+                                            tv_mystringcmd.append("Move Backwards\n");
+                                            tv_mystatus.append("Moving\n");
+                                            }
+                                            break;
+
+
+                                    // Command: CALIBRATE : ALIGN_FRONT
+                                    case "4":
+                                    case "ALIGN_FRONT":
+                                        tv_mystatus.append("Calibrating robot...\n");
+                                        tv_mystringcmd.append("Calibrating robot...\n");
+                                        break;
+
+                                    // Command: CALIBRATE : ALIGN_RIGHT
+                                    case "5":
+                                        tv_mystatus.append("Calibrating robot...\n");
+                                        tv_mystringcmd.append("Calibrating robot...\n");
+                                        break;
+
+                                    // Command: END EXPLORATION
+                                    case "8":
+                                    case "ENDEXP":
+                                        endExploration();
+                                        break;
+
+
+                                    // Command: END FASTEST PATH
+                                    case "9":
+                                    case "ENDFAST":
+                                        endFastestPath();
+                                        break;
+
+                                    // Command: Part 1 of Map Descriptor
+                                    case "md1":
+                                        String mapDes1 = filteredMsg[7];
+                                        mPGV.mapDescriptorExplored(mapDes1);
+                                        break;
+
+
+                                    // Command: Part 2 of Map Descriptor
+                                    case "md2":
+                                        String mapDes2 = filteredMsg[7];
+                                        mPGV.mapDescriptorObstacle(mapDes2);
+                                        break;
+
+                                    // Command: Robot has stopped moving
+                                    case "s":
+                                        tv_mystatus.append("Stop\n");
+                                        tv_mystringcmd.append(" \n");
+                                        break;
+
+                                    // Default case: string not recognised
+                                    default:
+                                        Log.d(TAG, "String command not recognised.");
+                                        break;
+                                        }
+                            }
+                        }
 
 
                     }

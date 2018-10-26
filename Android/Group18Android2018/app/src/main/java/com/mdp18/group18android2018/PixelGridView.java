@@ -240,10 +240,32 @@ public class PixelGridView extends View {
         return this.robotDirection;
     }
 
+    // Return robot direction in String (for arrow string commands)
+    public String robotDirectionString(int intDirection) {
+
+        String stringDir = "";
+
+        // Robot direction = Up
+        if (intDirection == 0)
+            stringDir = "U";
+
+        // Robot direction = Left
+        else if (intDirection == 1)
+            stringDir = "L";
+
+        // Robot direction = Down
+        else if (intDirection == 2)
+            stringDir = "D";
+
+        else
+            stringDir = "R";
+
+        return stringDir;
+    }
+
     // Set Arrow coordinates
     public void setArrowImageCoord(int[] robotPos) {
         int[] arrowImageCoord = new int[3];
-//        int[] robotPos = this.getCurCoord();
         int robotColumn = robotPos[0];
         int robotRow = robotPos[1];
         int robotDir = this.getRobotDirection();
@@ -278,12 +300,12 @@ public class PixelGridView extends View {
             arrowImageCoord[1] = robotRow - 2;
         }
 
-        
+        // Add the corresponding arrow image depending on direction of arrow.
         arrowImageCoord[2] = robotDir;
         this.arrowImageCoords.add(arrowImageCoord);
 
+        // Update map
         this.refreshMap(this.getAutoUpdate());
-
     }
 
     // Get Arrow coordinates
@@ -301,6 +323,7 @@ public class PixelGridView extends View {
         return this.obstacles;
     }
 
+    // Check if tile is an obstacle
     public boolean checkObstacle(int[] posCoord){
         boolean[][] obstacles = this.getObstacles();
         return obstacles[posCoord[0]][posCoord[1]];
@@ -325,6 +348,7 @@ public class PixelGridView extends View {
         invalidate();
     }
 
+    // For drawing the map
     @Override
     protected void onDraw (Canvas canvas){
         int pos[] = this.getCurPos();
@@ -589,6 +613,7 @@ public class PixelGridView extends View {
     }
 
     // Check if robot has reached wall
+    // Robot cannot go past map boundaries
     public boolean checkReachedWall ( int[] pos, int direction){
 
             int[] boundaries = new int[4];
@@ -793,11 +818,18 @@ public class PixelGridView extends View {
 
     // Part 1 of Map Descriptor
     public void mapDescriptorExplored (String hexMap) {
+
+        // Convert hex MDF String to BigInteger
         BigInteger hexBigInteger = new BigInteger(hexMap, 16);
+
+        // Discard padding bits in the front
         String binMap = hexBigInteger.toString(2);
+        // Discard padding bits in the back
         String binMapExtracted = binMap.substring(2,302);
+
         char cur;
         Integer[] binMapArray = new Integer[binMapExtracted.length()];
+
         for (int i = 0; i < binMapExtracted.length(); i++){
             cur = binMapExtracted.charAt(i);
             binMapArray[i] = Integer.parseInt(String.valueOf(cur));
@@ -814,17 +846,27 @@ public class PixelGridView extends View {
                 binMapArrayIndex++;
             }
         }
+        // Update map
         this.refreshMap(this.getAutoUpdate());
     }
 
     // Part 2 of Map Descriptor
     public void mapDescriptorObstacle(String hexMap){
+
+        // Concatenate hex decimal 1 at the front of the string so the following conversion
+        // will not remove leading zeros in hex MDF String.
         String hexMapTemp = "1".concat(hexMap);
+
+        // Convert hex MDF String to Big Integer
         BigInteger hexBigInteger = new BigInteger(hexMapTemp, 16);
+
+        // Discard concatenated bits
         String binMap = hexBigInteger.toString(2);
+
         char cur;
         int length = binMap.length();
         Integer[] binMapArray = new Integer[binMap.length() - 1];
+
         for (int i = 1; i < binMap.length(); i++){
             cur = binMap.charAt(i);
             binMapArray[i - 1] = Integer.parseInt(String.valueOf(cur));
@@ -842,6 +884,7 @@ public class PixelGridView extends View {
                 }
             }
         }
+        // Update map
         this.refreshMap(this.getAutoUpdate());
     }
 
