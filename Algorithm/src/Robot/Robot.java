@@ -200,10 +200,16 @@ public class Robot {
 	// Moving using the Command enum
 	public void move(Command m, int steps, Map exploredMap) {
 		// System.out.println(m+" steps:"+steps);
+		//Array used for Passing Fastest Movement Commands for faster movement
+		char[] moves = {'W','A','D','X'};
 		if (!sim) {
 			// System.out.println("Alg|Ard|"+m+"|"+steps);
-			NetMgr.getInstance().send("Alg|And|" + m.ordinal() + "|" + steps + "|");
-			NetMgr.getInstance().send("Alg|Ard|" + m.ordinal() + "|" + steps);
+//			if(!fastSense)
+//				NetMgr.getInstance().send("Alg|Ard|" + m.ordinal() + "|" + steps + "|");
+//			else
+				NetMgr.getInstance().send("Alg|Ard|" + moves[m.ordinal()] + "|" + steps + "|");
+			
+			NetMgr.getInstance().send("Alg|And|"+ m.ordinal() + "|" + steps + "|");
 		}
 		switch (m) {
 		case FORWARD:
@@ -301,8 +307,8 @@ public class Robot {
 				colInc = 0;
 				break;
 			}
+			int existingObsBlock = -1;
 			if (!sim) {
-				int existingObsBlock = -1;
 				// Check Map for existing obstacle location
 				for (int j = sensorList.get(i).getMinRange(); j <= sensorList.get(i).getMaxRange(); j++) {
 					if (exploredMap.checkValidCell(sensorList.get(i).getRow() + rowInc * j,
@@ -387,79 +393,18 @@ public class Robot {
 
 						exploredMap.reinitVirtualWall();
 					}
-				} else
+				} 
+//				else if(existingObsBlock>obsBlock && j!= existingObsBlock) {
+//					exploredMap.getCell(sensorList.get(i).getRow() + rowInc * j,
+//							sensorList.get(i).getCol() + colInc * j).setExplored(false);
+//					exploredMap.getCell(sensorList.get(i).getRow() + rowInc * j,
+//							sensorList.get(i).getCol() + colInc * j).setObstacle(false);
+//				}
+				else
 					break;
 			}
 		}
 		if (!sim) {
-
-			// Check for Zeros
-			// for(int i=0; i<sensorData.length; i++) {
-			// if(sensorData[i][1]==0)
-			// {
-			// System.out.println("Zero detected");
-			// senseCount++;
-			// if(senseCount>0) {
-			// NetMgr.getInstance().send("Alg|Ard|S|0");
-			// sense(exploredMap, map);
-			// return;
-			// }
-			// else {
-			// senseCount =0;
-			// break;
-			// }
-			//
-			// }
-			// }
-			// System.out.println("No Zeros Detected!");
-
-			// Check Right Alignment
-			if (Math.abs(sensorData[3][0] - sensorData[4][0]) > RobotConstants.RIGHT_THRES && sensorData[3][1] <= 1
-					&& sensorData[4][1] <= 1) {
-				System.out.println("Right Alignment------------------------");
-				NetMgr.getInstance().send("Alg|And|" + Command.ALIGN_RIGHT.ordinal() + "|0");
-				NetMgr.getInstance().send("Alg|Ard|" + Command.ALIGN_RIGHT.ordinal() + "|0");
-				sense(exploredMap, map);
-				return;
-			}
-
-			// Check Right distance
-			// double prevRightAvg = (sensorList.get(3).getPrevRawData() +
-			// sensorList.get(4).getPrevRawData())/2;
-			// double curRightAvg = (sensorData[3][0] + sensorData[3][0])/2;
-			// System.out.println("cur: "+curRightAvg+" prev:"+prevRightAvg);
-			// if too close/ far from right wall
-			// if(!rightDistAlign && Math.abs(curRightAvg-prevRightAvg) >=
-			// RobotConstants.RIGHT_DIS_THRES && sensorData[3][1]==1 &&
-			// sensorData[4][1]==1){
-			boolean distAlign = true;
-			for (int i = 3; i < 5; i++)
-				if ((sensorData[i][0] < RobotConstants.RIGHT_DIS_THRES_CLOSE
-						|| sensorData[i][0] > RobotConstants.RIGHT_DIS_THRES_FAR) && sensorData[i][1] == 1)
-					distAlign = false;
-
-			System.out.println("distAlign " + !distAlign);
-			System.out.println("rightDistAlign " + !rightDistAlign);
-			System.out.println("R1 or R2 " + (sensorData[3][1] == 1 || sensorData[4][1] == 1));
-			if (!rightDistAlign && !distAlign && (sensorData[3][1] == 1 || sensorData[4][1] == 1)) {
-				System.out.println("Right Distance Alignment-------------------------------");
-				NetMgr.getInstance().send("Alg|And|" + Command.ALIGN_FRONT + "|1");
-				NetMgr.getInstance().send("Alg|Ard|" + Command.TURN_RIGHT.ordinal() + "|1");
-				msg = NetMgr.getInstance().receive();
-				NetMgr.getInstance().send("Alg|Ard|" + Command.ALIGN_FRONT.ordinal() + "|1");
-				msg = NetMgr.getInstance().receive();
-				NetMgr.getInstance().send("Alg|Ard|" + Command.TURN_LEFT.ordinal() + "|1");
-
-				if (sensorData[3][1] == 1 && sensorData[4][1] == 1) {
-					msg = NetMgr.getInstance().receive();
-					NetMgr.getInstance().send("Alg|Ard|" + Command.ALIGN_RIGHT.ordinal() + "|1");
-				}
-				rightDistAlign = true;
-				sense(exploredMap, map);
-
-				return;
-			}
-			rightDistAlign = false;
 			// Checking Front Alignment too close/far from location
 			System.out.println("prevMove :" + prevMove);
 			if (prevMove == Command.FORWARD || prevMove == Command.BACKWARD) {
@@ -495,11 +440,60 @@ public class Robot {
 				// Discrepancy detected among the sensor data recieved
 				if (cal) {
 					NetMgr.getInstance().send("Alg|Ard|" + Command.ALIGN_FRONT.ordinal() + "|1");
-					NetMgr.getInstance().send("Alg|And|" + Command.ALIGN_FRONT.ordinal() + "|1");
+					NetMgr.getInstance().send("Alg|And|" + Command.ALIGN_FRONT.ordinal() + "|1|");
 					NetMgr.getInstance().receive();
 				}
 
 			}
+
+			// Check Right distance
+			// double prevRightAvg = (sensorList.get(3).getPrevRawData() +
+			// sensorList.get(4).getPrevRawData())/2;
+			// double curRightAvg = (sensorData[3][0] + sensorData[3][0])/2;
+			// System.out.println("cur: "+curRightAvg+" prev:"+prevRightAvg);
+			// if too close/ far from right wall
+			// if(!rightDistAlign && Math.abs(curRightAvg-prevRightAvg) >=
+			// RobotConstants.RIGHT_DIS_THRES && sensorData[3][1]==1 &&
+			// sensorData[4][1]==1){
+			boolean distAlign = true;
+			for (int i = 3; i < 5; i++)
+				if ((sensorData[i][0] < RobotConstants.RIGHT_DIS_THRES_CLOSE
+						|| sensorData[i][0] > RobotConstants.RIGHT_DIS_THRES_FAR) && sensorData[i][1] == 1)
+					distAlign = false;
+
+			System.out.println("distAlign " + !distAlign);
+			System.out.println("rightDistAlign " + !rightDistAlign);
+			System.out.println("R1 or R2 " + (sensorData[3][1] == 1 || sensorData[4][1] == 1));
+			if (!rightDistAlign && !distAlign && (sensorData[3][1] == 1 || sensorData[4][1] == 1)) {
+				System.out.println("Right Distance Alignment-------------------------------");
+				NetMgr.getInstance().send("Alg|And|" + Command.ALIGN_FRONT + "|1|");
+				NetMgr.getInstance().send("Alg|Ard|" + Command.TURN_RIGHT.ordinal() + "|1");
+				msg = NetMgr.getInstance().receive();
+				NetMgr.getInstance().send("Alg|Ard|" + Command.ALIGN_FRONT.ordinal() + "|1");
+				msg = NetMgr.getInstance().receive();
+				NetMgr.getInstance().send("Alg|Ard|" + Command.TURN_LEFT.ordinal() + "|1");
+
+				if (sensorData[3][1] == 1 && sensorData[4][1] == 1) {
+					msg = NetMgr.getInstance().receive();
+					NetMgr.getInstance().send("Alg|Ard|" + Command.ALIGN_RIGHT.ordinal() + "|1");
+				}
+				rightDistAlign = true;
+				sense(exploredMap, map);
+
+				return;
+			}
+			rightDistAlign = false;
+			
+			// Check Right Alignment
+			if (Math.abs(sensorData[3][0] - sensorData[4][0]) > RobotConstants.RIGHT_THRES && sensorData[3][1] <= 1
+					&& sensorData[4][1] <= 1) {
+				System.out.println("Right Alignment------------------------");
+				NetMgr.getInstance().send("Alg|And|" + Command.ALIGN_RIGHT.ordinal() + "|0|");
+				NetMgr.getInstance().send("Alg|Ard|" + Command.ALIGN_RIGHT.ordinal() + "|0");
+				sense(exploredMap, map);
+				return;
+			}
+			
 			if (!fastSense)
 				sendMapDescriptor(exploredMap);
 		}

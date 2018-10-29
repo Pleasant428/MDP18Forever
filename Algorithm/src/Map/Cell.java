@@ -2,14 +2,9 @@ package Map;
 
 import java.awt.Point;
 /**
- * 
- */
-
-/**
  * @author Saklani Pankaj
  *
  */
-
 public class Cell {
 	// Position Variables
 	private Point pos;

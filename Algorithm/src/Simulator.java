@@ -568,6 +568,7 @@ public class Simulator extends Application {
 				netMgr.startConn();
 				sim = false;
 				robot.setSim(false);
+				System.out.println("FastSense"+robot.isFastSense());
 				expTask = new Thread(new ExplorationTask());
 				expTask.start();
 
@@ -576,6 +577,7 @@ public class Simulator extends Application {
 			case SIM_FAST:
 				sim = true;
 				expMapDraw = true;
+				robot.setFastSense(true);
 				System.out.println("SF Here");
 				exploredMap.removePaths();
 				fastTask = new Thread(new FastTask());
@@ -603,7 +605,7 @@ public class Simulator extends Application {
 			// Wait for Start Command
 			if (!sim) {
 				do {
-					robot.setFastSense(true);
+					robot.setFastSense(false);
 					msg = netMgr.receive();
 					String[] msgArr = msg.split("\\|");
 					System.out.println("Calibrating: " + msgArr[2]);
@@ -629,21 +631,11 @@ public class Simulator extends Application {
 						int wayCol = Integer.parseInt(data[3]);
 						int wayRow = Integer.parseInt(data[4]);
 						robot.setStartPos(col, row, exploredMap);
-						robot.setDirection(dir);
-						switch (dir) {
-						case LEFT:
+						while(robot.getDirection()!=dir) {
 							robot.rotateSensors(true);
-							break;
-						case RIGHT:
-							robot.rotateSensors(false);
-							break;
-						case DOWN:
-							robot.rotateSensors(true);
-							robot.rotateSensors(true);
-							break;
-						default:
-							break;
+							robot.setDirection(Direction.getNext(robot.getDirection()));
 						}
+						
 						wayPoint = new Point(wayCol, wayRow);
 					} else if (c == Command.START_EXP) {
 						netMgr.send("Alg|Ard|S|0");
@@ -713,6 +705,7 @@ public class Simulator extends Application {
 	class FastTask extends Task<Integer> {
 		@Override
 		protected Integer call() throws Exception {
+			robot.setFastSense(true);
 			double startT = System.currentTimeMillis();
 			double endT = 0;
 			FastestPath fp = new FastestPath(exploredMap, robot, sim);
@@ -745,25 +738,28 @@ public class Simulator extends Application {
 					}
 
 				}
-				System.out.println("Inside Fastest Command For Loop "+ c);
 //				System.out.println("c:"+commands.get(i)+" Condition:"+(commands.get(i)==Command.FORWARD|| commands.get(i) == Command.BACKWARD));
 //				System.out.println("index: "+i+" condition: "+(i==(commands.size()-1)));
-				if (c == Command.FORWARD) {
+				if (c == Command.FORWARD && moves<9) {
 					// System.out.println("moves "+moves);
 					moves++;
 					// If last command
 					if (i == (commands.size() - 1)) {
 						robot.move(c, moves, exploredMap);
-						robot.sense(exploredMap, map);
+						netMgr.receive();
+						//robot.sense(exploredMap, map);
 					}
 				} else {
-					System.out.println("moves " + moves);
+					
 					if (moves > 0) {
+						System.out.println("Moving Forwards "+moves+" steps.");
 						robot.move(Command.FORWARD, moves, exploredMap);
-						robot.sense(exploredMap, map);
+						netMgr.receive();
+//						robot.sense(exploredMap, map);
 					}
 					robot.move(c, RobotConstants.MOVE_STEPS, exploredMap);
-					robot.sense(exploredMap, map);
+					netMgr.receive();
+//					robot.sense(exploredMap, map);
 					moves = 0;
 				}
 			}
