@@ -9,12 +9,8 @@ public class TestBed {
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		System.out.println(Command.FORWARD.ordinal());
-		net = NetMgr.getInstance();
-		net.startConn();
-		//while(true) {
-			net.send("Alg|Ard|0|1");
-			net.send("Alg|And|0|1");
-		//}
+		char[] moves = {'W','A','D','S'};
+		System.out.println(moves[Command.FORWARD.ordinal()]);
 			
 			
 			
