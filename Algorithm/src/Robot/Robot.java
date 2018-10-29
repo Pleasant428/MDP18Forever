@@ -23,6 +23,7 @@ public class Robot {
 	private int senseCount = 0;
 	private boolean rightDistAlign = false;
 	private boolean fastSense = false;
+	private Point pos;
 
 	public boolean isFastSense() {
 		return fastSense;
@@ -125,7 +126,6 @@ public class Robot {
 		this.direction = direction;
 	}
 
-	private Point pos;
 
 	public Sensor getSensor(String id) {
 		for (Sensor s : sensorList)
@@ -266,17 +266,65 @@ public class Robot {
 		int rowInc = 1, colInc = 1;
 		String msg = null;
 		if (!sim) {
-			msg = NetMgr.getInstance().receive();
-			String[] msgArr = msg.split("\\|");
-			String[] strSensor = msgArr[3].split("\\,");
-			System.out.println("Recieved " + strSensor.length + " sensor data");
+			String[] msgArr;
+			do {
+				msg = NetMgr.getInstance().receive();
+				msgArr = msg.split("\\|");
+				//If Image Detected (From RPI)
+				if(msgArr[2] != "Sensor") {
+					int row=0, col=0;
+					switch (direction) {
+					case LEFT:
+						rowInc = 1;
+						colInc = 0;
+						row = 1;
+						col = -1;
+						break;
 
-			// Translate string to integer
-			for (int i = 0; i < strSensor.length; i++) {
-				String[] arrSensorStr = strSensor[i].split("\\:");
-				sensorData[i][0] = Double.parseDouble(arrSensorStr[1]);
-				sensorData[i][1] = Double.parseDouble(arrSensorStr[2]);
-			}
+					case DOWN:
+						rowInc = 0;
+						colInc = -1;
+						row = -1;
+						col = -1;
+						break;
+
+					case UP:
+						rowInc = 0;
+						colInc = 1;
+						row = 1;
+						col = 1;
+						break;
+
+					case RIGHT:
+						rowInc = -1;
+						colInc = 0;
+						row = -1;
+						col = 1;
+						break;
+					}
+					for(int inc =0; inc< RobotConstants.CAMERA_RANGE; inc++) {
+						row += rowInc;
+						col += colInc;
+						if(exploredMap.getCell(pos.y+row, pos.x+col).isObstacle())
+							break;
+					}
+					Point loc = new Point(pos.x+col, pos.y+row);
+					exploredMap.detectedImg(loc, Direction.getPrevious(direction));
+					NetMgr.getInstance().send("Alg|And|A|"+loc.x+":"+loc.y+":"+Direction.getPrevious(direction));
+				}
+				//If Sensor Data (From Arduino
+				else {
+					String[] strSensor = msgArr[3].split("\\,");
+					System.out.println("Recieved " + strSensor.length + " sensor data");
+		
+					// Translate string to integer
+					for (int i = 0; i < strSensor.length; i++) {
+						String[] arrSensorStr = strSensor[i].split("\\:");
+						sensorData[i][0] = Double.parseDouble(arrSensorStr[1]);
+						sensorData[i][1] = Double.parseDouble(arrSensorStr[2]);
+					}
+				}
+			}while(msgArr[2]!="Sensor");
 		}
 
 		for (int i = 0; i < sensorList.size(); i++) {
@@ -394,12 +442,12 @@ public class Robot {
 						exploredMap.reinitVirtualWall();
 					}
 				} 
-//				else if(existingObsBlock>obsBlock && j!= existingObsBlock) {
-//					exploredMap.getCell(sensorList.get(i).getRow() + rowInc * j,
-//							sensorList.get(i).getCol() + colInc * j).setExplored(false);
-//					exploredMap.getCell(sensorList.get(i).getRow() + rowInc * j,
-//							sensorList.get(i).getCol() + colInc * j).setObstacle(false);
-//				}
+				else if(existingObsBlock>obsBlock && j!= existingObsBlock) {
+					exploredMap.getCell(sensorList.get(i).getRow() + rowInc * j,
+							sensorList.get(i).getCol() + colInc * j).setExplored(false);
+					exploredMap.getCell(sensorList.get(i).getRow() + rowInc * j,
+							sensorList.get(i).getCol() + colInc * j).setObstacle(false);
+				}
 				else
 					break;
 			}

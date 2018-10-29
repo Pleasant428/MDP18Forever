@@ -15,11 +15,11 @@ public class MapConstants {
 	public static final short CELL_CM = 10;
 	public static final short MAP_HEIGHT = 20;
 	public static final short MAP_WIDTH = 15;
-	public static final int GOALZONE_ROW = 18;
-	public static final int GOALZONE_COL = 13;
+	public static final short GOALZONE_ROW = 18;
+	public static final short GOALZONE_COL = 13;
 	public static final Point GOALZONE = new Point(GOALZONE_COL,GOALZONE_ROW);
-	public static final int STARTZONE_ROW = 1;
-	public static final int STARTZONE_COL = 1;
+	public static final short STARTZONE_ROW = 1;
+	public static final short STARTZONE_COL = 1;
 	
 	//Graphic Constants
 	public static final Color SZ_COLOR = Color.YELLOW;	//Start Zone Color

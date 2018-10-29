@@ -2,6 +2,8 @@ package Map;
 
 import java.awt.Point;
 import java.util.ArrayList;
+import java.util.HashMap;
+import Robot.RobotConstants.Direction;
 
 /**
  * @author Saklani Pankaj
@@ -11,11 +13,14 @@ import java.util.ArrayList;
 public class Map {
 
 	private final Cell[][] grid;
+	private ArrayList<Point> detectedImg;
+	private HashMap<Point,Direction> imgDir;
 	
 	// KIV add Robot once Created
 	public Map() {
 		grid = new Cell[MapConstants.MAP_HEIGHT][MapConstants.MAP_WIDTH];
-
+		detectedImg = new ArrayList<Point>();
+		imgDir = new HashMap<Point,Direction>();
 		initMap();
 	}
 	
@@ -32,6 +37,35 @@ public class Map {
 				}
 
 			}
+		}
+	}
+	
+	//Add the Detected Image to Map's image collections to track image location and direction
+	public boolean detectedImg(Point pos, Direction dir) {
+		if(checkValidCell(pos.y, pos.x) && grid[pos.y][pos.x].isObstacle()) {
+			detectedImg.add(pos);
+			imgDir.put(pos, dir);
+			return true;
+		}
+		return false;
+	}
+	
+	//Check if image has been detected before
+	public boolean isImgDetected(Point pos, Direction dir) {
+		return imgDir.containsKey(pos);
+	}
+	
+	//to String Image location and direction
+	public String detectedImgToString() {
+		if(detectedImg.isEmpty())
+			return null;
+		else
+		{
+			String detected = "";
+			for(Point pos: detectedImg) {
+				detected += "(x="+pos.x+" y="+pos.y+" "+imgDir.get(pos).name().charAt(0)+"),";
+			}
+			return detected;
 		}
 	}
 	
