@@ -308,8 +308,11 @@ public class Robot {
 						if(exploredMap.getCell(pos.y+row, pos.x+col).isObstacle())
 							break;
 					}
+					//Create new point for img location
 					Point loc = new Point(pos.x+col, pos.y+row);
+					//Save Image location and Direction
 					exploredMap.detectedImg(loc, Direction.getPrevious(direction));
+					//Send Coordinates of image to Android
 					NetMgr.getInstance().send("Alg|And|A|"+loc.x+":"+loc.y+":"+Direction.getPrevious(direction));
 				}
 				//If Sensor Data (From Arduino
