@@ -185,7 +185,7 @@ public class Exploration {
 						areaExplored = exploredMap.exploredPercentage();
 					}while(prevArea == areaExplored);
 					moves=1;
-					checkingStep = 3;
+					checkingStep = 2;
 				}
 			} while (areaExplored < coverageLimit && System.currentTimeMillis() < endTime);
 			
@@ -262,23 +262,38 @@ public class Exploration {
 				}
 			}
 	
-			//If Robot Gets Losts When Moving to unexplored area Move it Back to a wall
-			if(!loc.equals(start)&&movable(Direction.getPrevious(robot.getDirection())) && movable(Direction.getNext(robot.getDirection()))  && movable(Direction.reverse(robot.getDirection()))  && movable(robot.getDirection()) && exploredMap.exploredPercentage()<100) {
-				System.out.println("Not Near a Wal");
-				Direction dir = Direction.RIGHT;
-				//If nearer to left wall
-				if(robot.getPosition().getX()<MapConstants.MAP_WIDTH/2)
-					dir =  Direction.LEFT;
+			//If Robot Gets Lost When Moving to unexplored area Move it Back to a wall
+			if(!loc.equals(start)&&exploredMap.exploredPercentage()<100) {
+				//Get direction of the nearest virtual wall
+				Direction dir = nearestVirtualWall(robot.getPosition());
 				
-				//Turn Towards the Wall
-				if(robot.getDirection()!=dir)
+				//If not at a virtual wall
+				if(movable(dir))
 				{
-					//Turn Right if Nearer to Right Wall
-					if(dir== Direction.RIGHT)
-						robot.move(Command.TURN_RIGHT, RobotConstants.MOVE_STEPS, exploredMap);
-					//Turn Left if Nearer to Left Wall
-					else
-						robot.move(Command.TURN_LEFT, RobotConstants.MOVE_STEPS, exploredMap);
+					//Orient the robot to face the wall
+					while(dir!=robot.getDirection()) {
+						//Check the difference in the direction enum
+						if(dir.ordinal() - robot.getDirection().ordinal()==1)
+							robot.move(Command.TURN_LEFT, RobotConstants.MOVE_STEPS, exploredMap);
+						else
+							robot.move(Command.TURN_RIGHT, RobotConstants.MOVE_STEPS, exploredMap);
+					}
+					//Move Towards the wall till unable to move
+					while(movable(robot.getDirection())) {
+						robot.move(Command.FORWARD, RobotConstants.MOVE_STEPS, exploredMap);
+						if (sim) {
+							try {
+								TimeUnit.MILLISECONDS.sleep(RobotConstants.MOVE_SPEED / stepPerSecond);
+							} catch (InterruptedException e) {
+								e.printStackTrace();
+							}
+						}
+						robot.sense(exploredMap, map);
+					}
+				}
+				//Orient the robot to make its right side hug the wall
+				while(Direction.getNext(dir)!=robot.getDirection()) {
+					robot.move(Command.TURN_LEFT, RobotConstants.MOVE_STEPS, exploredMap);
 					if (sim) {
 						try {
 							TimeUnit.MILLISECONDS.sleep(RobotConstants.MOVE_SPEED / stepPerSecond);
@@ -289,29 +304,7 @@ public class Exploration {
 					robot.sense(exploredMap, map);
 				}
 				
-				//Move Towards the wall till unable to move
-				while(movable(robot.getDirection())) {
-					robot.move(Command.FORWARD, RobotConstants.MOVE_STEPS, exploredMap);
-					if (sim) {
-						try {
-							TimeUnit.MILLISECONDS.sleep(RobotConstants.MOVE_SPEED / stepPerSecond);
-						} catch (InterruptedException e) {
-							e.printStackTrace();
-						}
-					}
-					robot.sense(exploredMap, map);
-				}
-				robot.move(Command.TURN_LEFT, RobotConstants.MOVE_STEPS, exploredMap);
-				if (sim) {
-					try {
-						TimeUnit.MILLISECONDS.sleep(RobotConstants.MOVE_SPEED / stepPerSecond);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-				}
-				robot.sense(exploredMap, map);
 			}
-		
 //		} 
 //		//Moving back to Start multiple moves
 //		else {
@@ -376,6 +369,43 @@ public class Exploration {
 			}
 //		}
 		return true;
+	}
+	
+	//Returns the direction to the nearest virtual wall
+	public Direction nearestVirtualWall(Point pos) {
+		int rowInc, colInc, lowest = 1000, lowestIter = 0, curDist = 0;
+		//Distance to wall Evaluation order: right, up, left, down
+		Direction dir = Direction.RIGHT;
+		//Evaluate the distance to nearest virtualwall
+		for(int i=0; i<4; i++) {
+			rowInc = (int)Math.sin(Math.PI/2*i);
+			colInc = (int)Math.cos(Math.PI/2*i);
+			curDist = 0;
+			for(int j=1; j< MapConstants.MAP_HEIGHT; j++) {
+				if(exploredMap.checkValidCell(pos.y+rowInc*j, pos.x+colInc*j)) {
+					//Keep Looping till reached a virtual wall
+					if(!exploredMap.getCell(pos.y+rowInc*j, pos.x+colInc*j).isVirtualWall())
+						curDist++;
+					else
+						break;
+				}
+				//Reached the end of the wall
+				else
+					break;
+			}
+			//Evaluate the distance to previous lowest
+			if(curDist<lowest)
+			{
+				lowest = curDist;
+				lowestIter = i;
+			}
+		}
+		//Choose the direction based on the result
+		for(int c=0; c<lowestIter; c++)
+		{
+			dir = Direction.getNext(dir);
+		}
+		return dir;
 	}
 
 	public void getMove() throws InterruptedException {
