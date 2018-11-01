@@ -156,7 +156,7 @@ public class Exploration {
 			endTime = startTime + timeLimit;
 			double prevArea = exploredMap.exploredPercentage();
 			int moves = 1;
-			int checkingStep = 5;
+			int checkingStep = 4;
 			this.start = start;
 			
 			// Loop to explore the map
@@ -185,7 +185,7 @@ public class Exploration {
 						areaExplored = exploredMap.exploredPercentage();
 					}while(prevArea == areaExplored);
 					moves=1;
-					checkingStep = 2;
+					checkingStep = 3;
 				}
 			} while (areaExplored < coverageLimit && System.currentTimeMillis() < endTime);
 			
@@ -240,15 +240,15 @@ public class Exploration {
 		System.out.println("Exploration Fastest Commands: "+commands);
 		
 		//Not moving back to start single moves 
-//		if (!loc.equals(start)) {
+		if (!loc.equals(start)) {
 			for (Command c : commands) {
-				
+				System.out.println("Command: "+c);
 				if ((c == Command.FORWARD) && !movable(robot.getDirection())) {
 					System.out.println("Not Executing Forward Not Movable");
 					break;
 				} else{
-					if((c == Command.TURN_LEFT && !movable(Direction.getNext(robot.getDirection())))||
-						(c == Command.TURN_RIGHT && !movable(Direction.getPrevious(robot.getDirection()))))
+					if(((c == Command.TURN_LEFT && !movable(Direction.getNext(robot.getDirection())))||
+						(c == Command.TURN_RIGHT && !movable(Direction.getPrevious(robot.getDirection())))) && commands.indexOf(c) == commands.size()-1)
 						continue;
 					robot.move(c, RobotConstants.MOVE_STEPS, exploredMap);
 					robot.sense(exploredMap, map);
@@ -263,7 +263,7 @@ public class Exploration {
 			}
 	
 			//If Robot Gets Lost When Moving to unexplored area Move it Back to a wall
-			if(!loc.equals(start)&&exploredMap.exploredPercentage()<100) {
+			if(!loc.equals(start)&&exploredMap.exploredPercentage()<100 && movable(Direction.getPrevious(robot.getDirection()))) {
 				//Get direction of the nearest virtual wall
 				Direction dir = nearestVirtualWall(robot.getPosition());
 				
@@ -305,47 +305,47 @@ public class Exploration {
 				}
 				
 			}
-//		} 
-//		//Moving back to Start multiple moves
-//		else {
-//			int moves = 0;
-//			Command c = null;
-//			for (int i = 0; i < commands.size(); i++) {
-//				c = commands.get(i);
-//				if (sim) {
-//					try {
-//						TimeUnit.MILLISECONDS.sleep(RobotConstants.MOVE_SPEED / stepPerSecond);
-//					} catch (InterruptedException e) {
-//						e.printStackTrace();
-//					}
-//
-//				}
-//				
-//				if ((c == Command.FORWARD) && !movable(robot.getDirection())) {
-//					// System.out.println("moves "+moves);
-//					System.out.println("Not Executing Forward Not Movable");
-//					break;
-//				} 
-//				else {
-//					if(c == Command.FORWARD) {
-//						moves++;
-//						// If last command
-//						if (i == (commands.size() - 1)) {
-//							robot.move(c, moves, exploredMap);
-//							robot.sense(exploredMap, map);
-//						}
-//					}
-//					else{
-//						if (moves > 0) {
-//							robot.move(Command.FORWARD, moves, exploredMap);
-//							robot.sense(exploredMap, map);
-//						}
-//						robot.move(c, RobotConstants.MOVE_STEPS, exploredMap);
-//						robot.sense(exploredMap, map);
-//						moves = 0;
-//					}
-//				}
-//			}
+		} 
+		//Moving back to Start multiple moves
+		else {
+			int moves = 0;
+			Command c = null;
+			for (int i = 0; i < commands.size(); i++) {
+				c = commands.get(i);
+				if (sim) {
+					try {
+						TimeUnit.MILLISECONDS.sleep(RobotConstants.MOVE_SPEED / stepPerSecond);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+
+				}
+				
+				if ((c == Command.FORWARD) && !movable(robot.getDirection())) {
+					// System.out.println("moves "+moves);
+					System.out.println("Not Executing Forward Not Movable");
+					break;
+				} 
+				else {
+					if(c == Command.FORWARD) {
+						moves++;
+						// If last command
+						if (i == (commands.size() - 1)) {
+							robot.move(c, moves, exploredMap);
+							robot.sense(exploredMap, map);
+						}
+					}
+					else{
+						if (moves > 0) {
+							robot.move(Command.FORWARD, moves, exploredMap);
+							robot.sense(exploredMap, map);
+						}
+						robot.move(c, RobotConstants.MOVE_STEPS, exploredMap);
+						robot.sense(exploredMap, map);
+						moves = 0;
+					}
+				}
+			}
 			// Orient robot to face UP
 			if (loc.equals(start)) {
 				while (robot.getDirection() != Direction.UP) {
@@ -367,7 +367,7 @@ public class Exploration {
 					}
 				}
 			}
-//		}
+		}
 		return true;
 	}
 	
@@ -377,6 +377,7 @@ public class Exploration {
 		//Distance to wall Evaluation order: right, up, left, down
 		Direction dir = Direction.RIGHT;
 		//Evaluate the distance to nearest virtualwall
+		System.out.println("Nearest Wall");
 		for(int i=0; i<4; i++) {
 			rowInc = (int)Math.sin(Math.PI/2*i);
 			colInc = (int)Math.cos(Math.PI/2*i);
@@ -384,7 +385,7 @@ public class Exploration {
 			for(int j=1; j< MapConstants.MAP_HEIGHT; j++) {
 				if(exploredMap.checkValidCell(pos.y+rowInc*j, pos.x+colInc*j)) {
 					//Keep Looping till reached a virtual wall
-					if(!exploredMap.getCell(pos.y+rowInc*j, pos.x+colInc*j).isVirtualWall())
+					if(exploredMap.clearForRobot(pos.y+rowInc*j, pos.x+colInc*j))
 						curDist++;
 					else
 						break;
@@ -393,6 +394,7 @@ public class Exploration {
 				else
 					break;
 			}
+			System.out.println("Direction: "+i+" "+curDist);
 			//Evaluate the distance to previous lowest
 			if(curDist<lowest)
 			{
@@ -400,11 +402,13 @@ public class Exploration {
 				lowestIter = i;
 			}
 		}
+		System.out.println("Direction "+dir);
 		//Choose the direction based on the result
 		for(int c=0; c<lowestIter; c++)
 		{
 			dir = Direction.getNext(dir);
 		}
+		
 		return dir;
 	}
 

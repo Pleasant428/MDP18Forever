@@ -251,11 +251,13 @@ public class FastestPath {
 			//If the TempRobot and cell direction not the same
 			if(tempRobot.getDirection()!=cellDir) {
 				if(Direction.reverse(tempRobot.getDirection()) == cellDir) {
-					move = Command.BACKWARD;
+					move = Command.TURN_LEFT;
 					tempRobot.move(move, RobotConstants.MOVE_STEPS, exploredMap);
 					moves.add(move);
-					cell = newCell;
-					continue;
+					tempRobot.move(move, RobotConstants.MOVE_STEPS, exploredMap);
+					moves.add(move);
+//					cell = newCell;
+//					continue;
 				}
 				else {
 					move = getTurnMovement(tempRobot.getDirection(), cellDir);
