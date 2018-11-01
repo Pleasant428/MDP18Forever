@@ -659,6 +659,7 @@ public class Simulator extends Application {
 			Exploration explore = new Exploration(exploredMap, map, robot, coverageLimit, timeLimit, steps, sim);
 			explore.exploration(new Point(MapConstants.STARTZONE_COL, MapConstants.STARTZONE_COL));
 			if (!sim) {
+				netMgr.send("Alg|And|DONE|"+exploredMap.detectedImgToString());
 				netMgr.send("Alg|And|" + Command.ENDEXP + "|");
 				Command com = null;
 				do {

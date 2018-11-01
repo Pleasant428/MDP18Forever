@@ -2,6 +2,8 @@ package Map;
 
 import java.awt.Point;
 import java.util.ArrayList;
+import java.util.HashMap;
+import Robot.RobotConstants.Direction;
 
 /**
  * @author Saklani Pankaj
@@ -11,11 +13,14 @@ import java.util.ArrayList;
 public class Map {
 
 	private final Cell[][] grid;
+	private ArrayList<Point> detectedImg;
+	private HashMap<Point,Direction> imgDir;
 	
 	// KIV add Robot once Created
 	public Map() {
 		grid = new Cell[MapConstants.MAP_HEIGHT][MapConstants.MAP_WIDTH];
-
+		detectedImg = new ArrayList<Point>();
+		imgDir = new HashMap<Point,Direction>();
 		initMap();
 	}
 	
@@ -32,6 +37,35 @@ public class Map {
 				}
 
 			}
+		}
+	}
+	
+	//Add the Detected Image to Map's image collections to track image location and direction
+	public boolean detectedImg(Point pos, Direction dir) {
+		if(checkValidCell(pos.y, pos.x) && grid[pos.y][pos.x].isObstacle() && detectedImg.indexOf(pos) == -1) {
+			detectedImg.add(pos);
+			imgDir.put(pos, dir);
+			return true;
+		}
+		return false;
+	}
+	
+	//Check if image has been detected before
+	public boolean isImgDetected(Point pos, Direction dir) {
+		return imgDir.containsKey(pos);
+	}
+	
+	//to String Image location and direction
+	public String detectedImgToString() {
+		if(detectedImg.isEmpty())
+			return null;
+		else
+		{
+			String detected = "";
+			for(Point pos: detectedImg) {
+				detected += "(x="+pos.x+" y="+pos.y+" "+imgDir.get(pos).name().charAt(0)+"),";
+			}
+			return detected;
 		}
 	}
 	
@@ -91,7 +125,7 @@ public class Map {
 		for (int row = 0; row < MapConstants.MAP_HEIGHT; row++) {
 			for (int col = 0; col < MapConstants.MAP_WIDTH; col++) {
 				cell = grid[row][col];
-				if(checkValidMove(row,col) && clearForRobot(row,col) && !cell.isMoveThru())
+				if(checkValidMove(row,col) && clearForRobot(row,col) && areaMoveThru(row,col))
 //				if(checkValidMove(row,col) && clearForRobot(row,col) && moveThru(row,col))
 				{
 					if((distance > loc.distance(cell.getPos())&& cell.getPos().distance(botLoc)>0)){
@@ -104,11 +138,22 @@ public class Map {
 		return nearest;
 	}
 	
+	//Check if the entire area is moveThru
+	public boolean areaMoveThru(int row, int col) {
+		for(int r=row-1; r<= row+1; r++) {
+			for(int c=col-1; c<=col+1; c++) {
+				if(!grid[r][c].isMoveThru())
+					return true;
+			}
+		}
+		return false;
+	}
+	
 	//Make sure the robot can move to the row, and col
 	public boolean clearForRobot(int row, int col) {
 		for(int r=row-1; r<= row+1; r++) {
 			for(int c=col-1; c<=col+1; c++) {
-				if(!grid[r][c].isExplored()||grid[r][c].isObstacle())
+				if(!checkValidCell(r,c)||!grid[r][c].isExplored()||grid[r][c].isObstacle())
 					return false;
 			}
 		}

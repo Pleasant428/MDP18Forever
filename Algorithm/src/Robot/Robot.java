@@ -22,7 +22,9 @@ public class Robot {
 	private Command prevMove;
 	private int senseCount = 0;
 	private boolean rightDistAlign = false;
+	private boolean frontDistAlign = false;
 	private boolean fastSense = false;
+	private Point pos;
 
 	public boolean isFastSense() {
 		return fastSense;
@@ -125,7 +127,6 @@ public class Robot {
 		this.direction = direction;
 	}
 
-	private Point pos;
 
 	public Sensor getSensor(String id) {
 		for (Sensor s : sensorList)
@@ -203,10 +204,10 @@ public class Robot {
 		//Array used for Passing Fastest Movement Commands for faster movement
 		char[] moves = {'W','A','D','X'};
 		if (!sim) {
-			// System.out.println("Alg|Ard|"+m+"|"+steps);
-//			if(!fastSense)
-//				NetMgr.getInstance().send("Alg|Ard|" + m.ordinal() + "|" + steps + "|");
-//			else
+			System.out.println("Alg|Ard|"+m+"|"+steps);
+			if(!fastSense)
+				NetMgr.getInstance().send("Alg|Ard|" + m.ordinal() + "|" + steps + "|");
+			else
 				NetMgr.getInstance().send("Alg|Ard|" + moves[m.ordinal()] + "|" + steps + "|");
 			
 			NetMgr.getInstance().send("Alg|And|"+ m.ordinal() + "|" + steps + "|");
@@ -266,17 +267,77 @@ public class Robot {
 		int rowInc = 1, colInc = 1;
 		String msg = null;
 		if (!sim) {
-			msg = NetMgr.getInstance().receive();
-			String[] msgArr = msg.split("\\|");
-			String[] strSensor = msgArr[3].split("\\,");
-			System.out.println("Recieved " + strSensor.length + " sensor data");
+			String[] msgArr;
+			do {
+				System.out.println("Sense Loop");
+				msg = NetMgr.getInstance().receive();
+				msgArr = msg.split("\\|");
+				//If Image Detected (From RPI)
+				System.out.println("method"+msgArr[2]);
+				if(msgArr[2].compareToIgnoreCase("S")!=0) {
+					int row=0, col=0;
+					switch (direction) {
+					case LEFT:
+						rowInc = 1;
+						colInc = 0;
+						row = 1;
+						col = 0;
+						break;
 
-			// Translate string to integer
-			for (int i = 0; i < strSensor.length; i++) {
-				String[] arrSensorStr = strSensor[i].split("\\:");
-				sensorData[i][0] = Double.parseDouble(arrSensorStr[1]);
-				sensorData[i][1] = Double.parseDouble(arrSensorStr[2]);
-			}
+					case DOWN:
+						rowInc = 0;
+						colInc = -1;
+						row = 0;
+						col = -1;
+						break;
+
+					case UP:
+						rowInc = 0;
+						colInc = 1;
+						row = 0;
+						col = 1;
+						break;
+
+					case RIGHT:
+						rowInc = -1;
+						colInc = 0;
+						row = -1;
+						col = 0;
+						break;
+					}
+					boolean obsDetected =false;
+					for(int inc =0; inc< 1; inc++) {
+						row += rowInc;
+						col += colInc;
+						if(exploredMap.getCell(pos.y+row, pos.x+col).isObstacle()) {
+							obsDetected = true;
+							break;
+						}
+					}
+					System.out.println("Image Detected at ("+pos.x+col+","+pos.y+row+")");
+					if(obsDetected) {
+						//Create new point for img location
+						Point loc = new Point(pos.x+col, pos.y+row);
+						//Save Image location and Direction
+						exploredMap.detectedImg(loc, Direction.getNext(direction));
+						char c = Direction.getNext(direction).name().charAt(0);
+						//Send Coordinates of image to Android
+						NetMgr.getInstance().send("Alg|And|A|"+loc.x+","+loc.y+","+c+"|");
+					}
+				}
+				//If Sensor Data (From Arduino
+				else {
+					String[] strSensor = msgArr[3].split("\\,");
+					System.out.println("Recieved " + strSensor.length + " sensor data");
+		
+					// Translate string to integer
+					for (int i = 0; i < strSensor.length; i++) {
+						String[] arrSensorStr = strSensor[i].split("\\:");
+						sensorData[i][0] = Double.parseDouble(arrSensorStr[1]);
+						sensorData[i][1] = Double.parseDouble(arrSensorStr[2]);
+					}
+				}
+			}while(msgArr[2].compareToIgnoreCase("S")!=0);
 		}
 
 		for (int i = 0; i < sensorList.size(); i++) {
@@ -335,7 +396,7 @@ public class Robot {
 					// Second Reading reset existing block
 					if (senseCount > 1) {
 						senseCount = 0;
-						System.out.println("Discarding existing block");
+						System.out.println("Discarding existing block for sensor "+sensorList.get(i).getId());
 						exploredMap.getCell(sensorList.get(i).getRow() + rowInc * existingObsBlock,
 								sensorList.get(i).getCol() + colInc * existingObsBlock).setObstacle(false);
 					} else {
@@ -408,7 +469,7 @@ public class Robot {
 			// Checking Front Alignment too close/far from location
 			System.out.println("prevMove :" + prevMove);
 			if (prevMove == Command.FORWARD || prevMove == Command.BACKWARD) {
-
+				frontDistAlign = false;
 				for (int i = 0; i < 3; i++) {
 					System.out.println(
 							"Front " + i + ": " + sensorData[i][1] + " PrevData: " + sensorList.get(i).getPrevData()
@@ -441,6 +502,7 @@ public class Robot {
 				if (cal) {
 					NetMgr.getInstance().send("Alg|Ard|" + Command.ALIGN_FRONT.ordinal() + "|1");
 					NetMgr.getInstance().send("Alg|And|" + Command.ALIGN_FRONT.ordinal() + "|1|");
+					frontDistAlign=true;
 					NetMgr.getInstance().receive();
 				}
 
@@ -464,7 +526,7 @@ public class Robot {
 			System.out.println("distAlign " + !distAlign);
 			System.out.println("rightDistAlign " + !rightDistAlign);
 			System.out.println("R1 or R2 " + (sensorData[3][1] == 1 || sensorData[4][1] == 1));
-			if (!rightDistAlign && !distAlign && (sensorData[3][1] == 1 || sensorData[4][1] == 1)) {
+			if (!rightDistAlign && !distAlign && (sensorData[3][1] == 1 || sensorData[4][1] == 1) && ((prevMove!=Command.TURN_RIGHT && prevMove!=Command.TURN_LEFT)|| !frontDistAlign)) {
 				System.out.println("Right Distance Alignment-------------------------------");
 				NetMgr.getInstance().send("Alg|And|" + Command.ALIGN_FRONT + "|1|");
 				NetMgr.getInstance().send("Alg|Ard|" + Command.TURN_RIGHT.ordinal() + "|1");
