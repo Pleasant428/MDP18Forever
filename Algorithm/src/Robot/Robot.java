@@ -203,10 +203,10 @@ public class Robot {
 		//Array used for Passing Fastest Movement Commands for faster movement
 		char[] moves = {'W','A','D','X'};
 		if (!sim) {
-			// System.out.println("Alg|Ard|"+m+"|"+steps);
-//			if(!fastSense)
-//				NetMgr.getInstance().send("Alg|Ard|" + m.ordinal() + "|" + steps + "|");
-//			else
+			System.out.println("Alg|Ard|"+m+"|"+steps);
+			if(!fastSense)
+				NetMgr.getInstance().send("Alg|Ard|" + m.ordinal() + "|" + steps + "|");
+			else
 				NetMgr.getInstance().send("Alg|Ard|" + moves[m.ordinal()] + "|" + steps + "|");
 			
 			NetMgr.getInstance().send("Alg|And|"+ m.ordinal() + "|" + steps + "|");
@@ -268,10 +268,12 @@ public class Robot {
 		if (!sim) {
 			String[] msgArr;
 			do {
+				System.out.println("Sense Loop");
 				msg = NetMgr.getInstance().receive();
 				msgArr = msg.split("\\|");
 				//If Image Detected (From RPI)
-				if(msgArr[2] != "Sensor") {
+				System.out.println("method"+msgArr[2]);
+				if(msgArr[2].compareToIgnoreCase("S")!=0) {
 					int row=0, col=0;
 					switch (direction) {
 					case LEFT:
@@ -327,7 +329,7 @@ public class Robot {
 						sensorData[i][1] = Double.parseDouble(arrSensorStr[2]);
 					}
 				}
-			}while(msgArr[2]!="Sensor");
+			}while(msgArr[2].compareToIgnoreCase("S")!=0);
 		}
 
 		for (int i = 0; i < sensorList.size(); i++) {
