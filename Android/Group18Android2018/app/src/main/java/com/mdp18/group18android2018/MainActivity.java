@@ -11,7 +11,6 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.os.AsyncTask;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -27,8 +26,6 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
-
-
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.UUID;
@@ -36,32 +33,29 @@ import java.util.UUID;
 public class MainActivity extends AppCompatActivity implements SensorEventListener{
     private static final String TAG = "MainActivity";
 
-    /* DECLARATIONS FOR MAIN SCREEN WITH MAP */
+    // Declarations for main screen with map
     PixelGridView mPGV;
     ImageButton forwardButton, leftRotateButton, rightRotateButton, reverseButton;
     Button btn_update, btn_sendToAlgo, btn_calibrate;
     TextView tv_status, tv_map_exploration, tv_mystatus, tv_mystringcmd;
     ToggleButton tb_setWaypointCoord, tb_setStartCoord, tb_autoManual, tb_fastestpath, tb_exploration;
+    ArrayList<String> commandBuffer = new ArrayList<String>();
 
 
-    /* DECLARATIONS FOR TILT SENSOR */
+    // Declarations for Tilt Control
     private SensorManager sensorManager;
     private Sensor sensor;
     boolean tiltNavi;
     Switch tiltBtn;
 
 
-    /* FOR BLUETOOTH CONNECTION */
+    // Declarations for Bluetooth Connection
     private static final UUID myUUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
     BluetoothDevice myBTConnectionDevice;
     static String connectedDevice;
     boolean connectedState;
     boolean currentActivity;
 
-
-//    private static boolean isProcessingMessage = false;
-    ArrayList<String> commandBuffer = new ArrayList<String>();
-//    long startTime=0, endTime=0, totalTime = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -95,7 +89,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         btn_update.setEnabled(false);
 
 
-        // TILT SENSOR
+        // TILT CONTROL
         tiltNavi = false;
         tiltBtn = findViewById(R.id.tiltSwitch);
         // Declaring Sensor Manager and sensor type
@@ -397,29 +391,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         public void onReceive(Context context, Intent intent) {
             String allMsg = intent.getStringExtra("receivingMsg");
 
-//            String arrowCommands = "Arrows detected: ";
-//
-//            // Check for incoming message about arrow to display arrow immediately
-//            if(allMsg.toLowerCase().contains("Alg|And|A|".toLowerCase())){
-//                tv_mystatus.append("Upwards arrow detected\n");
-//                // Obtain current coordinates and direction of the robot
-//                int[] robotPos = mPGV.getCurCoord();
-//                int robotDir = mPGV.getRobotDirection();
-//
-//                // Place arrow on obtained coordinates
-//                mPGV.setArrowImageCoord(robotPos);
-//
-//                // Update map
-//                mPGV.refreshMap(mPGV.getAutoUpdate());
-//
-//                // Display Arrow string commands
-//                tv_mystringcmd.append(arrowCommands.concat(robotPos[0] + "," + robotPos[1] + "," + mPGV.robotDirectionString(robotDir) + "|") + "\n");
-//            }
-
             Log.d(TAG, "Receiving incoming message: " + allMsg);
 
             tv_mystringcmd.append(allMsg + "\n");
 
+            // Add incoming commands into a buffer to process
             commandBuffer.add(allMsg);
             while(!commandBuffer.isEmpty()){
                 String incomingMsg = commandBuffer.remove(0);
@@ -534,7 +510,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                                 break;
                                 }
 
-                                // To handle concatenated string commands
+
+                        // To handle concatenation with the previous string command
                         if (filteredMsg.length >= 5){
 
                             // If the concatenated string command is for Android
@@ -655,45 +632,45 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 // The following is for clearing checklist commands only.
 
                 // For receiving AMD robotPosition and grid
-//                if (incomingMsg.substring(0, 1).equals("{")) {
-//                    Log.d(TAG, "Incoming Message from AMD: " + incomingMsg);
-//                    String[] filteredMsg = msgDelimiter(incomingMsg.replaceAll(" ", "").replaceAll(",", "\\|").replaceAll("\\{", "").replaceAll("\\}", "").replaceAll("\\:", "\\|").replaceAll("\"", "").replaceAll("\\[", "").replaceAll("\\]", "").trim(), "\\|");
-//                    Log.d(TAG, "filteredMsg: " + filteredMsg);
-//
-//                    // AMD Robot Position
-//                    if (filteredMsg[0].equals("robotposition")) {
-//                        int robotPosCol = Integer.parseInt(filteredMsg[1]) + 1;
-//                        int robotPosRow = 19 - (Integer.parseInt(filteredMsg[2]) + 1);
-//                        int robotPosDeg = Integer.parseInt(filteredMsg[3]);
-//                        int robotPosDir = 0;
-//                        // Up
-//                        if (robotPosDeg == 0)
-//                            robotPosDir = 0;
-//                        //Right
-//                        else if (robotPosDeg == 90)
-//                            robotPosDir = 3;
-//                        //Down
-//                        else if (robotPosDeg == 180)
-//                            robotPosDir = 2;
-//                        // Left
-//                        else if (robotPosDeg == 270)
-//                            robotPosDir = 1;
-//                        // For setting robot start position from AMD
-//                        mPGV.setCurPos(robotPosRow, robotPosCol);
-//                        mPGV.setRobotDirection(robotPosDir);
-//                    }
-//
-//                    // AMD Map Descriptor
-//                    else if (filteredMsg[0].equals("grid")) {
-//                        String mdAMD = filteredMsg[1];
-//                        mPGV.mapDescriptorChecklist(mdAMD);
-//                        mPGV.refreshMap(mPGV.getAutoUpdate());
-//                        Log.d(TAG, "mdAMD: " + mdAMD);
-//
-//                        // For setting up map from received AMD MDF String, use mdAMD
-//                        Log.d(TAG, "Processing mdAMD...");
-//                    }
-//                }
+                if (incomingMsg.substring(0, 1).equals("{")) {
+                    Log.d(TAG, "Incoming Message from AMD: " + incomingMsg);
+                    String[] filteredMsg = msgDelimiter(incomingMsg.replaceAll(" ", "").replaceAll(",", "\\|").replaceAll("\\{", "").replaceAll("\\}", "").replaceAll("\\:", "\\|").replaceAll("\"", "").replaceAll("\\[", "").replaceAll("\\]", "").trim(), "\\|");
+                    Log.d(TAG, "filteredMsg: " + filteredMsg);
+
+                    // AMD Robot Position
+                    if (filteredMsg[0].equals("robotposition")) {
+                        int robotPosCol = Integer.parseInt(filteredMsg[1]) + 1;
+                        int robotPosRow = 19 - (Integer.parseInt(filteredMsg[2]) + 1);
+                        int robotPosDeg = Integer.parseInt(filteredMsg[3]);
+                        int robotPosDir = 0;
+                        // Up
+                        if (robotPosDeg == 0)
+                            robotPosDir = 0;
+                        //Right
+                        else if (robotPosDeg == 90)
+                            robotPosDir = 3;
+                        //Down
+                        else if (robotPosDeg == 180)
+                            robotPosDir = 2;
+                        // Left
+                        else if (robotPosDeg == 270)
+                            robotPosDir = 1;
+                        // For setting robot start position from AMD
+                        mPGV.setCurPos(robotPosRow, robotPosCol);
+                        mPGV.setRobotDirection(robotPosDir);
+                    }
+
+                    // AMD Map Descriptor
+                    else if (filteredMsg[0].equals("grid")) {
+                        String mdAMD = filteredMsg[1];
+                        mPGV.mapDescriptorChecklist(mdAMD);
+                        mPGV.refreshMap(mPGV.getAutoUpdate());
+                        Log.d(TAG, "mdAMD: " + mdAMD);
+
+                        // For setting up map from received AMD MDF String, use mdAMD
+                        Log.d(TAG, "Processing mdAMD...");
+                    }
+                }
             }
 
         }
@@ -777,6 +754,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
             String connectionStatus = intent.getStringExtra("ConnectionStatus");
             myBTConnectionDevice = intent.getParcelableExtra("Device");
+
+            // Disconnected from Bluetooth
             if (connectionStatus.equals("disconnect")) {
 
                 Log.d("MainActivity:", "Device Disconnected");
@@ -836,9 +815,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     // EXTENSION BEYOND THE BASICS
     // Tilt Control
 
-    /*
-     ONCLICKLISTENER FOR TILT BUTTON
-    */
+    // onClickListener for Tilt Button
     public void onClickTiltSwitch(View view) {
         tiltBtn.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -860,39 +837,45 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     public void onSensorChanged(SensorEvent event) {
         float x = event.values[0];
         float y = event.values[1];
+
+        // Check if Tilt Control activated
         if (tiltNavi == true) {
+            if (Math.abs(x) > Math.abs(y)) {
 
-        if (Math.abs(x) > Math.abs(y)) {
-            if (x < 0) {
+                // Right Tilt
+                if (x < 0) {
                 Log.d("MainActivity:", "RIGHT TILT!!");
-
                 tv_mystatus.append("Moving\n");
                 tv_mystringcmd.append("Android Controller: Turn Right\n");
                 mPGV.rotateRight();
             }
+
+            // Left Tilt
             if (x > 0) {
                 Log.d("MainActivity:", "LEFT TILT!!");
-
                 tv_mystatus.append("Moving\n");
                 tv_mystringcmd.append("Android Controller: Turn Left\n");
                 mPGV.rotateLeft();
+                }
             }
-        } else {
-            if (y < 0) {
-                Log.d("MainActivity:", "UP TILT!!");
 
+            else {
+                // Forward Tilt
+                if (y < 0) {
+                Log.d("MainActivity:", "UP TILT!!");
                 tv_mystatus.append("Moving\n");
                 tv_mystringcmd.append("Android Controller: Move Forward\n");
                 mPGV.moveForward();
-            }
-            if (y > 0) {
-                Log.d("MainActivity:", "DOWN TILT!!");
+                }
 
+                // Backward Tilt
+                if (y > 0) {
+                Log.d("MainActivity:", "DOWN TILT!!");
                 tv_mystatus.append("Moving\n");
                 tv_mystringcmd.append("Android Controller: Move Backwards\n");
                 mPGV.moveBackwards();
+                }
             }
-        }
         }
     }
 

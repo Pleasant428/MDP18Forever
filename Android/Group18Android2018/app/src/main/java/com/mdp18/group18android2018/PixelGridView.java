@@ -21,7 +21,7 @@ import static android.content.ContentValues.TAG;
 
 public class PixelGridView extends View {
 
-    // VARIABLE DECLARATIONS
+    // Declarations
     private int numColumns, numRows;
     private int cellWidth, cellHeight;
     private int frontStartPos, backStartPos, leftStartPos, rightStartPos;
@@ -240,68 +240,12 @@ public class PixelGridView extends View {
         return this.robotDirection;
     }
 
-    // Return robot direction in String (for arrow string commands)
-    public String robotDirectionString(int intDirection) {
-
-        String stringDir = "";
-
-        // Robot direction = Up
-        if (intDirection == 0)
-            stringDir = "U";
-
-        // Robot direction = Left
-        else if (intDirection == 1)
-            stringDir = "L";
-
-        // Robot direction = Down
-        else if (intDirection == 2)
-            stringDir = "D";
-
-        else
-            stringDir = "R";
-
-        return stringDir;
-    }
-
     // Set Arrow coordinates
     public void setArrowImageCoord(String x, String y, String face) {
         String[] arrowImageCoord = new String[3];
         arrowImageCoord[0] = x;
         arrowImageCoord[1] = y;
         arrowImageCoord[2] = face;
-
-        // Camera will be on the top right of the robot.
-
-        // If robot is facing up, arrow direction would be left.
-//        // Arrow coordinates will be col+2, row+1
-//        if (robotDir == 0) {
-//            arrowImageCoord[0] = robotColumn + 2;
-//            arrowImageCoord[1] = robotRow + 1;
-//        }
-//
-//        // If robot is facing left, arrow direction would be down.
-//        // Arrow coordinates will be col-1, row+2
-//         else if (robotDir == 1) {
-//            arrowImageCoord[0] = robotColumn - 1;
-//            arrowImageCoord[1] = robotRow + 2;
-//        }
-//
-//        // If robot is facing down, arrow direction would be right.
-//        // Arrow coordinates will be col-2, row-1
-//        else if (robotDir == 2) {
-//            arrowImageCoord[0] = robotColumn - 2;
-//            arrowImageCoord[1] = robotRow - 1;
-//        }
-//
-//        // If robot is facing right, arrow direction would be up.
-//        // Arrow coordinates will be col+1, row-2
-//        else {
-//            arrowImageCoord[0] = robotColumn + 1;
-//            arrowImageCoord[1] = robotRow - 2;
-//        }
-
-        // Add the corresponding arrow image depending on direction of arrow.
-//        arrowImageCoord[2] = robotDir;
 
         this.arrowImageCoords.add(arrowImageCoord);
 
@@ -322,12 +266,6 @@ public class PixelGridView extends View {
     // Get obstacle
     public boolean[][] getObstacles () {
         return this.obstacles;
-    }
-
-    // Check if tile is an obstacle
-    public boolean checkObstacle(int[] posCoord){
-        boolean[][] obstacles = this.getObstacles();
-        return obstacles[posCoord[0]][posCoord[1]];
     }
 
     @Override
@@ -579,33 +517,23 @@ public class PixelGridView extends View {
             rect = new RectF(Integer.parseInt(arrowImageCoords.get(i)[0]) * cellWidth, (19 - Integer.parseInt(arrowImageCoords.get(i)[1])) * cellHeight,
                     (Integer.parseInt(arrowImageCoords.get(i)[0])+1) * cellWidth, (20 - Integer.parseInt(arrowImageCoords.get(i)[1])) * cellHeight);
 
-            // Camera will be on the top right of the robot.
-
-            // If robot is facing up, arrow direction would be left.
-            // Arrow coordinates will be col+2, row+1
             if(arrowImageCoords.get(i)[2].equals("l")){
                 Bitmap arrowBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.arrow_up_l);
                 canvas.drawBitmap(arrowBitmap,null, rect, null);
 
             }
 
-            // If robot is facing left, arrow direction would be down.
-            // Arrow coordinates will be col-1, row+2
             else if(arrowImageCoords.get(i)[2].equals("d")){
                 Bitmap arrowBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.arrow_up_d);
                 canvas.drawBitmap(arrowBitmap,null, rect, null);
 
             }
 
-            // If robot is facing down, arrow direction would be right.
-            // Arrow coordinates will be col-2, row-1
             else if(arrowImageCoords.get(i)[2].equals("r")){
                 Bitmap arrowBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.arrow_up_r);
                 canvas.drawBitmap(arrowBitmap,null, rect, null);
             }
 
-            // If robot is facing right, arrow direction would be up.
-            // Arrow coordinates will be col+1, row-2
             else if(arrowImageCoords.get(i)[2].equals("u")){
                 Bitmap arrowBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.arrow_up_u);
                 canvas.drawBitmap(arrowBitmap,null, rect, null);
@@ -628,7 +556,6 @@ public class PixelGridView extends View {
             if (pos[direction] == boundaries[direction]) {
                 return true;
             }
-
             return false;
         }
 
@@ -636,7 +563,6 @@ public class PixelGridView extends View {
     // Move forward
     public void moveForward () {
         int[] pos = this.getCurPos();
-        int[] prev = this.getCurPos();
 
         int dir = this.getRobotDirection();
         boolean reachedWall = this.checkReachedWall(pos, dir);
@@ -833,12 +759,15 @@ public class PixelGridView extends View {
         char cur;
         Integer[] binMapArray = new Integer[binMapExtracted.length()];
 
+        // Separate each bit with an integer array
         for (int i = 0; i < binMapExtracted.length(); i++){
             cur = binMapExtracted.charAt(i);
             binMapArray[i] = Integer.parseInt(String.valueOf(cur));
         }
 
         int binMapArrayIndex = 0;
+
+        // Set each cell as explored/unexplored accordingly
         for(int j = 0; j < this.getNumRows(); j++){
             for(int i = 0; i < this.getNumColumns(); i++) {
                 if(binMapArray[binMapArrayIndex] == 1){
@@ -867,7 +796,6 @@ public class PixelGridView extends View {
         String binMap = hexBigInteger.toString(2);
 
         char cur;
-        int length = binMap.length();
         Integer[] binMapArray = new Integer[binMap.length() - 1];
 
         for (int i = 1; i < binMap.length(); i++){

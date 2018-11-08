@@ -1,14 +1,11 @@
 package com.mdp18.group18android2018;
 
-import android.app.Activity;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.Context;
 import android.content.Intent;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
-import android.widget.TextView;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -19,19 +16,16 @@ public class BluetoothChat extends Thread {
     private static final String TAG = "BluetoothChat";
 
 
-    // VARIABLE DECLARATIONS
+    // Declarations
     private static Context myContext;
     private static BluetoothSocket mySocket;
     private static InputStream myInputStream;
     private static OutputStream myOutPutStream;
     private static BluetoothDevice myBluetoothConnectionDevice;
 
-    /*
-           To maintain the bluetooth connection, sending the data, and receiving incoming messages
-           through input/output streams.
-   */
 
-
+    // To maintain the bluetooth connection, sending the data, and receiving incoming messages
+    // through input/output streams.
     public static BluetoothDevice getBluetoothDevice(){
         return myBluetoothConnectionDevice;
     }
@@ -56,14 +50,14 @@ public class BluetoothChat extends Thread {
         myOutPutStream = tempOut;
 
 
-        //Buffer store for the stream
+        // Buffer store for the stream
         byte[] buffer = new byte[1024];
 
-        //Bytes returned from the read()
+        // Bytes returned from the read()
         int bytes;
 
         while (true) {
-            //Read from the InputStream
+            // Read from the InputStream
             try {
                 bytes = myInputStream.read(buffer);
                 String incomingMessage = new String(buffer, 0, bytes);
@@ -96,9 +90,8 @@ public class BluetoothChat extends Thread {
         }
     }
 
-    /*
-        To write outgoing bluetooth messages
-    */
+
+    // To write outgoing bluetooth messages
     public static void write(byte[] bytes) {
 
         String text = new String(bytes, Charset.defaultCharset());

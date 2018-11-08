@@ -18,7 +18,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import java.nio.charset.Charset;
@@ -28,12 +27,10 @@ public class ReconfigStringCommand extends AppCompatActivity{
 
     private static final String TAG = "ReconfigStringCommand";
 
-    // Variable declaration
+    // Declarations
     Button btn_save, btn_reset, btn_retrieve, btn_f1, btn_f2;
     EditText et_f1, et_f2;
     SharedPreferences myPrefs;
-
-    // Strings declaration
     public static final String mypreference="mypref";
     public static final String F1="f1";
     public static final String F2="f2";
@@ -41,9 +38,6 @@ public class ReconfigStringCommand extends AppCompatActivity{
     // For bluetooth connection status
     private static final UUID myUUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
     BluetoothDevice myBTConnectionDevice;
-    static String connectedDevice;
-    boolean connectedState;
-    boolean currentActivity;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
