@@ -128,7 +128,6 @@ public class Map {
 				if(checkValidMove(row,col) && clearForRobot(row,col) && areaMoveThru(row,col))
 //				if(checkValidMove(row,col) && clearForRobot(row,col) && moveThru(row,col))
 				{
-					
 					if((distance > loc.distance(cell.getPos())&& cell.getPos().distance(botLoc)>0)){
 						nearest = cell;
 						distance = loc.distance(cell.getPos());

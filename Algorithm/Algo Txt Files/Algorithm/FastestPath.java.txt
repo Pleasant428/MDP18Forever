@@ -30,11 +30,13 @@ public class FastestPath {
 	private ArrayList<Cell> visited;		//Store visited cells
 	private HashMap<Point, Double> costG;
 	private ArrayList<Cell> path;
+	private boolean sim = true;
 	
 	
-	public FastestPath(Map exploredMap, Robot robot) {
+	public FastestPath(Map exploredMap, Robot robot, boolean sim) {
 		this.exploredMap = exploredMap;
 		this.robot = robot;
+		this.sim = sim;
 		prevCell = new HashMap<Cell, Cell>();
 		
 		costG = new HashMap<Point, Double>();
@@ -220,17 +222,32 @@ public class FastestPath {
 		Cell newCell;
 		Direction cellDir;
 		
+//		int calibrateCount = 0; //Calibrate after 3 moves
+		
+		
 		//Iterate through the path
 		for(int i=0; i< path.size(); i++) {
 			move = Command.ERROR;
 			newCell = path.get(i);
 			cellDir = getCellDirection(cell.getPos(),newCell.getPos());
 			
-			while(tempRobot.getDirection()!=cellDir) {
-				move = getTurnMovement(tempRobot.getDirection(), cellDir);
-				tempRobot.move(move, RobotConstants.MOVE_STEPS, exploredMap);
-				moves.add(move);
+			if(!sim) {
+//				if(calibratePoint(cell, tempRobot.getDirection())/*||calibrateCount == RobotConstants.CALIBRATE_AFTER*/)
+//				{
+////					calibrateCount = 0;
+//					//Found a Calibration Point
+//					moves.add(Command.ALIGN_RIGHT);
+//					moves.add(Command.ALIGN_FRONT);
+//				}
+//				else
+//					calibrateCount++;
 			}
+			
+//			while(tempRobot.getDirection()!=cellDir) {
+//				move = getTurnMovement(tempRobot.getDirection(), cellDir);
+//				tempRobot.move(move, RobotConstants.MOVE_STEPS, exploredMap);
+//				moves.add(move);
+//			}
 			//If the TempRobot and cell direction not the same
 			if(tempRobot.getDirection()!=cellDir) {
 				if(Direction.reverse(tempRobot.getDirection()) == cellDir) {
@@ -239,6 +256,8 @@ public class FastestPath {
 					moves.add(move);
 					tempRobot.move(move, RobotConstants.MOVE_STEPS, exploredMap);
 					moves.add(move);
+//					cell = newCell;
+//					continue;
 				}
 				else {
 					move = getTurnMovement(tempRobot.getDirection(), cellDir);
@@ -256,6 +275,46 @@ public class FastestPath {
 		//System.out.println("Generated Moves: "+moves.toString());
 		return moves;
 	}
+	
+	//Determine if a cell is a calibration point (all front and right cells are virtual walls) 
+	public boolean calibratePoint(Cell cur, Direction robotDir) {
+		Cell front1 = cur, front2= cur, front3 = cur, right1 = cur, right2 = cur;
+		switch(robotDir) {
+		case UP:
+			front1 = exploredMap.getCell(cur.getPos().y+1, cur.getPos().x-1);
+			front2 = exploredMap.getCell(cur.getPos().y+1, cur.getPos().x);
+			front3 = exploredMap.getCell(cur.getPos().y+1, cur.getPos().x+1);
+			right1 = exploredMap.getCell(cur.getPos().y+1, cur.getPos().x+1);
+			right2 = exploredMap.getCell(cur.getPos().y-1, cur.getPos().x+1);
+			break;
+		case DOWN:
+			front1 = exploredMap.getCell(cur.getPos().y-1, cur.getPos().x-1);
+			front2 = exploredMap.getCell(cur.getPos().y-1, cur.getPos().x);
+			front3 = exploredMap.getCell(cur.getPos().y-1, cur.getPos().x+1);
+			right1 = exploredMap.getCell(cur.getPos().y-1, cur.getPos().x-1);
+			right2 = exploredMap.getCell(cur.getPos().y+1, cur.getPos().x-1);
+			break;
+		case RIGHT:
+			front1 = exploredMap.getCell(cur.getPos().y+1, cur.getPos().x+1);
+			front2 = exploredMap.getCell(cur.getPos().y, cur.getPos().x+1);
+			front3 = exploredMap.getCell(cur.getPos().y-1, cur.getPos().x+1);
+			right1 = exploredMap.getCell(cur.getPos().y-1, cur.getPos().x+1);
+			right2 = exploredMap.getCell(cur.getPos().y-1, cur.getPos().x-1);
+			break;
+		case LEFT:
+			front1 = exploredMap.getCell(cur.getPos().y-1, cur.getPos().x-1);
+			front2 = exploredMap.getCell(cur.getPos().y, cur.getPos().x-1);
+			front3 = exploredMap.getCell(cur.getPos().y+1, cur.getPos().x-1);
+			right1 = exploredMap.getCell(cur.getPos().y-1, cur.getPos().x-1);
+			right2 = exploredMap.getCell(cur.getPos().y+1, cur.getPos().x+1);
+			break;
+		}
+		if(front1.isVirtualWall()&&front2.isVirtualWall()&&front3.isVirtualWall()&&right1.isVirtualWall()&&right2.isVirtualWall())
+			return true;
+		
+		return false;
+	}
+	
 	
 	//Returns which side to turn to face the cell based on the robot's direction
 	public Command getTurnMovement(Direction botDir, Direction cellDir) {
