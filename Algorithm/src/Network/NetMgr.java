@@ -3,25 +3,23 @@ package Network;
 import java.io.*;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.util.Timer;
-import java.util.TimerTask;
-
-import Robot.RobotConstants;
 
 //Class to Manage Connection
 public class NetMgr {
-
+	
+	//Variables for Java Socket
 	private String ipAddr;
 	private int port = 8080;
 	private static Socket socket = null;
-
+	
+	// Buffers for Reading and Writing
 	private BufferedWriter out;
 	private BufferedReader in;
 	private int msgCounter = 0;
 	
+	// Static Representation of NetMgr Instance
 	private static NetMgr netMgr = null;
-	private String prevMsg = null;
-	private Timer wait = new Timer();
+
 	
 	public NetMgr() {
 		this.ipAddr = "192.168.18.18";
@@ -102,7 +100,6 @@ public class NetMgr {
 			out.flush();
 			msgCounter++;
 			System.out.println(msgCounter+" Message Sent: "+msg);
-			prevMsg = msg;
 			
 		}
 		catch (IOException e) {

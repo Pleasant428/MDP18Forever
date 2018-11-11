@@ -10,33 +10,13 @@ public class Cell {
 	private Point pos;
 	
 	// Exploration Booleans
-	private boolean explored;
-	private boolean obstacle;
-	private boolean virtualWall;
-	private boolean isWayPoint;
-	private boolean moveThru;
-	private boolean path;
+	private boolean explored;		//If Cell is Explored
+	private boolean obstacle;		//If Cell is Obstacle
+	private boolean virtualWall;	//If Cell is virtualWall
+	private boolean isWayPoint;		//If Cell is waypoint
+	private boolean moveThru;		//If Cell is virtualWall
+	private boolean path;			//If Cell is path
 	
-	public boolean isPath() {
-		return path;
-	}
-
-	public void setPath(boolean path) {
-		this.path = path;
-	}
-
-	public boolean isWayPoint() {
-		return isWayPoint;
-	}
-
-	public boolean setWayPoint(boolean isWayPoint) {
-		if(!obstacle && explored && !virtualWall) {
-			this.isWayPoint = isWayPoint;
-			return true;
-		}
-		return false;
-	}
-
 	public Cell(Point pos) {
 		this.pos = pos;
 		this.explored = false;
@@ -67,7 +47,26 @@ public class Cell {
 	public void setPos(Point pos) {
 		this.pos = pos;
 	}
-	
+	public boolean isPath() {
+		return path;
+	}
+
+	public void setPath(boolean path) {
+		this.path = path;
+	}
+
+	public boolean isWayPoint() {
+		return isWayPoint;
+	}
+
+	public boolean setWayPoint(boolean isWayPoint) {
+		if(!obstacle && explored && !virtualWall) {
+			this.isWayPoint = isWayPoint;
+			return true;
+		}
+		return false;
+	}
+
 	//Method to check if robot can move to this cell
 	public boolean movableCell() {
 		return explored && !obstacle && !virtualWall;

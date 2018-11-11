@@ -37,7 +37,7 @@ import javafx.scene.input.MouseButton;
 public class Simulator extends Application {
 
 	// Program Variables
-	private Map map; // Used to hold loaded map for sim
+	private Map map;
 	private Map exploredMap;
 	private Point wayPoint = new Point(MapConstants.GOALZONE);
 	private Robot robot;
@@ -47,7 +47,8 @@ public class Simulator extends Application {
 	private boolean setObstacle = false;
 	private boolean setWaypoint = false;
 	private boolean setRobot = false;
-
+	
+	// Network Manager to Send and Recieve Messages
 	private static final NetMgr netMgr = NetMgr.getInstance();
 
 	// GUI Components
@@ -82,9 +83,7 @@ public class Simulator extends Application {
 		// Default Location at the startzone
 		robot = new Robot(sim, Direction.UP, 1, 1);
 		robot.setStartPos(robot.getPosition().x, robot.getPosition().y, exploredMap);
-
-		// Threads
-
+		
 		// Setting the Title and Values for the Window
 		primaryStage.setTitle("MDP Group 18: Algorithm Simulator");
 		GridPane grid = new GridPane();
@@ -172,6 +171,8 @@ public class Simulator extends Application {
 		// Button ActionListeners
 		resetMapBtn.setOnMouseClicked(resetMapBtnClick);
 		startBtn.setOnMouseClicked(startBtnClick);
+		
+		// Click to change Position and Direction of Robot 
 		setRobotBtn.setOnMouseClicked(new EventHandler<MouseEvent>() {
 			public void handle(MouseEvent e) {
 				setRobot = !setRobot;
@@ -184,6 +185,8 @@ public class Simulator extends Application {
 				setObstacle = false;
 			}
 		});
+		
+		// Click to change position of Waypoint
 		setWaypointBtn.setOnMouseClicked(new EventHandler<MouseEvent>() {
 			public void handle(MouseEvent e) {
 				setWaypoint = !setWaypoint;
@@ -195,6 +198,8 @@ public class Simulator extends Application {
 				setRobot = false;
 			}
 		});
+		
+		// Click to place obstacle on the Map (Creating/Modifying Map)
 		setObstacleBtn.setOnMouseClicked(new EventHandler<MouseEvent>() {
 			public void handle(MouseEvent e) {
 				setObstacle = !setObstacle;
@@ -212,6 +217,8 @@ public class Simulator extends Application {
 				expMapDraw = !setObstacle;
 			}
 		});
+		
+		// Click to Load Map from txt files using MDF Strings
 		loadMapBtn.setOnMouseClicked(new EventHandler<MouseEvent>() {
 			public void handle(MouseEvent e) {
 				if (setObstacle) {
@@ -232,6 +239,8 @@ public class Simulator extends Application {
 
 			}
 		});
+		
+		// Click to Save Map save MDF String of Map to a txt file
 		saveMapBtn.setOnMouseClicked(new EventHandler<MouseEvent>() {
 			public void handle(MouseEvent e) {
 				if (setObstacle) {
@@ -297,15 +306,8 @@ public class Simulator extends Application {
 		controlGrid.add(setObstacleBtn, 2, 9, 4, 1);
 
 		GridPane.setFillWidth(modeCB, true);
-//		controlGrid.setFillWidth(startBtn, true);
-//		controlGrid.setFillWidth(loadMapBtn, true);
-//		controlGrid.setFillWidth(saveMapBtn, true);
-//		controlGrid.setFillWidth(resetMapBtn, true);
-//		controlGrid.setFillWidth(setWaypointBtn, true);
-//		controlGrid.setFillWidth(setRobotBtn, true);
-//		controlGrid.setFillWidth(setObstacleBtn, true);
+		
 		// Button Init
-
 		// Choosing where to place components on the Grid
 		grid.add(mapGrid, 0, 0);
 		grid.add(controlGrid, 1, 0);
@@ -315,6 +317,8 @@ public class Simulator extends Application {
 		// Dimensions of the Window
 		Scene scene = new Scene(grid, 800, 600);
 		primaryStage.setScene(scene);
+		
+		//Manually Move Actual Robot for Testing
 		scene.setOnKeyPressed(new EventHandler<KeyEvent>() {
 			public void handle(KeyEvent e) {
 				sim = false;
@@ -420,19 +424,22 @@ public class Simulator extends Application {
 		launch(args);
 	}
 
-	// Mouse Event Handler for clicking and detecting Location
+	// Mouse Event Handler for Clicking on Map (Effect Depends on What Action Button Was Pressed)
 	private EventHandler<MouseEvent> MapClick = new EventHandler<MouseEvent>() {
 		public void handle(MouseEvent event) {
 			double mouseX = event.getX();
 			double mouseY = event.getY();
-
+			
+			// Derive Selected Cell based on Mouse Position
 			int selectedCol = (int) ((mouseX - MapConstants.MAP_OFFSET / 2) / MapConstants.MAP_CELL_SZ);
 			int selectedRow = (int) (MapConstants.MAP_HEIGHT
 					- (mouseY - MapConstants.MAP_OFFSET / 2) / MapConstants.MAP_CELL_SZ);
-			// Debug Text
+			
+			// Display Status of Cell
 			System.out.println(exploredMap.getCell(selectedRow, selectedCol).toString() + " validMove:"
 					+ exploredMap.checkValidMove(selectedRow, selectedCol));
-
+			
+			// Actions Based on Button Pressed Previously
 			if (setWaypoint) {
 				System.out.println(setWayPoint(selectedRow, selectedCol)
 						? "New WayPoint set at row: " + selectedRow + " col: " + selectedCol
@@ -442,7 +449,7 @@ public class Simulator extends Application {
 				System.out.println(setRobotLocation(selectedRow, selectedCol) ? "Robot Position has changed"
 						: "Unable to put Robot at obstacle or virtual wall!");
 
-			if (setObstacle) {
+			if (setObstacle||!setObstacle) {
 				if (event.getButton() == MouseButton.PRIMARY)
 					System.out.println(setObstacle(selectedRow, selectedCol)
 							? "New Obstacle Added at row: " + selectedRow + " col: " + selectedCol
@@ -453,6 +460,7 @@ public class Simulator extends Application {
 							: "Obstacle at location does not exists!");
 
 			}
+			// if adding obstacle display the Map instead of exploredMap for ease of obstacle addition
 			if (setObstacle)
 				expMapDraw = false;
 			else
@@ -548,45 +556,37 @@ public class Simulator extends Application {
 
 			String selectedMode = modeCB.getSelectionModel().getSelectedItem();
 			switch (selectedMode) {
+			//Run Just the Fastest Path on Real Robot
 			case REAL_FAST:
-//				sim = false;
-//				System.out.println("RF Here");
-//				exploredMap.draw(true);
-//				robot.draw();
-//				fastTask = new Thread(new FastTask());
-//				fastTask.start();
 				netMgr.startConn();
 				sim = false;
 				robot.setSim(false);
-				System.out.println("SF Here");
 				exploredMap.removePaths();
 				expMapDraw = true;
 				fastTask = new Thread(new FastTask());
 				fastTask.start();
-
+			//Run Complete Exploration + Fastest Path on Real Robot
 			case REAL_EXP:
 				netMgr.startConn();
 				sim = false;
 				robot.setSim(false);
-				System.out.println("FastSense"+robot.isFastSense());
+				
+				//Start Exploration Thread (Run Concurrently with Sim)
 				expTask = new Thread(new ExplorationTask());
 				expTask.start();
-
 				break;
-
+			//Run Fastest Path on Simulator
 			case SIM_FAST:
 				sim = true;
 				expMapDraw = true;
 				robot.setFastSense(true);
-				System.out.println("SF Here");
 				exploredMap.removePaths();
 				fastTask = new Thread(new FastTask());
 				fastTask.start();
 				break;
-
+			//Run Exploration on Simulator
 			case SIM_EXP:
 				sim = true;
-				System.out.println("SE Here");
 				robot.sense(exploredMap, map);
 				expMapDraw = true;
 				expTask = new Thread(new ExplorationTask());
@@ -597,19 +597,24 @@ public class Simulator extends Application {
 		}
 	};
 
+	//Thread For Exploration
 	class ExplorationTask extends Task<Integer> {
 		@Override
 		protected Integer call() throws Exception {
 			String msg = null;
 			Command c;
-			// Wait for Start Command
+			// Real Run Wait for Android's Command
 			if (!sim) {
+				
+				// Loop till Start Exploration Command Recieved
 				do {
 					robot.setFastSense(false);
 					msg = netMgr.receive();
 					String[] msgArr = msg.split("\\|");
 					System.out.println("Calibrating: " + msgArr[2]);
 					c = Command.ERROR;
+					
+					// Calibrate Command Recieved
 					if (msgArr[2].compareToIgnoreCase("C") == 0) {
 						System.out.println("Calibrating");
 						for (int i = 0; i < 4; i++) {
@@ -619,30 +624,39 @@ public class Simulator extends Application {
 						netMgr.send("Alg|Ard|" + Command.ALIGN_RIGHT.ordinal() + "|0");
 						msg = netMgr.receive();
 						System.out.println("Done Calibrating");
-					} else {
+					}
+					
+					else {
 						c = Command.values()[Integer.parseInt(msgArr[2])];
 					}
-
+					
+					// Initial Robot Position, Direction and Waypoint Command
 					if (c == Command.ROBOT_POS) {
+						//Split Message
 						String[] data = msgArr[3].split("\\,");
 						int col = Integer.parseInt(data[0]);
 						int row = Integer.parseInt(data[1]);
 						Direction dir = Direction.values()[Integer.parseInt(data[2])];
 						int wayCol = Integer.parseInt(data[3]);
 						int wayRow = Integer.parseInt(data[4]);
+						
+						// Update Robot Position, Direction and Waypoint
 						robot.setStartPos(col, row, exploredMap);
 						while(robot.getDirection()!=dir) {
 							robot.rotateSensors(true);
-							robot.setDirection(Direction.getNext(robot.getDirection()));
+							robot.setDirection(Direction.turnRight(robot.getDirection()));
 						}
-						
 						wayPoint = new Point(wayCol, wayRow);
 					} else if (c == Command.START_EXP) {
 						netMgr.send("Alg|Ard|S|0");
 					}
 				} while (c != Command.START_EXP);
 			}
+			
+			// Robot Sense before starting
 			robot.sense(exploredMap, map);
+			
+			// Take Exploration Variables from Sim
 			System.out.println("coverage: " + coverageLimitSB.getValue());
 			System.out.println("time: " + timeLimitSB.getValue());
 			double coverageLimit = (int) (coverageLimitSB.getValue());
@@ -655,9 +669,12 @@ public class Simulator extends Application {
 				timeLimit = 240000;
 			if (steps == 0)
 				steps = 5;
-
+			
+			//Start Exploration, using Exploration Class
 			Exploration explore = new Exploration(exploredMap, map, robot, coverageLimit, timeLimit, steps, sim);
 			explore.exploration(new Point(MapConstants.STARTZONE_COL, MapConstants.STARTZONE_COL));
+			
+			// If Real Run Send End Exploration Msg to Android
 			if (!sim) {
 				netMgr.send("Alg|And|DONE|"+exploredMap.detectedImgToString());
 				netMgr.send("Alg|And|" + Command.ENDEXP + "|");
@@ -709,14 +726,13 @@ public class Simulator extends Application {
 			robot.setFastSense(true);
 			double startT = System.currentTimeMillis();
 			double endT = 0;
-			FastestPath fp = new FastestPath(exploredMap, robot, sim);
+			FastestPath fp = new FastestPath(exploredMap, robot);
 			ArrayList<Cell> path;
-//			if (wayPoint.distance(MapConstants.GOALZONE) != 0) {
+			
+			// Get Path to Waypoint
 			path = fp.run(new Point(robot.getPosition().x, robot.getPosition().y), wayPoint, robot.getDirection());
+			// Get Path from Waypoint to Goal and Append to previous path
 			path.addAll(fp.run(wayPoint, MapConstants.GOALZONE, robot.getDirection()));
-//			} else
-//				path = fp.run(new Point(robot.getPosition().x, robot.getPosition().y), MapConstants.GOALZONE,
-//						robot.getDirection());
 
 			fp.displayFastestPath(path, true);
 			ArrayList<Command> commands = fp.getPathCommands(path);
@@ -729,6 +745,8 @@ public class Simulator extends Application {
 			int moves = 0;
 			System.out.println(commands);
 			Command c = null;
+			
+			//Sends Commands 1 by 1 to Robot
 			for (int i = 0; i < commands.size(); i++) {
 				c = commands.get(i);
 				if (sim) {
@@ -739,32 +757,33 @@ public class Simulator extends Application {
 					}
 
 				}
-//				System.out.println("c:"+commands.get(i)+" Condition:"+(commands.get(i)==Command.FORWARD|| commands.get(i) == Command.BACKWARD));
-//				System.out.println("index: "+i+" condition: "+(i==(commands.size()-1)));
+				robot.move(c, RobotConstants.MOVE_STEPS, exploredMap);
+				System.out.println("c:"+commands.get(i)+" Condition:"+(commands.get(i)==Command.FORWARD|| commands.get(i) == Command.BACKWARD));
+				System.out.println("index: "+i+" condition: "+(i==(commands.size()-1)));
+				
+				// Add Multiple Forward together and send as 1 move
 				if (c == Command.FORWARD && moves<9) {
 					// System.out.println("moves "+moves);
 					moves++;
 					// If last command
 					if (i == (commands.size() - 1)) {
 						robot.move(c, moves, exploredMap);
-						netMgr.receive();
-						//robot.sense(exploredMap, map);
+						robot.sense(exploredMap, map);
 					}
+				// Send other Command to Robots
 				} else {
-					
 					if (moves > 0) {
 						System.out.println("Moving Forwards "+moves+" steps.");
 						robot.move(Command.FORWARD, moves, exploredMap);
-						netMgr.receive();
-//						robot.sense(exploredMap, map);
+						robot.sense(exploredMap, map);
 					}
 					robot.move(c, RobotConstants.MOVE_STEPS, exploredMap);
-					netMgr.receive();
-//					robot.sense(exploredMap, map);
+					robot.sense(exploredMap, map);
 					moves = 0;
 				}
 			}
 			
+			//Send End of Fastest to Robot
 			if (!sim) {
 				netMgr.send("Alg|Ard|"+RobotConstants.Command.ALIGN_FRONT.ordinal()+"|");
 				netMgr.send("Alg|And|" + RobotConstants.Command.ENDFAST+"|");
@@ -778,7 +797,7 @@ public class Simulator extends Application {
 		}
 	}
 
-	// Event Handler for resetMapBtn
+	// Event Handler for resetMapBtn will Clear Entire Map
 	private EventHandler<MouseEvent> resetMapBtnClick = new EventHandler<MouseEvent>() {
 		public void handle(MouseEvent event) {
 			if (setObstacle) {
@@ -794,6 +813,8 @@ public class Simulator extends Application {
 	
 	// Draw Method for Robot
 	public void drawRobot() {
+		
+		// Draw Robot Body
 		gc.setStroke(RobotConstants.ROBOT_OUTLINE);
 		gc.setLineWidth(2);
 
@@ -811,7 +832,8 @@ public class Simulator extends Application {
 				(MapConstants.MAP_CELL_SZ - 1) * MapConstants.MAP_HEIGHT - row * MapConstants.MAP_CELL_SZ
 						+ MapConstants.MAP_OFFSET / 2,
 				3 * MapConstants.MAP_CELL_SZ, 3 * MapConstants.MAP_CELL_SZ);
-
+		
+		// Draw Robot Direction (front of Robot)
 		gc.setFill(RobotConstants.ROBOT_DIRECTION);
 		switch (robot.getDirection()) {
 		case UP:
@@ -835,7 +857,8 @@ public class Simulator extends Application {
 				(MapConstants.MAP_CELL_SZ - 1) * MapConstants.MAP_HEIGHT - dirRow * MapConstants.MAP_CELL_SZ
 						+ MapConstants.MAP_OFFSET / 2,
 				MapConstants.MAP_CELL_SZ, MapConstants.MAP_CELL_SZ);
-
+		
+		// Draw Sensors on Map (text)
 		gc.setFill(Color.BLACK);
 		for (Sensor s : robot.getSensorList()) {
 			gc.fillText(s.getId(), s.getCol() * MapConstants.MAP_CELL_SZ + MapConstants.MAP_OFFSET / 2,

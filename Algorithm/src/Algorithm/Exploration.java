@@ -15,7 +15,8 @@ import Robot.RobotConstants.Direction;
  *
  */
 public class Exploration {
-
+	
+	//Exploration Variables
 	private Map exploredMap;
 	private Map map;
 	private Robot robot;
@@ -24,10 +25,11 @@ public class Exploration {
 	private double areaExplored;
 	private long startTime;
 	private long endTime;
-	private int stepPerSecond;
+	private int stepPerSecond; // Delay for Simulator
 	private Point start;
 	private boolean sim;
-
+	
+	// Base Initializer
 	public Exploration(Map exploredMap, Map map, Robot robot, double coverageLimit, int timeLimit, int stepPerSecond,
 			boolean sim) {
 		this.exploredMap = exploredMap;
@@ -38,23 +40,24 @@ public class Exploration {
 		this.stepPerSecond = stepPerSecond;
 		this.sim = sim;
 	}
-
+	
+	// Getter and Setters for Variables
 	public Map getExploredMap() {
 		return exploredMap;
 	}
-
+	
 	public void setExploredMap(Map exploredMap) {
 		this.exploredMap = exploredMap;
 	}
-
+	
 	public Map getMap() {
 		return map;
 	}
-
+	
 	public void setMap(Map map) {
 		this.map = map;
 	}
-
+	
 	public double getCoverageLimit() {
 		return coverageLimit;
 	}
@@ -231,7 +234,7 @@ public class Exploration {
 		}
 		ArrayList<Command> commands = new ArrayList<Command>();
 		ArrayList<Cell> path = new ArrayList<Cell>();
-		FastestPath fp = new FastestPath(exploredMap, robot, sim);
+		FastestPath fp = new FastestPath(exploredMap, robot);
 		path = fp.run(robot.getPosition(), loc, robot.getDirection());
 		if (path == null)
 			return false;
@@ -239,7 +242,7 @@ public class Exploration {
 		commands = fp.getPathCommands(path);
 		System.out.println("Exploration Fastest Commands: "+commands);
 		
-		//Not moving back to start single moves 
+		// Single Step Movement (Not Returning to Start)
 		if (!loc.equals(start)) {
 			for (Command c : commands) {
 				System.out.println("Command: "+c);
@@ -247,8 +250,8 @@ public class Exploration {
 					System.out.println("Not Executing Forward Not Movable");
 					break;
 				} else{
-					if(((c == Command.TURN_LEFT && !movable(Direction.getNext(robot.getDirection())))||
-						(c == Command.TURN_RIGHT && !movable(Direction.getPrevious(robot.getDirection())))) && commands.indexOf(c) == commands.size()-1)
+					if(((c == Command.TURN_LEFT && !movable(Direction.turnRight(robot.getDirection())))||
+						(c == Command.TURN_RIGHT && !movable(Direction.turnLeft(robot.getDirection())))) && commands.indexOf(c) == commands.size()-1)
 						continue;
 					robot.move(c, RobotConstants.MOVE_STEPS, exploredMap);
 					robot.sense(exploredMap, map);
@@ -263,7 +266,7 @@ public class Exploration {
 			}
 	
 			//If Robot Gets Lost When Moving to unexplored area Move it Back to a wall
-			if(!loc.equals(start)&&exploredMap.exploredPercentage()<100 && movable(Direction.getPrevious(robot.getDirection()))) {
+			if(!loc.equals(start)&&exploredMap.exploredPercentage()<100 && movable(Direction.turnLeft(robot.getDirection()))) {
 				//Get direction of the nearest virtual wall
 				Direction dir = nearestVirtualWall(robot.getPosition());
 				
@@ -292,7 +295,7 @@ public class Exploration {
 					}
 				}
 				//Orient the robot to make its right side hug the wall
-				while(Direction.getNext(dir)!=robot.getDirection()) {
+				while(Direction.turnRight(dir)!=robot.getDirection()) {
 					robot.move(Command.TURN_LEFT, RobotConstants.MOVE_STEPS, exploredMap);
 					if (sim) {
 						try {
@@ -306,7 +309,7 @@ public class Exploration {
 				
 			}
 		} 
-		//Moving back to Start multiple moves
+		// Moving back to Start using Multiple Steps
 		else {
 			int moves = 0;
 			Command c = null;
@@ -360,7 +363,7 @@ public class Exploration {
 					if(!sim && !movable(robot.getDirection())) {
 						NetMgr.getInstance().send("Alg|Ard|"+Command.ALIGN_FRONT.ordinal()+"|0");
 						NetMgr.getInstance().receive();
-						if(!movable(Direction.getPrevious(robot.getDirection()))) {
+						if(!movable(Direction.turnLeft(robot.getDirection()))) {
 							NetMgr.getInstance().send("Alg|Ard|"+Command.ALIGN_RIGHT+"|0");
 							NetMgr.getInstance().receive();
 						}
@@ -406,16 +409,17 @@ public class Exploration {
 		//Choose the direction based on the result
 		for(int c=0; c<lowestIter; c++)
 		{
-			dir = Direction.getNext(dir);
+			dir = Direction.turnRight(dir);
 		}
 		
 		return dir;
 	}
-
+	
+	// Derive the next Move for Exploration
 	public void getMove() throws InterruptedException {
 		Direction dir = robot.getDirection();
 		// Check Right if free then turn Right
-		if (movable(Direction.getPrevious(dir))) {
+		if (movable(Direction.turnLeft(dir))) {
 			if (sim)
 				TimeUnit.MILLISECONDS.sleep(RobotConstants.MOVE_SPEED / stepPerSecond);
 			robot.move(Command.TURN_RIGHT, RobotConstants.MOVE_STEPS, exploredMap);
@@ -436,8 +440,8 @@ public class Exploration {
 			robot.sense(exploredMap, map);
 		}
 		// Check left free and move left
-		else if (movable(Direction.getNext(dir))) {
-			// System.out.println("Left Direction " + Direction.getNext(dir).name());
+		else if (movable(Direction.turnRight(dir))) {
+			// System.out.println("Left Direction " + Direction.turnRight(dir).name());
 			if (sim)
 				TimeUnit.MILLISECONDS.sleep(RobotConstants.MOVE_SPEED / stepPerSecond);
 			robot.move(Command.TURN_LEFT, RobotConstants.MOVE_STEPS, exploredMap);
@@ -454,7 +458,7 @@ public class Exploration {
 		// Backwards
 		else {
 			// Keep Moving back till either can turn right/ left
-			while (!movable(Direction.getPrevious(dir)) && !movable(Direction.getNext(dir))) {
+			while (!movable(Direction.turnLeft(dir)) && !movable(Direction.turnRight(dir))) {
 				// System.out.println("Backward While");
 				if (sim)
 					TimeUnit.MILLISECONDS.sleep(RobotConstants.MOVE_SPEED / stepPerSecond);
@@ -462,7 +466,7 @@ public class Exploration {
 				robot.sense(exploredMap, map);
 			}
 			// Turn left if possible
-			if (movable(Direction.getNext(dir))) {
+			if (movable(Direction.turnRight(dir))) {
 				System.out.println("Backward Turn Left");
 				if (sim)
 					TimeUnit.MILLISECONDS.sleep(RobotConstants.MOVE_SPEED / stepPerSecond);
