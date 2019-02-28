@@ -13,9 +13,7 @@ import threading
 
 import time
 
-class 
-
-mThreads(threading.Thread):
+class mThreads(threading.Thread):
     
 	def __init__(self):
         
