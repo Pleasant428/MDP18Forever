@@ -37,17 +37,14 @@ public class RobotConstants {
 	// Direction enum based on compass
 	public static enum Direction {
 		UP, LEFT, DOWN, RIGHT;
-
 		// Used to Get the new direction, when robot turns right
-		public static Direction getNext(Direction currDirection) {
+		public static Direction turnRight(Direction currDirection) {
 			return values()[(currDirection.ordinal() + 1) % values().length];
 		}
-
 		// Used to Get the new direction, when robot turns left
-		public static Direction getPrevious(Direction currDirection) {
+		public static Direction turnLeft(Direction currDirection) {
 			return values()[(currDirection.ordinal() + values().length - 1) % values().length];
 		}
-		
 		public static Direction reverse(Direction currDirection) {
 			return values()[(currDirection.ordinal() + 2) % values().length];
 		}

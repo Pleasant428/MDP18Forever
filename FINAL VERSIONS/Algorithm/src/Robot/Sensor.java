@@ -32,7 +32,8 @@ public class Sensor {
         this.prevData = 9;
         this.prevRawData = 99;
     }
-
+    
+    // Getters and Setters
 	public String getId() {
 		return id;
 	}

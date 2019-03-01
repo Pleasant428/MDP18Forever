@@ -11,6 +11,7 @@ import Map.MapConstants;
  * @author 
  *
  */
+//Map Descriptor Class
 public class MapDescriptor {
 
     private static String binToHex(String binStr) {
